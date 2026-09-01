@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="100%" height="100%">
+  <defs>
+    <!-- Dark Tech Canvas Background -->
+    <radialGradient id="banner-bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#111A2E" />
+      <stop offset="50%" stop-color="#090E1A" />
+      <stop offset="100%" stop-color="#03060B" />
+    </radialGradient>
+
+    <!-- Neon Glow Gradients -->
+    <linearGradient id="neon-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="50%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#818CF8" />
+    </linearGradient>
+
+    <linearGradient id="neon-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C084FC" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+
+    <linearGradient id="bolt-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="logo-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur1" />
+      <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="glow-badge" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#00F0FF" flood-opacity="0.3" />
+    </filter>
+
+    <pattern id="banner-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255, 255, 255, 0.025)" stroke-width="1" />
+    </pattern>
+  </defs>
+
+  <style>
+    .font-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; }
+    .font-mono { font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace; }
+  </style>
+
+  <!-- Background -->
+  <rect width="1200" height="360" fill="url(#banner-bg)" />
+  <rect width="1200" height="360" fill="url(#banner-grid)" />
+
+  <!-- Ambient Light Orbs -->
+  <circle cx="200" cy="180" r="160" fill="#00F0FF" opacity="0.08" filter="blur(60px)" />
+  <circle cx="1000" cy="180" r="180" fill="#7C3AED" opacity="0.08" filter="blur(70px)" />
+
+  <!-- LEFT EMBLEM: ZIPSTREAM ICON -->
+  <g transform="translate(100, 70)">
+    <!-- Hexagon Outer Border -->
+    <polygon points="110,10 190,55 190,145 110,190 30,145 30,55" fill="rgba(15, 23, 42, 0.8)" stroke="url(#neon-cyan)" stroke-width="3" filter="url(#glow-badge)" />
+    
+    <!-- Inner Hex Tech Accents -->
+    <polygon points="110,25 175,62 175,138 110,175 45,138 45,62" fill="none" stroke="rgba(0, 240, 255, 0.2)" stroke-width="1" stroke-dasharray="6 4" />
+
+    <!-- Stream Zipper / Lightning Bolt Core -->
+    <g transform="translate(50, 40)">
+      <!-- Zip teeth tracks -->
+      <line x1="45" y1="20" x2="45" y2="100" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6 6" />
+      <line x1="75" y1="20" x2="75" y2="100" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6 6" />
+
+      <!-- Center Dynamic Lightning Stream -->
+      <path d="M 68 15 L 48 62 L 64 62 L 52 105 L 76 52 L 60 52 Z" fill="url(#bolt-grad)" filter="url(#logo-glow)" />
+    </g>
+  </g>
+
+  <!-- MAIN TITLE & TAGLINE -->
+  <g transform="translate(340, 95)">
+    <!-- Tech Tag -->
+    <rect x="0" y="0" width="186" height="26" rx="13" fill="rgba(0, 240, 255, 0.12)" stroke="rgba(0, 240, 255, 0.35)" stroke-width="1" />
+    <circle cx="12" cy="13" r="4" fill="#00F0FF" />
+    <text x="24" y="17" fill="#00F0FF" class="font-mono" font-size="11" font-weight="700" letter-spacing="2">ZERO-COPY STREAM</text>
+
+    <!-- Main Title -->
+    <text x="0" y="72" fill="#FFFFFF" class="font-sans" font-size="52" font-weight="900" letter-spacing="-1">
+      ZipStream <tspan fill="url(#neon-cyan)">Hub</tspan>
+    </text>
+
+    <!-- Subtitle / Tagline -->
+    <text x="0" y="112" fill="#94A3B8" class="font-sans" font-size="18" font-weight="400">
+      Instant 4K media playback directly from remote ZIP archives in <tspan fill="#00F0FF" font-weight="700">&lt; 0.6s</tspan>
+    </text>
+
+    <!-- Feature Pill Badges -->
+    <g transform="translate(0, 140)">
+      <!-- Pill 1 -->
+      <rect x="0" y="0" width="130" height="34" rx="8" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.12)" />
+      <text x="65" y="21" fill="#F1F5F9" class="font-sans" font-size="12" font-weight="600" text-anchor="middle">⚡ 0ms Scrubbing</text>
+
+      <!-- Pill 2 -->
+      <rect x="142" y="0" width="130" height="34" rx="8" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.12)" />
+      <text x="207" y="21" fill="#F1F5F9" class="font-sans" font-size="12" font-weight="600" text-anchor="middle">💾 0 Bytes Disk</text>
+
+      <!-- Pill 3 -->
+      <rect x="284" y="0" width="130" height="34" rx="8" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.12)" />
+      <text x="349" y="21" fill="#F1F5F9" class="font-sans" font-size="12" font-weight="600" text-anchor="middle">🎬 ZIP64 4K HDR</text>
+
+      <!-- Pill 4 -->
+      <rect x="426" y="0" width="140" height="34" rx="8" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.12)" />
+      <text x="496" y="21" fill="#F1F5F9" class="font-sans" font-size="12" font-weight="600" text-anchor="middle">🌐 Multi-Client Ready</text>
+    </g>
+  </g>
+
+  <!-- RIGHT ACCENT GRAPHIC: SPEED INDICATOR -->
+  <g transform="translate(970, 95)" filter="url(#glow-badge)">
+    <rect width="150" height="175" rx="14" fill="rgba(15, 23, 42, 0.6)" stroke="rgba(0, 240, 255, 0.25)" stroke-width="1.2" />
+    
+    <text x="75" y="36" fill="#64748B" class="font-mono" font-size="10" font-weight="700" text-anchor="middle" letter-spacing="1">LATENCY</text>
+    <text x="75" y="78" fill="#00F0FF" class="font-mono" font-size="34" font-weight="900" text-anchor="middle">0.6s</text>
+    <text x="75" y="100" fill="#38BDF8" class="font-sans" font-size="11" font-weight="600" text-anchor="middle">Instant Startup</text>
+
+    <line x1="20" y1="120" x2="130" y2="120" stroke="rgba(255, 255, 255, 0.08)" />
+
+    <text x="75" y="142" fill="#10B981" class="font-mono" font-size="13" font-weight="800" text-anchor="middle">0B DISK USAGE</text>
+    <text x="75" y="158" fill="#64748B" class="font-sans" font-size="10" text-anchor="middle">100% In-Memory</text>
+  </g>
+</svg>

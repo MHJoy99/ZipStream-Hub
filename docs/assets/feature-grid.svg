@@ -1,0 +1,211 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bg-glow-grid" cx="50%" cy="30%" r="90%">
+      <stop offset="0%" stop-color="#141B2D" />
+      <stop offset="60%" stop-color="#0B0F1A" />
+      <stop offset="100%" stop-color="#04070D" />
+    </radialGradient>
+
+    <!-- Card Background Gradient -->
+    <linearGradient id="card-surface" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(30, 41, 59, 0.4)" />
+      <stop offset="100%" stop-color="rgba(15, 23, 42, 0.25)" />
+    </linearGradient>
+
+    <!-- Glowing Pill Accents -->
+    <linearGradient id="cyan-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+
+    <linearGradient id="purple-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#EC4899" />
+    </linearGradient>
+
+    <linearGradient id="emerald-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+
+    <linearGradient id="amber-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#EF4444" />
+    </linearGradient>
+
+    <linearGradient id="indigo-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+
+    <linearGradient id="blue-accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#818CF8" />
+    </linearGradient>
+
+    <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+
+    <pattern id="grid-subtle" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255, 255, 255, 0.02)" stroke-width="1" />
+    </pattern>
+  </defs>
+
+  <style>
+    .font-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; }
+    .font-mono { font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace; }
+  </style>
+
+  <!-- Background -->
+  <rect width="1200" height="780" fill="url(#bg-glow-grid)" />
+  <rect width="1200" height="780" fill="url(#grid-subtle)" />
+
+  <!-- Ambient light -->
+  <circle cx="300" cy="200" r="250" fill="#00F0FF" opacity="0.03" filter="blur(80px)" />
+  <circle cx="900" cy="500" r="250" fill="#A855F7" opacity="0.03" filter="blur(80px)" />
+
+  <!-- HEADER -->
+  <g transform="translate(60, 48)">
+    <rect x="0" y="0" width="144" height="26" rx="13" fill="rgba(0, 240, 255, 0.1)" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1" />
+    <circle cx="12" cy="13" r="4" fill="#00F0FF" />
+    <text x="24" y="17" fill="#00F0FF" class="font-mono" font-size="11" font-weight="600" letter-spacing="1.5">CORE CAPABILITIES</text>
+    
+    <text x="0" y="58" fill="#FFFFFF" class="font-sans" font-size="28" font-weight="800" letter-spacing="-0.5">ZipStream Hub Engineering Features</text>
+    <text x="0" y="80" fill="#94A3B8" class="font-sans" font-size="14">Next-generation streaming architecture built for extreme bandwidth and memory efficiency</text>
+  </g>
+
+  <!-- 3x2 GRID CONTAINER -->
+
+  <!-- CARD 1: 0ms Scrubbing / Seek -->
+  <g transform="translate(60, 150)" filter="url(#card-shadow)">
+    <rect width="345" height="265" rx="16" fill="url(#card-surface)" stroke="rgba(0, 240, 255, 0.25)" stroke-width="1.2" />
+    <!-- Icon Container -->
+    <rect x="24" y="24" width="48" height="48" rx="12" fill="rgba(0, 240, 255, 0.12)" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1" />
+    <!-- Seek Icon -->
+    <path d="M 40 40 L 48 48 L 40 56 M 48 40 L 56 48 L 48 56" fill="none" stroke="#00F0FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+
+    <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">0ms Realtime Seek</text>
+    <text x="84" y="62" fill="#38BDF8" class="font-mono" font-size="12" font-weight="600">ZERO LATENCY SCRUBBING</text>
+
+    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13" line-height="1.5">
+      Direct mathematical byte offset translation from internal compressed segments to uncompressed video streams. No extraction required to seek anywhere.
+    </text>
+
+    <!-- Bottom Highlights Box -->
+    <rect x="24" y="195" width="297" height="46" rx="8" fill="rgba(0, 0, 0, 0.3)" stroke="rgba(0, 240, 255, 0.1)" />
+    <text x="36" y="215" fill="#38BDF8" class="font-mono" font-size="11" font-weight="600">Performance:</text>
+    <text x="36" y="231" fill="#E2E8F0" class="font-sans" font-size="12">Instant scrub across 4K keyframes</text>
+  </g>
+
+  <!-- CARD 2: ZIP64 & 4K HDR Support -->
+  <g transform="translate(425, 150)" filter="url(#card-shadow)">
+    <rect width="345" height="265" rx="16" fill="url(#card-surface)" stroke="rgba(168, 85, 247, 0.25)" stroke-width="1.2" />
+    <!-- Icon Container -->
+    <rect x="24" y="24" width="48" height="48" rx="12" fill="rgba(168, 85, 247, 0.12)" stroke="rgba(168, 85, 247, 0.3)" stroke-width="1" />
+    <!-- 4K HDR Icon -->
+    <rect x="36" y="38" width="24" height="20" rx="3" fill="none" stroke="#C084FC" stroke-width="2" />
+    <text x="48" y="52" fill="#C084FC" class="font-mono" font-size="9" font-weight="800" text-anchor="middle">4K</text>
+
+    <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">ZIP64 4K HDR Engine</text>
+    <text x="84" y="62" fill="#C084FC" class="font-mono" font-size="12" font-weight="600">MASSIVE ARCHIVE PARSER</text>
+
+    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
+      Full 64-bit extension parsing for archives exceeding the 4GB / 65k file barrier. Seamlessly supports 100GB+ 4K Dolby Vision and HDR10+ remux files.
+    </text>
+
+    <!-- Bottom Highlights Box -->
+    <rect x="24" y="195" width="297" height="46" rx="8" fill="rgba(0, 0, 0, 0.3)" stroke="rgba(168, 85, 247, 0.1)" />
+    <text x="36" y="215" fill="#C084FC" class="font-mono" font-size="11" font-weight="600">Capacity:</text>
+    <text x="36" y="231" fill="#E2E8F0" class="font-sans" font-size="12">Supports files up to 16 Exabytes</text>
+  </g>
+
+  <!-- CARD 3: Zero Disk Usage -->
+  <g transform="translate(790, 150)" filter="url(#card-shadow)">
+    <rect width="345" height="265" rx="16" fill="url(#card-surface)" stroke="rgba(16, 185, 129, 0.25)" stroke-width="1.2" />
+    <!-- Icon Container -->
+    <rect x="24" y="24" width="48" height="48" rx="12" fill="rgba(16, 185, 129, 0.12)" stroke="rgba(16, 185, 129, 0.3)" stroke-width="1" />
+    <!-- Zero Disk Icon -->
+    <circle cx="48" cy="48" r="12" fill="none" stroke="#10B981" stroke-width="2" />
+    <line x1="40" y1="56" x2="56" y2="40" stroke="#10B981" stroke-width="2" />
+
+    <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">Zero Disk Space</text>
+    <text x="84" y="62" fill="#34D399" class="font-mono" font-size="12" font-weight="600">RAM BUFFERED PIPELINE</text>
+
+    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
+      Zero intermediate temporary files written to SSD or NVMe storage. Eliminates disk wear-leveling exhaustion and saves hundreds of gigabytes locally.
+    </text>
+
+    <!-- Bottom Highlights Box -->
+    <rect x="24" y="195" width="297" height="46" rx="8" fill="rgba(0, 0, 0, 0.3)" stroke="rgba(16, 185, 129, 0.1)" />
+    <text x="36" y="215" fill="#34D399" class="font-mono" font-size="11" font-weight="600">Hardware Impact:</text>
+    <text x="36" y="231" fill="#E2E8F0" class="font-sans" font-size="12">0 Bytes written, ~32MB RAM ring buffer</text>
+  </g>
+
+  <!-- CARD 4: Connection Pooling & Prefetch -->
+  <g transform="translate(60, 440)" filter="url(#card-shadow)">
+    <rect width="345" height="265" rx="16" fill="url(#card-surface)" stroke="rgba(245, 158, 11, 0.25)" stroke-width="1.2" />
+    <!-- Icon Container -->
+    <rect x="24" y="24" width="48" height="48" rx="12" fill="rgba(245, 158, 11, 0.12)" stroke="rgba(245, 158, 11, 0.3)" stroke-width="1" />
+    <!-- Bolt / Pool Icon -->
+    <path d="M 49 34 L 41 46 L 47 46 L 45 62 L 55 49 L 49 49 Z" fill="#F59E0B" />
+
+    <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">HTTP Connection Pooling</text>
+    <text x="84" y="62" fill="#FBBF24" class="font-mono" font-size="12" font-weight="600">PERSISTENT TCP SESSIONS</text>
+
+    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
+      Async Keep-Alive connection recycling with smart speculative prefetching. Eliminates repeated TLS handshakes during dynamic playback.
+    </text>
+
+    <!-- Bottom Highlights Box -->
+    <rect x="24" y="195" width="297" height="46" rx="8" fill="rgba(0, 0, 0, 0.3)" stroke="rgba(245, 158, 11, 0.1)" />
+    <text x="36" y="215" fill="#FBBF24" class="font-mono" font-size="11" font-weight="600">Throughput:</text>
+    <text x="36" y="231" fill="#E2E8F0" class="font-sans" font-size="12">Max saturates Gigabit network links</text>
+  </g>
+
+  <!-- CARD 5: Multi-Client Streaming -->
+  <g transform="translate(425, 440)" filter="url(#card-shadow)">
+    <rect width="345" height="265" rx="16" fill="url(#card-surface)" stroke="rgba(99, 102, 241, 0.25)" stroke-width="1.2" />
+    <!-- Icon Container -->
+    <rect x="24" y="24" width="48" height="48" rx="12" fill="rgba(99, 102, 241, 0.12)" stroke="rgba(99, 102, 241, 0.3)" stroke-width="1" />
+    <!-- Multi client icon -->
+    <circle cx="44" cy="44" r="5" fill="#818CF8" />
+    <circle cx="56" cy="54" r="4" fill="#6366F1" />
+    <path d="M 36 58 C 36 52 40 50 48 50 C 56 50 60 52 60 58" fill="none" stroke="#818CF8" stroke-width="2" />
+
+    <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">Multi-Client Support</text>
+    <text x="84" y="62" fill="#818CF8" class="font-mono" font-size="12" font-weight="600">PARALLEL STREAMS</text>
+
+    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
+      Serve simultaneous streams to multiple local network devices (Living Room Apple TV, PotPlayer desktop, mobile VLC) through a unified local gateway.
+    </text>
+
+    <!-- Bottom Highlights Box -->
+    <rect x="24" y="195" width="297" height="46" rx="8" fill="rgba(0, 0, 0, 0.3)" stroke="rgba(99, 102, 241, 0.1)" />
+    <text x="36" y="215" fill="#818CF8" class="font-mono" font-size="11" font-weight="600">Concurrency:</text>
+    <text x="36" y="231" fill="#E2E8F0" class="font-sans" font-size="12">Multi-threaded non-blocking HTTP daemon</text>
+  </g>
+
+  <!-- CARD 6: Cross-Platform Native -->
+  <g transform="translate(790, 440)" filter="url(#card-shadow)">
+    <rect width="345" height="265" rx="16" fill="url(#card-surface)" stroke="rgba(56, 189, 248, 0.25)" stroke-width="1.2" />
+    <!-- Icon Container -->
+    <rect x="24" y="24" width="48" height="48" rx="12" fill="rgba(56, 189, 248, 0.12)" stroke="rgba(56, 189, 248, 0.3)" stroke-width="1" />
+    <!-- Cross platform Terminal/OS Icon -->
+    <rect x="36" y="38" width="24" height="20" rx="4" fill="none" stroke="#38BDF8" stroke-width="2" />
+    <polyline points="41,45 45,48 41,51" fill="none" stroke="#38BDF8" stroke-width="2" />
+
+    <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">Cross-Platform Ready</text>
+    <text x="84" y="62" fill="#38BDF8" class="font-mono" font-size="12" font-weight="600">WIN / MACOS / LINUX</text>
+
+    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
+      Zero native compilation dependencies. Runs seamlessly on Windows 11/10, macOS (Apple Silicon / Intel), Linux servers, and Raspberry Pi / NAS.
+    </text>
+
+    <!-- Bottom Highlights Box -->
+    <rect x="24" y="195" width="297" height="46" rx="8" fill="rgba(0, 0, 0, 0.3)" stroke="rgba(56, 189, 248, 0.1)" />
+    <text x="36" y="215" fill="#38BDF8" class="font-mono" font-size="11" font-weight="600">Compatibility:</text>
+    <text x="36" y="231" fill="#E2E8F0" class="font-sans" font-size="12">Python 3.10+ / Standalone Binary</text>
+  </g>
+</svg>

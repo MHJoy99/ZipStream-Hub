@@ -1,0 +1,298 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bg-glow" cx="50%" cy="30%" r="80%" fx="40%" fy="20%">
+      <stop offset="0%" stop-color="#141E30" />
+      <stop offset="50%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#070B14" />
+    </radialGradient>
+
+    <!-- Card Gradients -->
+    <linearGradient id="card-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255, 255, 255, 0.08)" />
+      <stop offset="100%" stop-color="rgba(255, 255, 255, 0.02)" />
+    </linearGradient>
+
+    <linearGradient id="card-grad-active" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(0, 229, 255, 0.12)" />
+      <stop offset="100%" stop-color="rgba(59, 130, 246, 0.04)" />
+    </linearGradient>
+
+    <!-- Accent Gradients -->
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="100%" stop-color="#7000FF" />
+    </linearGradient>
+
+    <linearGradient id="amber-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF3366" />
+      <stop offset="100%" stop-color="#FF9900" />
+    </linearGradient>
+
+    <linearGradient id="green-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <!-- Drop Shadows & Filters -->
+    <filter id="shadow-card" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+    <filter id="glow-cyan" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glow-subtle" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255, 255, 255, 0.03)" stroke-width="1" />
+    </pattern>
+
+    <!-- Marker Arrow -->
+    <marker id="arrow-cyan" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#00F0FF" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#3B82F6" />
+    </marker>
+  </defs>
+
+  <style>
+    .font-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; }
+    .font-mono { font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace; }
+    .pulse-line {
+      stroke-dasharray: 8 6;
+      animation: dash 20s linear infinite;
+    }
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -1000;
+      }
+    }
+  </style>
+
+  <!-- Background Canvas -->
+  <rect width="1200" height="680" fill="url(#bg-glow)" />
+  <rect width="1200" height="680" fill="url(#grid-pattern)" />
+
+  <!-- Ambient Glow Blobs -->
+  <circle cx="200" cy="300" r="180" fill="#00F0FF" opacity="0.04" filter="blur(60px)" />
+  <circle cx="650" cy="280" r="220" fill="#7000FF" opacity="0.05" filter="blur(70px)" />
+  <circle cx="1020" cy="320" r="160" fill="#10B981" opacity="0.04" filter="blur(50px)" />
+
+  <!-- HEADER SECTION -->
+  <g transform="translate(60, 48)">
+    <rect x="0" y="0" width="124" height="26" rx="13" fill="rgba(0, 240, 255, 0.1)" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1" />
+    <circle cx="12" cy="13" r="4" fill="#00F0FF" />
+    <text x="24" y="17" fill="#00F0FF" class="font-mono" font-size="11" font-weight="600" letter-spacing="1.5">ARCHITECTURE</text>
+    
+    <text x="0" y="58" fill="#FFFFFF" class="font-sans" font-size="28" font-weight="800" letter-spacing="-0.5">ZipStream Zero-Copy Streaming Pipeline</text>
+    <text x="0" y="80" fill="#94A3B8" class="font-sans" font-size="14">Instant 0.6s tail-range index parsing bypassing full 20GB+ network downloads</text>
+  </g>
+
+  <!-- PIPELINE CONNECTOR FLOW -->
+  <!-- Stream Flow Path (Tail Read Phase) -->
+  <path d="M 270 280 L 370 280" stroke="#00F0FF" stroke-width="2.5" fill="none" marker-end="url(#arrow-cyan)" class="pulse-line" />
+  <path d="M 570 280 L 650 280" stroke="#00F0FF" stroke-width="2.5" fill="none" marker-end="url(#arrow-cyan)" class="pulse-line" />
+  <path d="M 870 280 L 950 280" stroke="#00F0FF" stroke-width="2.5" fill="none" marker-end="url(#arrow-cyan)" class="pulse-line" />
+
+  <!-- STEP 1: REMOTE CLOUD ZIP -->
+  <g transform="translate(60, 160)" filter="url(#shadow-card)">
+    <!-- Glass Box -->
+    <rect width="210" height="320" rx="16" fill="url(#card-grad-1)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" />
+    
+    <!-- Header Badge -->
+    <rect x="18" y="20" width="40" height="40" rx="10" fill="rgba(255, 255, 255, 0.05)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1" />
+    <path d="M 28 42 C 28 35 34 32 38 32 C 41 28 47 28 49 32 C 53 32 58 35 58 42 Z" fill="none" stroke="#38BDF8" stroke-width="2" stroke-linejoin="round" />
+    
+    <text x="68" y="36" fill="#F8FAFC" class="font-sans" font-size="15" font-weight="700">Remote Cloud</text>
+    <text x="68" y="52" fill="#64748B" class="font-sans" font-size="12">HTTP / S3 / WebDAV</text>
+
+    <!-- File Representation -->
+    <g transform="translate(20, 80)">
+      <rect width="170" height="150" rx="10" fill="rgba(15, 23, 42, 0.6)" stroke="rgba(255, 255, 255, 0.08)" />
+      
+      <!-- 20GB Body (Skipped) -->
+      <rect x="10" y="10" width="150" height="90" rx="6" fill="rgba(239, 68, 68, 0.08)" stroke="rgba(239, 68, 68, 0.2)" stroke-dasharray="4 3" />
+      <text x="85" y="45" fill="#F87171" class="font-mono" font-size="11" text-anchor="middle" font-weight="600">UNTOUCHED DATA</text>
+      <text x="85" y="65" fill="#EF4444" class="font-mono" font-size="16" text-anchor="middle" font-weight="800">~20 GB (Skipped)</text>
+      <text x="85" y="82" fill="#7F1D1D" class="font-sans" font-size="10" text-anchor="middle">No local disk space used</text>
+
+      <!-- Tail Section (Targeted) -->
+      <rect x="10" y="108" width="150" height="32" rx="6" fill="rgba(0, 240, 255, 0.15)" stroke="#00F0FF" stroke-width="1.5" />
+      <text x="85" y="128" fill="#E0F2FE" class="font-mono" font-size="11" text-anchor="middle" font-weight="700">Tail: 64KB - 1MB</text>
+    </g>
+
+    <!-- Tag info -->
+    <rect x="20" y="248" width="170" height="48" rx="8" fill="rgba(0, 0, 0, 0.3)" />
+    <text x="30" y="268" fill="#94A3B8" class="font-sans" font-size="11">Range Request:</text>
+    <text x="30" y="284" fill="#38BDF8" class="font-mono" font-size="11" font-weight="600">Range: bytes=-1048576</text>
+  </g>
+
+  <!-- STEP 2: HTTP TAIL RANGE ENGINE -->
+  <g transform="translate(370, 160)" filter="url(#shadow-card)">
+    <rect width="200" height="320" rx="16" fill="url(#card-grad-active)" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1.2" />
+    
+    <rect x="18" y="20" width="40" height="40" rx="10" fill="rgba(0, 240, 255, 0.1)" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1" />
+    <path d="M 30 35 L 46 35 M 30 40 L 42 40 M 30 45 L 48 45" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" />
+
+    <text x="68" y="36" fill="#F8FAFC" class="font-sans" font-size="15" font-weight="700">Tail Parser</text>
+    <text x="68" y="52" fill="#38BDF8" class="font-sans" font-size="12">EOCD &amp; Central Dir</text>
+
+    <!-- Steps in Parser -->
+    <g transform="translate(18, 80)">
+      <!-- Box 1 -->
+      <rect width="164" height="44" rx="8" fill="rgba(15, 23, 42, 0.7)" stroke="rgba(0, 240, 255, 0.2)" />
+      <circle cx="20" cy="22" r="8" fill="rgba(0, 240, 255, 0.2)" />
+      <text x="20" y="25" fill="#00F0FF" class="font-mono" font-size="10" font-weight="700" text-anchor="middle">1</text>
+      <text x="36" y="20" fill="#E2E8F0" class="font-sans" font-size="11" font-weight="600">Find EOCD (0x06054b50)</text>
+      <text x="36" y="33" fill="#64748B" class="font-mono" font-size="9">Scan last 64KB in ~0.1s</text>
+
+      <!-- Box 2 -->
+      <g transform="translate(0, 52)">
+        <rect width="164" height="44" rx="8" fill="rgba(15, 23, 42, 0.7)" stroke="rgba(0, 240, 255, 0.2)" />
+        <circle cx="20" cy="22" r="8" fill="rgba(0, 240, 255, 0.2)" />
+        <text x="20" y="25" fill="#00F0FF" class="font-mono" font-size="10" font-weight="700" text-anchor="middle">2</text>
+        <text x="36" y="20" fill="#E2E8F0" class="font-sans" font-size="11" font-weight="600">ZIP64 Locator Check</text>
+        <text x="36" y="33" fill="#64748B" class="font-mono" font-size="9">Handles &gt;4GB archives</text>
+      </g>
+
+      <!-- Box 3 -->
+      <g transform="translate(0, 104)">
+        <rect width="164" height="44" rx="8" fill="rgba(15, 23, 42, 0.7)" stroke="rgba(0, 240, 255, 0.2)" />
+        <circle cx="20" cy="22" r="8" fill="rgba(0, 240, 255, 0.2)" />
+        <text x="20" y="25" fill="#00F0FF" class="font-mono" font-size="10" font-weight="700" text-anchor="middle">3</text>
+        <text x="36" y="20" fill="#E2E8F0" class="font-sans" font-size="11" font-weight="600">Central Directory Map</text>
+        <text x="36" y="33" fill="#64748B" class="font-mono" font-size="9">Extract offsets &amp; sizes</text>
+      </g>
+    </g>
+
+    <!-- Metric pill -->
+    <rect x="18" y="248" width="164" height="48" rx="8" fill="rgba(0, 240, 255, 0.08)" stroke="rgba(0, 240, 255, 0.2)" />
+    <text x="100" y="268" fill="#38BDF8" class="font-mono" font-size="11" text-anchor="middle" font-weight="600">PARSED IN</text>
+    <text x="100" y="286" fill="#00F0FF" class="font-mono" font-size="15" text-anchor="middle" font-weight="800">&lt; 0.6 SECONDS</text>
+  </g>
+
+  <!-- STEP 3: ZIPSTREAM ENGINE & PREFETCHER -->
+  <g transform="translate(650, 160)" filter="url(#shadow-card)">
+    <rect width="220" height="320" rx="16" fill="url(#card-grad-1)" stroke="rgba(112, 0, 255, 0.4)" stroke-width="1.2" />
+    
+    <rect x="18" y="20" width="40" height="40" rx="10" fill="rgba(112, 0, 255, 0.15)" stroke="rgba(112, 0, 255, 0.4)" stroke-width="1" />
+    <path d="M 38 28 L 48 34 L 48 46 L 38 52 L 28 46 L 28 34 Z" fill="none" stroke="#A855F7" stroke-width="2" />
+
+    <text x="68" y="36" fill="#F8FAFC" class="font-sans" font-size="15" font-weight="700">ZipStream Hub</text>
+    <text x="68" y="52" fill="#C084FC" class="font-sans" font-size="12">Core Engine &amp; Cache</text>
+
+    <g transform="translate(18, 80)">
+      <!-- Virtual Server -->
+      <rect width="184" height="70" rx="8" fill="rgba(15, 23, 42, 0.8)" stroke="rgba(168, 85, 247, 0.2)" />
+      <text x="14" y="24" fill="#E2E8F0" class="font-sans" font-size="11" font-weight="600">Async Range Bridge</text>
+      <text x="14" y="40" fill="#94A3B8" class="font-sans" font-size="10">Maps file offset -> zip byte offset</text>
+      <rect x="14" y="48" width="156" height="12" rx="3" fill="#1E293B" />
+      <rect x="14" y="48" width="110" height="12" rx="3" fill="url(#cyan-glow)" />
+      <text x="92" y="58" fill="#FFFFFF" class="font-mono" font-size="8" text-anchor="middle" font-weight="700">PREFETCH BUFFER: 32MB</text>
+
+      <!-- Connection Pool -->
+      <g transform="translate(0, 80)">
+        <rect width="184" height="74" rx="8" fill="rgba(15, 23, 42, 0.8)" stroke="rgba(168, 85, 247, 0.2)" />
+        <text x="14" y="24" fill="#E2E8F0" class="font-sans" font-size="11" font-weight="600">Adaptive Read Ahead</text>
+        <circle cx="20" cy="46" r="4" fill="#10B981" />
+        <text x="32" y="50" fill="#CBD5E1" class="font-mono" font-size="10">Conn Pool (TCP keep-alive)</text>
+        <circle cx="20" cy="62" r="4" fill="#10B981" />
+        <text x="32" y="66" fill="#CBD5E1" class="font-mono" font-size="10">Non-blocking Seek Pipe</text>
+      </g>
+    </g>
+
+    <rect x="18" y="248" width="184" height="48" rx="8" fill="rgba(112, 0, 255, 0.1)" stroke="rgba(112, 0, 255, 0.3)" />
+    <text x="110" y="268" fill="#D8B4FE" class="font-mono" font-size="11" text-anchor="middle">VIRTUAL HTTP STREAM</text>
+    <text x="110" y="285" fill="#38BDF8" class="font-mono" font-size="10" text-anchor="middle">http://127.0.0.1:8765/stream/...</text>
+  </g>
+
+  <!-- STEP 4: CLIENT MEDIA PLAYERS -->
+  <g transform="translate(950, 160)" filter="url(#shadow-card)">
+    <rect width="190" height="320" rx="16" fill="url(#card-grad-1)" stroke="rgba(16, 185, 129, 0.3)" stroke-width="1.2" />
+    
+    <rect x="18" y="20" width="40" height="40" rx="10" fill="rgba(16, 185, 129, 0.1)" stroke="rgba(16, 185, 129, 0.3)" stroke-width="1" />
+    <polygon points="32,28 48,39 32,50" fill="#10B981" />
+
+    <text x="68" y="36" fill="#F8FAFC" class="font-sans" font-size="15" font-weight="700">Native Playback</text>
+    <text x="68" y="52" fill="#34D399" class="font-sans" font-size="12">0ms Scrubbing / Seek</text>
+
+    <!-- Player Logos / Badges -->
+    <g transform="translate(18, 80)">
+      <!-- PotPlayer -->
+      <rect width="154" height="42" rx="8" fill="rgba(15, 23, 42, 0.7)" stroke="rgba(255, 255, 255, 0.06)" />
+      <rect x="10" y="11" width="20" height="20" rx="4" fill="#F59E0B" />
+      <polygon points="17,17 25,21 17,25" fill="#000" />
+      <text x="38" y="26" fill="#F1F5F9" class="font-sans" font-size="12" font-weight="600">PotPlayer</text>
+
+      <!-- VLC Player -->
+      <g transform="translate(0, 50)">
+        <rect width="154" height="42" rx="8" fill="rgba(15, 23, 42, 0.7)" stroke="rgba(255, 255, 255, 0.06)" />
+        <rect x="10" y="11" width="20" height="20" rx="4" fill="#EA580C" />
+        <polygon points="20,14 14,27 26,27" fill="#FFF" />
+        <text x="38" y="26" fill="#F1F5F9" class="font-sans" font-size="12" font-weight="600">VLC Media Player</text>
+      </g>
+
+      <!-- MPV / Browser -->
+      <g transform="translate(0, 100)">
+        <rect width="154" height="42" rx="8" fill="rgba(15, 23, 42, 0.7)" stroke="rgba(255, 255, 255, 0.06)" />
+        <rect x="10" y="11" width="20" height="20" rx="4" fill="#6366F1" />
+        <circle cx="20" cy="21" r="6" fill="#FFF" />
+        <text x="38" y="26" fill="#F1F5F9" class="font-sans" font-size="12" font-weight="600">MPV / IINA / Web</text>
+      </g>
+    </g>
+
+    <!-- Tag info -->
+    <rect x="18" y="248" width="154" height="48" rx="8" fill="rgba(16, 185, 129, 0.1)" stroke="rgba(16, 185, 129, 0.2)" />
+    <text x="95" y="268" fill="#6EE7B7" class="font-mono" font-size="11" text-anchor="middle" font-weight="600">SEEK LATENCY</text>
+    <text x="95" y="286" fill="#10B981" class="font-mono" font-size="14" text-anchor="middle" font-weight="800">~0ms (Realtime)</text>
+  </g>
+
+  <!-- BOTTOM METRICS BAR -->
+  <g transform="translate(60, 520)" filter="url(#shadow-card)">
+    <rect width="1080" height="110" rx="14" fill="rgba(15, 23, 42, 0.7)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />
+    
+    <!-- Stat 1 -->
+    <g transform="translate(40, 25)">
+      <text x="0" y="16" fill="#64748B" class="font-sans" font-size="12" font-weight="600" letter-spacing="1">INITIAL STARTUP TIME</text>
+      <text x="0" y="52" fill="#00F0FF" class="font-mono" font-size="32" font-weight="800">0.58s</text>
+      <text x="95" y="50" fill="#10B981" class="font-sans" font-size="12" font-weight="600">↓ 99.9% faster</text>
+      <text x="0" y="70" fill="#94A3B8" class="font-sans" font-size="11">vs 15+ mins download</text>
+    </g>
+
+    <line x1="290" y1="20" x2="290" y2="90" stroke="rgba(255, 255, 255, 0.06)" />
+
+    <!-- Stat 2 -->
+    <g transform="translate(330, 25)">
+      <text x="0" y="16" fill="#64748B" class="font-sans" font-size="12" font-weight="600" letter-spacing="1">LOCAL DISK CONSUMPTION</text>
+      <text x="0" y="52" fill="#10B981" class="font-mono" font-size="32" font-weight="800">0 Bytes</text>
+      <text x="125" y="50" fill="#38BDF8" class="font-sans" font-size="12" font-weight="600">RAM buffer only</text>
+      <text x="0" y="70" fill="#94A3B8" class="font-sans" font-size="11">Zero SSD wear / wear-leveling</text>
+    </g>
+
+    <line x1="570" y1="20" x2="570" y2="90" stroke="rgba(255, 255, 255, 0.06)" />
+
+    <!-- Stat 3 -->
+    <g transform="translate(610, 25)">
+      <text x="0" y="16" fill="#64748B" class="font-sans" font-size="12" font-weight="600" letter-spacing="1">MAX FILE ARCHIVE SIZE</text>
+      <text x="0" y="52" fill="#C084FC" class="font-mono" font-size="32" font-weight="800">16 EB</text>
+      <text x="100" y="50" fill="#A855F7" class="font-sans" font-size="12" font-weight="600">ZIP64 Standard</text>
+      <text x="0" y="70" fill="#94A3B8" class="font-sans" font-size="11">Supports massive 4K/8K Blurays</text>
+    </g>
+
+    <line x1="840" y1="20" x2="840" y2="90" stroke="rgba(255, 255, 255, 0.06)" />
+
+    <!-- Stat 4 -->
+    <g transform="translate(880, 25)">
+      <text x="0" y="16" fill="#64748B" class="font-sans" font-size="12" font-weight="600" letter-spacing="1">NETWORK BANDWIDTH SAVED</text>
+      <text x="0" y="52" fill="#F59E0B" class="font-mono" font-size="32" font-weight="800">99.8%</text>
+      <text x="110" y="50" fill="#FBBF24" class="font-sans" font-size="12" font-weight="600">On preview</text>
+      <text x="0" y="70" fill="#94A3B8" class="font-sans" font-size="11">Only streaming watched segments</text>
+    </g>
+  </g>
+</svg>

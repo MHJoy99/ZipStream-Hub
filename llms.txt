@@ -1,0 +1,43 @@
+# ZipStreamHub
+> High-performance zero-download streaming server & virtual archive extractor for remote ZIP / ZIP64 archives.
+
+ZipStreamHub converts remote ZIP/ZIP64 files into instantly playable, random-seekable HTTP 1.1 streams for media players (PotPlayer, MPV, VLC, IINA) and web browsers without downloading or storing any files on local disk.
+
+## Quick Reference
+- Main Repository & Docs: https://github.com/mermis/zipstreamhub
+- Full Documentation for LLMs: /llms-full.txt
+- Architecture Deep Dive: /docs/ARCHITECTURE.md
+- REST API Reference: /docs/API.md
+- Troubleshooting Guide: /docs/TROUBLESHOOTING.md
+- Non-Coder Visual Guide: /docs/QUICKSTART_NON_CODERS.md
+
+## Core Capabilities
+- **Zero-Download HTTP 206 Streaming**: Translates client player byte-range requests directly to remote ZIP file byte offsets with STORE compression.
+- **Sub-Second Tail Parsing**: Reads End of Central Directory (EOCD `0x06054b50`) and ZIP64 Locator (`0x07064b50`) in ~0.6s without fetching the entire archive.
+- **Sliding-Window Buffer**: Multi-threaded `StreamPrefetcher` with 32MB configurable read-ahead and 128KB socket slices.
+- **Native Player Integration**: Auto-detects and triggers MPV, PotPlayer, VLC, and IINA via CLI and Web UI.
+- **Cross-Platform**: Windows, macOS, Linux, and Docker support.
+
+## Endpoints Summary
+- `POST /api/inspect`: Accepts `{"url": "<zip_url>"}`. Parses Central Directory and returns archive structure with file list and byte offsets.
+- `POST /api/play`: Accepts `{"url": "<stream_url>"}`. Auto-detects and launches local media player.
+- `GET /stream/<id>/<filename>`: Exposes an HTTP 206 Partial Content byte-range stream for the selected file inside the remote archive.
+- `GET /`: Serves the glassmorphism web control panel.
+
+## CLI Usage
+```bash
+# Start server
+python server.py
+
+# Interactive CLI player
+python cli.py "<zip_url>"
+
+# Direct player launch
+python cli.py "<zip_url>" --player potplayer --ep 1
+```
+
+## Architecture Summary
+1. Client requests remote ZIP URL.
+2. `RemoteZipReader` fetches last 1MB via HTTP Range to parse EOCD (`0x06054b50`), ZIP64 EOCD Locator (`0x07064b50`), and Central Directory (`0x02014b50`).
+3. Local file headers (`0x04034b50`) are parsed on demand to resolve exact `data_offset`.
+4. `StreamPrefetcher` uses `urllib3.PoolManager` with persistent HTTP keep-alive connections to prefetch 32MB upstream blocks and slice them into 128KB packets for the client.

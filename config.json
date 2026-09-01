@@ -1,0 +1,51 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8787,
+    "debug": false
+  },
+  "streaming": {
+    "prefetch_buffer_size_mb": 32,
+    "slice_size_kb": 128,
+    "max_concurrent_streams": 8,
+    "chunk_timeout_seconds": 30
+  },
+  "players": {
+    "default_player": "mpv",
+    "available_players": {
+      "mpv": {
+        "name": "MPV Media Player",
+        "command": "mpv",
+        "args": ["--force-window=immediate", "{url}"]
+      },
+      "vlc": {
+        "name": "VLC Media Player",
+        "command": "vlc",
+        "args": ["{url}"]
+      },
+      "potplayer": {
+        "name": "PotPlayer",
+        "command": "potplayer",
+        "args": ["{url}"]
+      },
+      "iina": {
+        "name": "IINA (macOS)",
+        "command": "iina",
+        "args": ["{url}"]
+      },
+      "browser": {
+        "name": "Web Browser Player",
+        "command": "web",
+        "args": ["{url}"]
+      }
+    }
+  },
+  "ui": {
+    "theme": "dark",
+    "accent_color": "#3b82f6",
+    "compact_mode": false,
+    "show_thumbnails": true,
+    "page_size": 50,
+    "autoplay": false
+  }
+}

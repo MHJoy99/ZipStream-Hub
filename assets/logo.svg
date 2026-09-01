@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Radial Dark Tech Background -->
+    <radialGradient id="logo-bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="60%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#020617" />
+    </radialGradient>
+
+    <!-- Neon Gradients -->
+    <linearGradient id="neon-stream" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="60%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#6366F1" />
+    </linearGradient>
+
+    <linearGradient id="bolt-color" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="glow-master" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur1" />
+      <feGaussianBlur in="SourceGraphic" stdDeviation="24" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="shadow-base" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.8" />
+    </filter>
+  </defs>
+
+  <style>
+    .font-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif; }
+    .font-mono { font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace; }
+  </style>
+
+  <!-- Background Base Container -->
+  <rect width="512" height="512" rx="110" fill="url(#logo-bg)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" filter="url(#shadow-base)" />
+
+  <!-- Outer Hexagon / Shield -->
+  <g transform="translate(46, 46)">
+    <polygon points="210,20 370,110 370,310 210,400 50,310 50,110" fill="rgba(15, 23, 42, 0.7)" stroke="url(#neon-stream)" stroke-width="6" />
+    <polygon points="210,45 345,125 345,295 210,375 75,295 75,125" fill="none" stroke="rgba(0, 240, 255, 0.25)" stroke-width="2" stroke-dasharray="10 8" />
+
+    <!-- Stream Zipper Tracks -->
+    <g transform="translate(100, 75)">
+      <!-- Left Track -->
+      <line x1="60" y1="30" x2="60" y2="240" stroke="#38BDF8" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 12" />
+      <!-- Right Track -->
+      <line x1="160" y1="30" x2="160" y2="240" stroke="#38BDF8" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 12" />
+
+      <!-- Center Lightning Energy Bolt -->
+      <path d="M 130 20 L 80 125 L 120 125 L 90 230 L 155 110 L 115 110 Z" fill="url(#bolt-color)" filter="url(#glow-master)" />
+    </g>
+  </g>
+</svg>

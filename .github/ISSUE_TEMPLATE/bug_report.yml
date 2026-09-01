@@ -1,0 +1,84 @@
+name: 🐛 Bug Report
+description: File a bug report to help us improve ZipStreamHub
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Please provide as much detail as possible.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can maintainers reproduce this behavior?
+      placeholder: |
+        1. Run `zipstream` or start server with `python server.py`
+        2. Stream URL: `https://...`
+        3. Seek to position X in player Y
+        4. Observe error / stall
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: Which OS are you running on?
+      options:
+        - Windows 11 / 10
+        - Linux (Ubuntu / Debian / Arch / Fedora)
+        - macOS (Apple Silicon)
+        - macOS (Intel)
+        - Docker / Container
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: player
+    attributes:
+      label: Media Player
+      description: What media player was used (if applicable)?
+      options:
+        - PotPlayer
+        - MPV
+        - VLC
+        - IINA
+        - Web Browser (Built-in HTML5)
+        - Other
+    validations:
+      required: false
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      placeholder: e.g. Python 3.11.9
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs & Output
+      description: Please paste any console output, tracebacks, or server logs.
+      render: shell

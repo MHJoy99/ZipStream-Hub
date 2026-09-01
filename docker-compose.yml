@@ -1,0 +1,22 @@
+services:
+  zipstreamhub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zipstreamhub:latest
+    container_name: zipstreamhub
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      - ZIPSTREAM_PORT=8787
+      - ZIPSTREAM_HOST=0.0.0.0
+      - ZIPSTREAM_PREFETCH_BUFFER_MB=32
+      - ZIPSTREAM_SLICE_SIZE_KB=128
+      - ZIPSTREAM_MAX_CONCURRENT_STREAMS=8
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8787/').read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

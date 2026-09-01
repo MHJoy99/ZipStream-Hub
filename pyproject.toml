@@ -1,0 +1,112 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zipstreamhub"
+version = "1.0.0"
+description = "High-performance zero-disk streaming server and virtual archive extractor for remote ZIP / ZIP64 files."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "ZipStreamHub Contributors" }
+]
+keywords = [
+    "zip",
+    "zip64",
+    "streaming",
+    "http-range",
+    "video-stream",
+    "media-player",
+    "virtual-filesystem",
+    "cloud-storage"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: System :: Archiving",
+]
+dependencies = [
+    "urllib3>=1.26.0,<3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.6.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "pre-commit>=3.5.0",
+    "mypy>=1.0.0",
+    "build>=1.0.0",
+    "twine>=4.0.0"
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0"
+]
+
+[project.scripts]
+zipstream = "cli:main"
+zipstream-server = "server:start_server"
+
+[project.urls]
+Homepage = "https://github.com/ZipStreamHub/ZipStreamHub"
+Documentation = "https://github.com/ZipStreamHub/ZipStreamHub#readme"
+Repository = "https://github.com/ZipStreamHub/ZipStreamHub.git"
+"Issue Tracker" = "https://github.com/ZipStreamHub/ZipStreamHub/issues"
+Changelog = "https://github.com/ZipStreamHub/ZipStreamHub/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = ["tests*", "assets*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests", "test_engine.py"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-v --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+]
+ignore = [
+    "E501",  # line length handled by formatter
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["zip_stream_engine", "zip_stream_server", "config", "engine", "server", "cli", "player_detector", "zipplay"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312", "py313"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
