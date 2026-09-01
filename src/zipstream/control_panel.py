@@ -1662,7 +1662,19 @@ class ZipStreamControlPanel(tk.Tk):
 
             base_dir = os.path.dirname(os.path.abspath(__file__))
             backend_script = os.path.join(base_dir, "server.py")
+            if not os.path.exists(backend_script):
+                # Fallback to root server.py
+                root_backend = os.path.join(os.path.dirname(os.path.dirname(base_dir)), "server.py")
+                if os.path.exists(root_backend):
+                    backend_script = root_backend
+
             python_exe = sys.executable
+            # If running via pythonw.exe, prefer standard python.exe for subprocess stability
+            if python_exe.lower().endswith("pythonw.exe"):
+                candidate = python_exe[:-5] + ".exe"
+                if os.path.exists(candidate):
+                    python_exe = candidate
+
             try:
                 creation_flags = 0
                 if sys.platform == "win32":
@@ -1671,9 +1683,10 @@ class ZipStreamControlPanel(tk.Tk):
                 cmd_args = [python_exe, backend_script, "--port", str(target_port), "--auto-port"]
                 SERVER_PROCESS = subprocess.Popen(
                     cmd_args,
-                    cwd=base_dir,
+                    cwd=os.path.dirname(backend_script),
                     creationflags=creation_flags
                 )
+                self.active_pid = SERVER_PROCESS.pid
                 self.active_port = target_port
                 self.set_running_state(True)
                 self.log(f"ZipStream server process spawned on port {target_port} (PID: {SERVER_PROCESS.pid})", "success")

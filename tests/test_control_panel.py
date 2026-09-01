@@ -403,8 +403,12 @@ class TestControlPanelQuickPlayerAndSTRM(BaseControlPanelTest):
         fake_reader.entries = [{"id": 1, "filename": "S01E01.mp4", "file_size": 1000}]
         mock_reader.return_value = fake_reader
 
+        mock_resp = MagicMock()
+        mock_resp.read.return_value = json.dumps({"history": [{"url": "http://example.com/tvshow.zip"}]}).encode("utf-8")
+        mock_resp.__enter__.return_value = mock_resp
+
         m_open = mock_open()
-        with patch("builtins.open", m_open):
+        with patch("urllib.request.urlopen", return_value=mock_resp), patch("builtins.open", m_open):
             self.app.export_strm_bundle()
 
         mock_gen_zip.assert_called_once()
