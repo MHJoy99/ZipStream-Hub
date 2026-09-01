@@ -77,3 +77,6 @@ desktop.ini
 *.log
 local_cache/
 data/
+history.db
+history.db-journal
+history.json

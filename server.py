@@ -8,11 +8,14 @@ import os
 import mimetypes
 import subprocess
 import threading
-from typing import Dict, Optional, Tuple
+import urllib.parse
+from typing import Dict, Optional, Tuple, List
 
 # Clean intra-package / local directory imports
 from engine import RemoteZipReader, StreamPrefetcher, HTTP_POOL
 from player_detector import get_installed_players, launch_stream
+from subtitle_parser import is_video_file, is_subtitle_file, convert_to_vtt
+import history
 
 PORT = 8787
 
@@ -50,15 +53,9 @@ class ThreadedZipStreamServer(socketserver.ThreadingMixIn, http.server.HTTPServe
 class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
-    def handle(self):
-        try:
-            super().handle()
-        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
-            pass
-
     def _set_cors_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, HEAD, POST, DELETE, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Range, Content-Type, Accept, Origin, User-Agent")
         self.send_header("Access-Control-Expose-Headers", "Content-Range, Content-Length, Accept-Ranges")
 
@@ -94,6 +91,12 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             self._serve_file(gui_path, "text/html")
         elif self.path == "/api/players":
             self._handle_api_players()
+        elif self.path == "/api/history" or self.path.startswith("/api/history?"):
+            self._handle_api_history_get()
+        elif self.path.startswith("/api/playlist.m3u"):
+            self._handle_api_playlist()
+        elif self.path.startswith("/api/subtitle"):
+            self._handle_api_subtitle()
         elif self.path.startswith("/stream/"):
             self._handle_stream_get()
         else:
@@ -106,6 +109,16 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             self._handle_api_inspect()
         elif self.path == "/api/play":
             self._handle_api_play()
+        elif self.path == "/api/history/favorite":
+            self._handle_api_history_favorite()
+        else:
+            self.send_response(404)
+            self._set_cors_headers()
+            self.end_headers()
+
+    def do_DELETE(self):
+        if self.path == "/api/history" or self.path.startswith("/api/history?"):
+            self._handle_api_history_delete()
         else:
             self.send_response(404)
             self._set_cors_headers()
@@ -154,6 +167,17 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
 
                 CURRENT_READER = reader
                 CACHED_ENTRIES = {e["id"]: e for e in reader.entries}
+
+            # Record in history
+            try:
+                history.add_history(
+                    url=zip_url,
+                    title=os.path.basename(zip_url.split("?")[0]) or zip_url,
+                    size_bytes=reader.total_size,
+                    file_count=len(reader.entries),
+                )
+            except Exception:
+                pass
 
             resp = {
                 "status": "ok",
@@ -206,6 +230,247 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Connection", "keep-alive")
             self.end_headers()
             self.wfile.write(err_bytes)
+
+    def _handle_api_history_get(self):
+        try:
+            parsed = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed.query)
+            limit_str = qs.get("limit", ["20"])[0]
+            fav_str = qs.get("favorites_only", ["0"])[0]
+            limit = int(limit_str) if limit_str.isdigit() else 20
+            favorites_only = fav_str.lower() in ("1", "true", "yes")
+
+            items = history.get_history(limit=limit)
+            if favorites_only:
+                items = [item for item in items if item.get("is_favorite")]
+
+            resp = {
+                "status": "ok",
+                "history": items,
+                "count": len(items)
+            }
+            data_bytes = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(data_bytes)
+        except Exception as e:
+            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            self.send_response(500)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(err_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(err_bytes)
+
+    def _handle_api_history_favorite(self):
+        length = int(self.headers.get("Content-Length", 0))
+        post_data = self.rfile.read(length) if length > 0 else b"{}"
+        try:
+            body = json.loads(post_data.decode("utf-8")) if post_data else {}
+            url = body.get("url", "").strip()
+            if not url:
+                parsed = urllib.parse.urlparse(self.path)
+                qs = urllib.parse.parse_qs(parsed.query)
+                url = qs.get("url", [""])[0].strip()
+
+            if not url:
+                raise ValueError("Missing 'url' parameter")
+
+            is_favorite = history.toggle_favorite(url)
+            resp = {
+                "status": "ok",
+                "url": url,
+                "is_favorite": is_favorite
+            }
+            data_bytes = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(data_bytes)
+        except Exception as e:
+            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            self.send_response(400)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(err_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(err_bytes)
+
+    def _handle_api_history_delete(self):
+        try:
+            parsed = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed.query)
+            url = qs.get("url", [""])[0].strip()
+
+            if not url:
+                length = int(self.headers.get("Content-Length", 0))
+                if length > 0:
+                    body = json.loads(self.rfile.read(length).decode("utf-8"))
+                    url = body.get("url", "").strip()
+
+            if not url:
+                raise ValueError("Missing 'url' parameter")
+
+            deleted = history.delete_history(url)
+            resp = {
+                "status": "ok",
+                "url": url,
+                "deleted": deleted
+            }
+            data_bytes = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(data_bytes)
+        except Exception as e:
+            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            self.send_response(400)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(err_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(err_bytes)
+
+    def _handle_api_playlist(self):
+        try:
+            parsed = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed.query)
+            query_url = qs.get("url", [""])[0].strip()
+
+            host_header = self.headers.get("Host", f"127.0.0.1:{PORT}")
+            base_url = f"http://{host_header}"
+            
+            with ARCHIVE_LOCK:
+                if query_url:
+                    if query_url in READERS_BY_URL:
+                        reader = READERS_BY_URL[query_url]
+                    else:
+                        reader = RemoteZipReader(query_url)
+                        READERS_BY_URL[query_url] = reader
+                    entries = reader.entries
+                else:
+                    reader = CURRENT_READER
+                    entries = list(CACHED_ENTRIES.values()) if CACHED_ENTRIES else (reader.entries if reader else [])
+
+            # Filter to video files only
+            video_entries = [ep for ep in entries if is_video_file(ep.get("name", ""))]
+            if not video_entries and entries:
+                # If none explicitly identified by extension, check if any entry exists
+                video_entries = entries
+
+            if not video_entries:
+                self.send_response(400)
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(b"#EXTM3U\n# No active or queried archive video entries found.\n")
+                return
+
+            lines = ["#EXTM3U", "#EXT-X-VERSION:3", f"# PLAYLIST GENERATED BY ZIPSTREAM HUB ({len(video_entries)} items)"]
+            for ep in sorted(video_entries, key=lambda x: x["id"]):
+                duration = -1
+                name = ep.get("name", f"Track {ep['id']}")
+                encoded_name = urllib.parse.quote(name)
+                stream_link = f"{base_url}/stream/{ep['id']}/{encoded_name}"
+                lines.append(f'#EXTINF:{duration} tvg-name="{name}" group-title="ZipStream Hub",{name}')
+                lines.append(stream_link)
+
+            playlist_content = "\n".join(lines).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/x-mpegurl; charset=utf-8")
+            self.send_header("Content-Disposition", 'attachment; filename="zipstream_playlist.m3u"')
+            self.send_header("Content-Length", str(len(playlist_content)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(playlist_content)
+        except Exception as e:
+            self.send_response(500)
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(str(e).encode("utf-8"))
+
+    def _handle_api_subtitle(self):
+        """
+        Extracts subtitle text (.srt / .vtt / .ass / .ssa) from the archive and converts to WebVTT on the fly.
+        Format: /api/subtitle?id=<id>&name=<sub_name>&url=<archive_url>
+        """
+        try:
+            parsed = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed.query)
+            
+            ep_id_str = qs.get("id", [""])[0]
+            sub_name = qs.get("name", [""])[0]
+            query_url = qs.get("url", [""])[0].strip()
+
+            with ARCHIVE_LOCK:
+                if query_url:
+                    if query_url in READERS_BY_URL:
+                        reader = READERS_BY_URL[query_url]
+                    else:
+                        reader = RemoteZipReader(query_url)
+                        READERS_BY_URL[query_url] = reader
+                    cached = {e["id"]: e for e in reader.entries}
+                else:
+                    reader = CURRENT_READER
+                    cached = dict(CACHED_ENTRIES)
+
+            if not reader or not cached:
+                self.send_response(404)
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(b"No active archive.")
+                return
+
+            target_entry = None
+            if ep_id_str.isdigit():
+                target_entry = cached.get(int(ep_id_str))
+            
+            if not target_entry and sub_name:
+                for e in cached.values():
+                    if e["name"].lower() == sub_name.lower():
+                        target_entry = e
+                        break
+
+            if not target_entry:
+                self.send_response(404)
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(b"Subtitle entry not found.")
+                return
+
+            # Read subtitle bytes efficiently via Range request without reading whole archive
+            sub_bytes = reader.read_entry_bytes(target_entry)
+            text = sub_bytes.decode("utf-8", errors="replace")
+
+            # Convert to WebVTT using subtitle_parser
+            vtt_text = convert_to_vtt(text, target_entry.get("name", ""))
+            vtt_bytes = vtt_text.encode("utf-8")
+
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "text/vtt; charset=utf-8")
+            self.send_header("Content-Length", str(len(vtt_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(vtt_bytes)
+        except Exception as e:
+            self.send_response(500)
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(str(e).encode("utf-8"))
 
     def _handle_api_play(self):
         length = int(self.headers.get("Content-Length", 0))

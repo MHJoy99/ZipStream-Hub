@@ -6,6 +6,7 @@ import threading
 import queue
 import time
 import socket
+import zlib
 import urllib3
 from typing import List, Dict, Optional, Generator
 
@@ -277,3 +278,30 @@ class RemoteZipReader:
             data_start = entry["local_header_offset"] + 30 + name_len + extra_len
             entry["data_offset"] = data_start
             return data_start
+
+    def read_entry_bytes(self, entry: Dict) -> bytes:
+        """
+        Reads decompressed/raw bytes for a single entry using an exact HTTP Range request.
+        Does not download or buffer the rest of the archive.
+        Supports method 0 (STORE) and method 8 (DEFLATE).
+        """
+        data_start = self.get_data_offset(entry)
+        comp_size = entry.get("comp_size_bytes") or entry.get("size_bytes", 0)
+        if comp_size == 0:
+            return b""
+
+        raw_data = self._fetch_range(data_start, data_start + comp_size - 1)
+        method = entry.get("method", 0)
+
+        if method == 0:
+            # STORE
+            return raw_data
+        elif method == 8:
+            # DEFLATE (raw deflate stream, wbits=-15)
+            try:
+                return zlib.decompress(raw_data, -15)
+            except Exception:
+                # Fallback standard zlib
+                return zlib.decompress(raw_data)
+        else:
+            raise NotImplementedError(f"Unsupported compression method: {method}")

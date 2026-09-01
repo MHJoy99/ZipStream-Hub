@@ -42,8 +42,12 @@
 - **⚡ Zero-Download Streaming:** Streams media directly from remote HTTP/HTTPS ZIP archives over standard HTTP 206 byte-range requests.
 - **📦 Full ZIP / ZIP64 & Store Support:** Supports massive archives > 4GB (up to 16 Exabytes) with `STORE` and `DEFLATE` methods.
 - **🚀 Intelligent Sliding-Window Prefetcher:** Multi-threaded read-ahead buffer (default 32MB) with 128KB chunk slicing for butter-smooth playback and sub-second seek times.
-- **🎯 1-Click Native Player Integration:** Auto-detects local media players (**PotPlayer**, **MPV**, **VLC**) and launches streams with zero setup.
-- **🌐 Glassmorphism Web Dashboard:** Dark-mode web interface for visual archive inspection and 1-click playback.
+- **🎯 1-Click Native Player Integration:** Auto-detects local media players (**PotPlayer**, **MPV**, **VLC**, **MPC-HC**, **MPC-BE**, **IINA**) via Windows Registry and system PATH.
+- **🌐 In-Browser Web Player & Dark-Mode Dashboard:** Built-in HTML5 video player with fullscreen mode, playback speed control, and live stream telemetry.
+- **📺 M3U / M3U8 IPTV Playlist Generator:** Instantly export complete archive playlists for **Kodi**, **Infuse (Apple TV/iOS)**, and VLC.
+- **💬 Auto Subtitle (.srt $\to$ WebVTT) Engine:** Automatic subtitle detection and on-the-fly conversion of `.srt` tracks to WebVTT for seamless browser viewing.
+- **⭐ Archive History & Bookmarks:** Quick-access storage for frequently inspected archives with 1-click reloading and saved seek positions.
+- **🪟 Windows 1-Click Launcher:** Effortless background startup via `launch_zipstream.vbs`, desktop shortcuts, and automatic browser launch.
 - **💻 Interactive Terminal Player:** Colorful ANSI CLI (`cli.py` / `zipplay.bat`) for keyboard-driven episode selection.
 
 ---
@@ -127,6 +131,8 @@ Detailed OpenAPI specifications are available in [docs/API.md](docs/API.md).
 
 ## 📖 Documentation Links
 
+- 🎬 **Complete Media Player & M3U Guide**: [docs/PLAYERS.md](docs/PLAYERS.md)
+- 📊 **Competitive Analysis & Benchmarks**: [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md)
 - 🤖 **LLM Reference Files**: [llms.txt](llms.txt) | [llms-full.txt](llms-full.txt)
 - 🏛️ **Architecture & Binary Deep Dive**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - 🔌 **REST API Specification**: [docs/API.md](docs/API.md)

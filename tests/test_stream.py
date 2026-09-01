@@ -288,3 +288,34 @@ def test_remote_zip_parser_and_offset_lookup():
     assert data_offset > 0
     actual_slice = zip_bytes[data_offset:data_offset + ep1["size_bytes"]]
     assert actual_slice == b"STREAM_TEST_CONTENT_12345" * 1000
+
+
+def test_playlist_m3u_endpoint():
+    """Verify GET /api/playlist.m3u returns correct playlist content and headers."""
+    import urllib.request
+    test_port = 8797
+    server_address = ("127.0.0.1", test_port)
+    httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+    time.sleep(0.1)
+
+    try:
+        # Populate CACHED_ENTRIES
+        with ARCHIVE_LOCK:
+            server.CACHED_ENTRIES = {
+                1: {"id": 1, "name": "Show.S01E01.1080p.mkv", "size_bytes": 1000},
+                2: {"id": 2, "name": "Show.S01E02.1080p.mkv", "size_bytes": 2000}
+            }
+
+        req = urllib.request.Request(f"http://127.0.0.1:{test_port}/api/playlist.m3u")
+        with urllib.request.urlopen(req) as resp:
+            assert resp.status == 200
+            assert "application/x-mpegurl" in resp.headers.get("Content-Type")
+            content = resp.read().decode("utf-8")
+            assert "#EXTM3U" in content
+            assert "Show.S01E01.1080p.mkv" in content
+            assert f"http://127.0.0.1:{test_port}/stream/1/Show.S01E01.1080p.mkv" in content
+    finally:
+        httpd.shutdown()
+        httpd.server_close()

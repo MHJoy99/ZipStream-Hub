@@ -38,11 +38,11 @@ def test_player_detector_browser_fallback_launch():
 
 
 def test_api_players_and_play_endpoints():
-    test_port = 8798
+    test_port = 8882
     server = ThreadedZipStreamServer(("127.0.0.1", test_port), ZipStreamWebHandler)
     server_thread = threading.Thread(target=server.serve_forever, daemon=True)
     server_thread.start()
-    time.sleep(0.1)
+    time.sleep(0.2)
 
     try:
         # 1. Test GET /api/players
@@ -56,7 +56,7 @@ def test_api_players_and_play_endpoints():
             assert any(p["key"] == "browser" for p in data["players"])
 
         # 2. Test POST /api/play with browser
-        payload = json.dumps({"url": "http://127.0.0.1:8798/stream/0/test.mp4", "player": "browser"}).encode("utf-8")
+        payload = json.dumps({"url": f"http://127.0.0.1:{test_port}/stream/0/test.mp4", "player": "browser"}).encode("utf-8")
         post_req = urllib.request.Request(
             f"http://127.0.0.1:{test_port}/api/play",
             data=payload,
