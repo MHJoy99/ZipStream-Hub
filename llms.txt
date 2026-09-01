@@ -4,7 +4,7 @@
 ZipStreamHub converts remote ZIP/ZIP64 files into instantly playable, random-seekable HTTP 1.1 streams for media players (PotPlayer, MPV, VLC, IINA) and web browsers without downloading or storing any files on local disk.
 
 ## Quick Reference
-- Main Repository & Docs: https://github.com/mermis/zipstreamhub
+- Main Repository & Docs: https://github.com/MHJoy99/ZipStream-Hub
 - Full Documentation for LLMs: /llms-full.txt
 - Architecture Deep Dive: /docs/ARCHITECTURE.md
 - REST API Reference: /docs/API.md

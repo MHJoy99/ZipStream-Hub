@@ -64,11 +64,11 @@ zipstream = "cli:main"
 zipstream-server = "server:run_server"
 
 [project.urls]
-Homepage = "https://github.com/ZipStreamHub/ZipStreamHub"
-Documentation = "https://github.com/ZipStreamHub/ZipStreamHub#readme"
-Repository = "https://github.com/ZipStreamHub/ZipStreamHub.git"
-"Issue Tracker" = "https://github.com/ZipStreamHub/ZipStreamHub/issues"
-Changelog = "https://github.com/ZipStreamHub/ZipStreamHub/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/MHJoy99/ZipStream-Hub"
+Documentation = "https://github.com/MHJoy99/ZipStream-Hub#readme"
+Repository = "https://github.com/MHJoy99/ZipStream-Hub.git"
+"Issue Tracker" = "https://github.com/MHJoy99/ZipStream-Hub/issues"
+Changelog = "https://github.com/MHJoy99/ZipStream-Hub/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["."]

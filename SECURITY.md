@@ -17,7 +17,7 @@ The ZipStreamHub team takes security issues seriously. If you discover a securit
 
 ### How to Report
 
-1. Send an email to **security@zipstreamhub.org** or use GitHub's [Private Vulnerability Reporting](https://github.com/ZipStreamHub/ZipStreamHub/security/advisories/new).
+1. Send an email to **security@zipstreamhub.org** or use GitHub's [Private Vulnerability Reporting](https://github.com/MHJoy99/ZipStream-Hub/security/advisories/new).
 2. Include:
    - A detailed description of the vulnerability.
    - Steps to reproduce or proof-of-concept code.

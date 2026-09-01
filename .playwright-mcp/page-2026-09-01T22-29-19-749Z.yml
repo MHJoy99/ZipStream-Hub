@@ -1,0 +1,1042 @@
+- generic [ref=f1e2]:
+  - generic [ref=f1e3]:
+    - link "Skip to content" [ref=f1e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=f1e9]:
+      - heading "Navigation Menu" [level=2] [ref=f1e10]
+      - generic [ref=f1e11]:
+        - link "Homepage" [ref=f1e13] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f1e16]:
+          - navigation "Global" [ref=f1e17]:
+            - list [ref=f1e18]:
+              - listitem [ref=f1e19]:
+                - button "Platform" [ref=f1e21] [cursor=pointer]
+              - listitem [ref=f1e24]:
+                - button "Solutions" [ref=f1e26] [cursor=pointer]
+              - listitem [ref=f1e29]:
+                - button "Resources" [ref=f1e31] [cursor=pointer]
+              - listitem [ref=f1e34]:
+                - button "Open Source" [ref=f1e36] [cursor=pointer]
+              - listitem [ref=f1e39]:
+                - button "Enterprise" [ref=f1e41] [cursor=pointer]
+              - listitem [ref=f1e44]:
+                - link "Pricing" [ref=f1e45] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+          - generic [ref=f1e46]:
+            - button "Search or jump to, type / to search" [ref=f1e48] [cursor=pointer]
+            - link "Sign in" [ref=f1e55] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FMHJoy99%2FZipStream-Hub
+            - link "Sign up" [ref=f1e58] [cursor=pointer]:
+              - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E%2F%3Crepo-name%3E&source=header-repo&source_repo=MHJoy99%2FZipStream-Hub
+            - button "Appearance settings" [ref=f1e61] [cursor=pointer]
+  - main [ref=f1e68]:
+    - generic [ref=f1e69]:
+      - generic [ref=f1e70]:
+        - generic [ref=f1e72]:
+          - link "MHJoy99" [ref=f1e76] [cursor=pointer]:
+            - /url: /MHJoy99
+          - generic [ref=f1e77]: /
+          - strong [ref=f1e78]:
+            - link "ZipStream-Hub" [ref=f1e79] [cursor=pointer]:
+              - /url: /MHJoy99/ZipStream-Hub
+          - generic [ref=f1e80]: Public
+        - generic [ref=f1e81]:
+          - list:
+            - listitem [ref=f1e82]:
+              - link "You must be signed in to change notification settings" [ref=f1e83] [cursor=pointer]:
+                - /url: /login?return_to=%2FMHJoy99%2FZipStream-Hub
+                - text: Notifications
+            - listitem [ref=f1e86]:
+              - link "Fork 0" [ref=f1e87] [cursor=pointer]:
+                - /url: /login?return_to=%2FMHJoy99%2FZipStream-Hub
+                - text: Fork
+                - generic "0" [ref=f1e90]
+            - listitem [ref=f1e91]:
+              - link "You must be signed in to star a repository" [ref=f1e93] [cursor=pointer]:
+                - /url: /login?return_to=%2FMHJoy99%2FZipStream-Hub
+                - text: Star
+                - generic "1 user starred this repository" [ref=f1e96]: "1"
+      - navigation "Repository" [ref=f1e97]:
+        - list [ref=f1e98]:
+          - listitem [ref=f1e99]:
+            - link "Code" [ref=f1e100] [cursor=pointer]:
+              - /url: /MHJoy99/ZipStream-Hub
+          - listitem [ref=f1e104]:
+            - link "Issues" [ref=f1e105] [cursor=pointer]:
+              - /url: /MHJoy99/ZipStream-Hub/issues
+          - listitem [ref=f1e110]:
+            - link "Pull requests" [ref=f1e111] [cursor=pointer]:
+              - /url: /MHJoy99/ZipStream-Hub/pulls
+          - listitem [ref=f1e115]:
+            - link "Actions" [ref=f1e116] [cursor=pointer]:
+              - /url: /MHJoy99/ZipStream-Hub/actions
+          - listitem [ref=f1e120]:
+            - link "Projects" [ref=f1e121] [cursor=pointer]:
+              - /url: /MHJoy99/ZipStream-Hub/projects
+          - listitem [ref=f1e125]:
+            - link "Security and quality" [ref=f1e126] [cursor=pointer]:
+              - /url: /MHJoy99/ZipStream-Hub/security
+          - listitem [ref=f1e130]:
+            - link "Insights" [ref=f1e131] [cursor=pointer]:
+              - /url: /MHJoy99/ZipStream-Hub/pulse
+    - generic [ref=f1e148]:
+      - generic [ref=f1e151]:
+        - generic [ref=f1e152]:
+          - generic [ref=f1e153]:
+            - button "main branch" [ref=f1e155] [cursor=pointer]:
+              - generic [ref=f1e156]: main
+            - generic [ref=f1e160]:
+              - link "Branches" [ref=f1e161] [cursor=pointer]:
+                - /url: /MHJoy99/ZipStream-Hub/branches
+              - link "Tags" [ref=f1e164] [cursor=pointer]:
+                - /url: /MHJoy99/ZipStream-Hub/tags
+          - generic [ref=f1e167]:
+            - combobox "Go to file" [ref=f1e175]
+            - button "Code" [ref=f1e176] [cursor=pointer]
+        - generic [ref=f1e179]:
+          - generic [ref=f1e180]:
+            - generic [ref=f1e182]:
+              - heading "Latest commit" [level=2] [ref=f1e183]
+              - generic [ref=f1e186]:
+                - heading "History" [level=2] [ref=f1e187]
+                - link "5 Commits" [ref=f1e188] [cursor=pointer]:
+                  - /url: /MHJoy99/ZipStream-Hub/commits/main/
+            - heading "Folders and files" [level=2] [ref=f1e191]
+            - table "Folders and files" [ref=f1e192]:
+              - rowgroup:
+                - row "Name Last commit message Last commit date":
+                  - columnheader "Name"
+                  - columnheader "Last commit message"
+                  - columnheader "Last commit date"
+              - rowgroup [ref=f1e193]:
+                - row ".github, (Directory)" [ref=f1e194]:
+                  - cell [ref=f1e195]:
+                    - link ".github, (Directory)" [ref=f1e202] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/tree/main/.github
+                      - text: .github
+                  - cell [ref=f1e203]
+                  - cell [ref=f1e205]
+                - row "archive, (Directory)" [ref=f1e208]:
+                  - cell [ref=f1e209]:
+                    - link "archive, (Directory)" [ref=f1e216] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/tree/main/archive
+                      - text: archive
+                  - cell [ref=f1e217]
+                  - cell [ref=f1e219]
+                - row "assets, (Directory)" [ref=f1e222]:
+                  - cell [ref=f1e223]:
+                    - link "assets, (Directory)" [ref=f1e230] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/tree/main/assets
+                      - text: assets
+                  - cell [ref=f1e231]
+                  - cell [ref=f1e233]
+                - row "docs, (Directory)" [ref=f1e236]:
+                  - cell [ref=f1e237]:
+                    - link "docs, (Directory)" [ref=f1e244] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/tree/main/docs
+                      - text: docs
+                  - cell [ref=f1e245]
+                  - cell [ref=f1e247]
+                - row "tests, (Directory)" [ref=f1e250]:
+                  - cell [ref=f1e251]:
+                    - link "tests, (Directory)" [ref=f1e258] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/tree/main/tests
+                      - text: tests
+                  - cell [ref=f1e259]
+                  - cell [ref=f1e261]
+                - row ".dockerignore, (File)" [ref=f1e264]:
+                  - cell [ref=f1e265]:
+                    - link ".dockerignore, (File)" [ref=f1e272] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/.dockerignore
+                      - text: .dockerignore
+                  - cell [ref=f1e273]
+                  - cell [ref=f1e275]
+                - row ".env.example, (File)" [ref=f1e278]:
+                  - cell [ref=f1e279]:
+                    - link ".env.example, (File)" [ref=f1e286] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/.env.example
+                      - text: .env.example
+                  - cell [ref=f1e287]
+                  - cell [ref=f1e289]
+                - row ".gitattributes, (File)" [ref=f1e292]:
+                  - cell [ref=f1e293]:
+                    - link ".gitattributes, (File)" [ref=f1e300] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/.gitattributes
+                      - text: .gitattributes
+                  - cell [ref=f1e301]
+                  - cell [ref=f1e303]
+                - row ".gitignore, (File)" [ref=f1e306]:
+                  - cell [ref=f1e307]:
+                    - link ".gitignore, (File)" [ref=f1e314] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/.gitignore
+                      - text: .gitignore
+                  - cell [ref=f1e315]
+                  - cell [ref=f1e317]
+                - row ".pre-commit-config.yaml, (File)" [ref=f1e320]:
+                  - cell [ref=f1e321]:
+                    - link ".pre-commit-config.yaml, (File)" [ref=f1e328] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/.pre-commit-config.yaml
+                      - text: .pre-commit-config.yaml
+                  - cell [ref=f1e329]
+                  - cell [ref=f1e331]
+                - row "CHANGELOG.md, (File)" [ref=f1e334]:
+                  - cell [ref=f1e335]:
+                    - link "CHANGELOG.md, (File)" [ref=f1e342] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/CHANGELOG.md
+                      - text: CHANGELOG.md
+                  - cell [ref=f1e343]
+                  - cell [ref=f1e345]
+                - row "CODE_OF_CONDUCT.md, (File)" [ref=f1e348]:
+                  - cell [ref=f1e349]:
+                    - link "CODE_OF_CONDUCT.md, (File)" [ref=f1e356] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/CODE_OF_CONDUCT.md
+                      - text: CODE_OF_CONDUCT.md
+                  - cell [ref=f1e357]
+                  - cell [ref=f1e359]
+                - row "CONTRIBUTING.md, (File)" [ref=f1e362]:
+                  - cell [ref=f1e363]:
+                    - link "CONTRIBUTING.md, (File)" [ref=f1e370] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/CONTRIBUTING.md
+                      - text: CONTRIBUTING.md
+                  - cell [ref=f1e371]
+                  - cell [ref=f1e373]
+                - row "Create-Desktop-Shortcut.ps1, (File)" [ref=f1e376]:
+                  - cell [ref=f1e377]:
+                    - link "Create-Desktop-Shortcut.ps1, (File)" [ref=f1e384] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/Create-Desktop-Shortcut.ps1
+                      - text: Create-Desktop-Shortcut.ps1
+                  - cell [ref=f1e385]
+                  - cell [ref=f1e387]
+                - row "Dockerfile, (File)" [ref=f1e390]:
+                  - cell [ref=f1e391]:
+                    - link "Dockerfile, (File)" [ref=f1e398] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/Dockerfile
+                      - text: Dockerfile
+                  - cell [ref=f1e399]
+                  - cell [ref=f1e401]
+                - row "LICENSE, (File)" [ref=f1e404]:
+                  - cell [ref=f1e405]:
+                    - link "LICENSE, (File)" [ref=f1e412] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/LICENSE
+                      - text: LICENSE
+                  - cell [ref=f1e413]
+                  - cell [ref=f1e415]
+                - row "README.md, (File)" [ref=f1e418]:
+                  - cell [ref=f1e419]:
+                    - link "README.md, (File)" [ref=f1e426] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/README.md
+                      - text: README.md
+                  - cell [ref=f1e427]
+                  - cell [ref=f1e429]
+                - row "SECURITY.md, (File)" [ref=f1e432]:
+                  - cell [ref=f1e433]:
+                    - link "SECURITY.md, (File)" [ref=f1e440] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/SECURITY.md
+                      - text: SECURITY.md
+                  - cell [ref=f1e441]
+                  - cell [ref=f1e443]
+                - row "Start-ZipStream.bat, (File)" [ref=f1e446]:
+                  - cell [ref=f1e447]:
+                    - link "Start-ZipStream.bat, (File)" [ref=f1e454] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/Start-ZipStream.bat
+                      - text: Start-ZipStream.bat
+                  - cell [ref=f1e455]
+                  - cell [ref=f1e457]
+                - row "__init__.py, (File)" [ref=f1e460]:
+                  - cell [ref=f1e461]:
+                    - link "__init__.py, (File)" [ref=f1e468] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/__init__.py
+                      - text: __init__.py
+                  - cell [ref=f1e469]
+                  - cell [ref=f1e471]
+                - row "cli.py, (File)" [ref=f1e474]:
+                  - cell [ref=f1e475]:
+                    - link "cli.py, (File)" [ref=f1e482] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/cli.py
+                      - text: cli.py
+                  - cell [ref=f1e483]
+                  - cell [ref=f1e485]
+                - row "config.json, (File)" [ref=f1e488]:
+                  - cell [ref=f1e489]:
+                    - link "config.json, (File)" [ref=f1e496] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/config.json
+                      - text: config.json
+                  - cell [ref=f1e497]
+                  - cell [ref=f1e499]
+                - row "config.py, (File)" [ref=f1e502]:
+                  - cell [ref=f1e503]:
+                    - link "config.py, (File)" [ref=f1e510] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/config.py
+                      - text: config.py
+                  - cell [ref=f1e511]
+                  - cell [ref=f1e513]
+                - row "control_panel.py, (File)" [ref=f1e516]:
+                  - cell [ref=f1e517]:
+                    - link "control_panel.py, (File)" [ref=f1e524] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/control_panel.py
+                      - text: control_panel.py
+                  - cell [ref=f1e525]
+                  - cell [ref=f1e527]
+                - row "docker-compose.yml, (File)" [ref=f1e530]:
+                  - cell [ref=f1e531]:
+                    - link "docker-compose.yml, (File)" [ref=f1e538] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/docker-compose.yml
+                      - text: docker-compose.yml
+                  - cell [ref=f1e539]
+                  - cell [ref=f1e541]
+                - row "engine.py, (File)" [ref=f1e544]:
+                  - cell [ref=f1e545]:
+                    - link "engine.py, (File)" [ref=f1e552] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/engine.py
+                      - text: engine.py
+                  - cell [ref=f1e553]
+                  - cell [ref=f1e555]
+                - row "history.py, (File)" [ref=f1e558]:
+                  - cell [ref=f1e559]:
+                    - link "history.py, (File)" [ref=f1e566] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/history.py
+                      - text: history.py
+                  - cell [ref=f1e567]
+                  - cell [ref=f1e569]
+                - row "install_shortcut.bat, (File)" [ref=f1e572]:
+                  - cell [ref=f1e573]:
+                    - link "install_shortcut.bat, (File)" [ref=f1e580] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/install_shortcut.bat
+                      - text: install_shortcut.bat
+                  - cell [ref=f1e581]
+                  - cell [ref=f1e583]
+                - row "launch_zipstream.vbs, (File)" [ref=f1e586]:
+                  - cell [ref=f1e587]:
+                    - link "launch_zipstream.vbs, (File)" [ref=f1e594] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/launch_zipstream.vbs
+                      - text: launch_zipstream.vbs
+                  - cell [ref=f1e595]
+                  - cell [ref=f1e597]
+                - row "llms-full.txt, (File)" [ref=f1e600]:
+                  - cell [ref=f1e601]:
+                    - link "llms-full.txt, (File)" [ref=f1e608] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/llms-full.txt
+                      - text: llms-full.txt
+                  - cell [ref=f1e609]
+                  - cell [ref=f1e611]
+                - row "llms.txt, (File)" [ref=f1e614]:
+                  - cell [ref=f1e615]:
+                    - link "llms.txt, (File)" [ref=f1e622] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/llms.txt
+                      - text: llms.txt
+                  - cell [ref=f1e623]
+                  - cell [ref=f1e625]
+                - row "player_detector.py, (File)" [ref=f1e628]:
+                  - cell [ref=f1e629]:
+                    - link "player_detector.py, (File)" [ref=f1e636] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/player_detector.py
+                      - text: player_detector.py
+                  - cell [ref=f1e637]
+                  - cell [ref=f1e639]
+                - row "pyproject.toml, (File)" [ref=f1e642]:
+                  - cell [ref=f1e643]:
+                    - link "pyproject.toml, (File)" [ref=f1e650] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/pyproject.toml
+                      - text: pyproject.toml
+                  - cell [ref=f1e651]
+                  - cell [ref=f1e653]
+                - row "requirements-dev.txt, (File)" [ref=f1e656]:
+                  - cell [ref=f1e657]:
+                    - link "requirements-dev.txt, (File)" [ref=f1e664] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/requirements-dev.txt
+                      - text: requirements-dev.txt
+                  - cell [ref=f1e665]
+                  - cell [ref=f1e667]
+                - row "requirements.txt, (File)" [ref=f1e670]:
+                  - cell [ref=f1e671]:
+                    - link "requirements.txt, (File)" [ref=f1e678] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/requirements.txt
+                      - text: requirements.txt
+                  - cell [ref=f1e679]
+                  - cell [ref=f1e681]
+                - row "server.py, (File)" [ref=f1e684]:
+                  - cell [ref=f1e685]:
+                    - link "server.py, (File)" [ref=f1e692] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/server.py
+                      - text: server.py
+                  - cell [ref=f1e693]
+                  - cell [ref=f1e695]
+                - row "subtitle_parser.py, (File)" [ref=f1e698]:
+                  - cell [ref=f1e699]:
+                    - link "subtitle_parser.py, (File)" [ref=f1e706] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/subtitle_parser.py
+                      - text: subtitle_parser.py
+                  - cell [ref=f1e707]
+                  - cell [ref=f1e709]
+                - row "web_gui.html, (File)" [ref=f1e712]:
+                  - cell [ref=f1e713]:
+                    - link "web_gui.html, (File)" [ref=f1e720] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/web_gui.html
+                      - text: web_gui.html
+                  - cell [ref=f1e721]
+                  - cell [ref=f1e723]
+                - row "zipstream_dashboard_preview.png, (File)" [ref=f1e726]:
+                  - cell [ref=f1e727]:
+                    - link "zipstream_dashboard_preview.png, (File)" [ref=f1e734] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/zipstream_dashboard_preview.png
+                      - text: zipstream_dashboard_preview.png
+                  - cell [ref=f1e735]
+                  - cell [ref=f1e737]
+                - row "zipstream_icon.ico, (File)" [ref=f1e740]:
+                  - cell [ref=f1e741]:
+                    - link "zipstream_icon.ico, (File)" [ref=f1e748] [cursor=pointer]:
+                      - /url: /MHJoy99/ZipStream-Hub/blob/main/zipstream_icon.ico
+                      - text: zipstream_icon.ico
+                  - cell [ref=f1e749]
+                  - cell [ref=f1e751]
+          - generic [ref=f1e755]:
+            - generic [ref=f1e756]:
+              - heading "Repository files navigation" [level=2] [ref=f1e757]
+              - navigation "Repository files" [ref=f1e758]:
+                - list [ref=f1e759]:
+                  - listitem [ref=f1e760]:
+                    - link "README" [ref=f1e761] [cursor=pointer]:
+                      - /url: "#"
+                  - listitem [ref=f1e766]:
+                    - link "Code of conduct" [ref=f1e767] [cursor=pointer]:
+                      - /url: "#"
+                  - listitem [ref=f1e772]:
+                    - link "Contributing" [ref=f1e773] [cursor=pointer]:
+                      - /url: "#"
+                  - listitem [ref=f1e778]:
+                    - link "MIT license" [ref=f1e779] [cursor=pointer]:
+                      - /url: "#"
+                  - listitem [ref=f1e784]:
+                    - link "Security" [ref=f1e785] [cursor=pointer]:
+                      - /url: "#"
+              - button "Outline" [ref=f1e790] [cursor=pointer]
+            - article [ref=f1e794]:
+              - generic [ref=f1e795]:
+                - heading "⚡ ZipStreamHub" [level=1] [ref=f1e796]
+                - 'link "Permalink: ⚡ ZipStreamHub" [ref=f1e797] [cursor=pointer]':
+                  - /url: "#-zipstreamhub"
+              - paragraph [ref=f1e800]:
+                - link [ref=f1e801] [cursor=pointer]:
+                  - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/assets/banner.svg
+                  - img "ZipStreamHub Banner" [ref=f1e802]
+              - paragraph [ref=f1e803]:
+                - link [ref=f1e804] [cursor=pointer]:
+                  - /url: https://github.com/mermis/zipstreamhub
+                  - img "Startup Badge" [ref=f1e805]
+                - link [ref=f1e806] [cursor=pointer]:
+                  - /url: https://github.com/mermis/zipstreamhub
+                  - img "Disk Usage Badge" [ref=f1e807]
+                - link [ref=f1e808] [cursor=pointer]:
+                  - /url: https://github.com/mermis/zipstreamhub
+                  - img "ZIP64 Badge" [ref=f1e809]
+                - link [ref=f1e810] [cursor=pointer]:
+                  - /url: https://github.com/mermis/zipstreamhub
+                  - img "Seeking Badge" [ref=f1e811]
+                - link [ref=f1e812] [cursor=pointer]:
+                  - /url: /MHJoy99/ZipStream-Hub/blob/main/LICENSE
+                  - img "License Badge" [ref=f1e813]
+              - separator [ref=f1e814]
+              - paragraph [ref=f1e815]:
+                - strong [ref=f1e816]: ZipStreamHub
+                - text: is an ultra-fast, zero-download streaming server and virtual archive extractor for remote ZIP and ZIP64 files. It bridges cloud archive storage directly to media players like
+                - strong [ref=f1e817]: PotPlayer
+                - text: ","
+                - strong [ref=f1e818]: MPV
+                - text: ","
+                - strong [ref=f1e819]: VLC
+                - text: ", and"
+                - strong [ref=f1e820]: IINA
+                - text: or web browsers, allowing instant playback and random-access seeking inside multi-gigabyte or multi-terabyte cloud archives without downloading or unpacking files locally.
+              - separator [ref=f1e821]
+              - generic [ref=f1e822]:
+                - heading "📑 Table of Contents" [level=2] [ref=f1e823]
+                - 'link "Permalink: 📑 Table of Contents" [ref=f1e824] [cursor=pointer]':
+                  - /url: "#-table-of-contents"
+              - list [ref=f1e827]:
+                - listitem [ref=f1e828]:
+                  - link "✨ Key Features" [ref=f1e829] [cursor=pointer]:
+                    - /url: "#-key-features"
+                - listitem [ref=f1e830]:
+                  - link "📊 Benchmark & Performance" [ref=f1e831] [cursor=pointer]:
+                    - /url: "#-benchmark--performance-comparison"
+                - listitem [ref=f1e832]:
+                  - link "🏗️ System Architecture" [ref=f1e833] [cursor=pointer]:
+                    - /url: "#-architecture-pipeline"
+                - listitem [ref=f1e834]:
+                  - link "🚀 Quick Start" [ref=f1e835] [cursor=pointer]:
+                    - /url: "#-quick-start"
+                  - list [ref=f1e836]:
+                    - listitem [ref=f1e837]:
+                      - link "1. Web GUI Experience" [ref=f1e838] [cursor=pointer]:
+                        - /url: "#1-web-gui-dashboard"
+                    - listitem [ref=f1e839]:
+                      - link "2. Interactive CLI Player" [ref=f1e840] [cursor=pointer]:
+                        - /url: "#2-interactive-cli-player"
+                    - listitem [ref=f1e841]:
+                      - link "3. Docker Deployment" [ref=f1e842] [cursor=pointer]:
+                        - /url: "#3-docker-deployment"
+                - listitem [ref=f1e843]:
+                  - link "🔌 REST API Overview" [ref=f1e844] [cursor=pointer]:
+                    - /url: "#-rest-api-overview"
+                - listitem [ref=f1e845]:
+                  - link "📖 Documentation Links" [ref=f1e846] [cursor=pointer]:
+                    - /url: "#-documentation-links"
+                - listitem [ref=f1e847]:
+                  - link "⚙️ Memory & Buffer Tuning (Up to 5GB)" [ref=f1e848] [cursor=pointer]:
+                    - /url: "#%EF%B8%8F-memory--high-speed-buffer-tuning-up-to-5gb"
+                - listitem [ref=f1e849]:
+                  - link "🛠️ Configuration & Environment Variables" [ref=f1e850] [cursor=pointer]:
+                    - /url: "#%EF%B8%8F-configuration--environment-variables"
+                - listitem [ref=f1e851]:
+                  - link "🤝 Contributing & License" [ref=f1e852] [cursor=pointer]:
+                    - /url: "#-contributing--license"
+              - separator [ref=f1e853]
+              - generic [ref=f1e854]:
+                - heading "✨ Key Features" [level=2] [ref=f1e855]
+                - 'link "Permalink: ✨ Key Features" [ref=f1e856] [cursor=pointer]':
+                  - /url: "#-key-features"
+              - paragraph [ref=f1e859]:
+                - link [ref=f1e860] [cursor=pointer]:
+                  - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/assets/feature-grid.svg
+                  - img "ZipStreamHub Feature Grid" [ref=f1e861]
+              - list [ref=f1e862]:
+                - listitem [ref=f1e863]:
+                  - strong [ref=f1e864]: "⚡ Zero-Download Streaming:"
+                  - text: Streams media directly from remote HTTP/HTTPS ZIP archives over standard HTTP 206 byte-range requests.
+                - listitem [ref=f1e865]:
+                  - strong [ref=f1e866]: "📦 Full ZIP / ZIP64 & Store Support:"
+                  - text: Supports massive archives > 4GB (up to 16 Exabytes) with
+                  - code [ref=f1e867]: STORE
+                  - text: and
+                  - code [ref=f1e868]: DEFLATE
+                  - text: methods.
+                - listitem [ref=f1e869]:
+                  - strong [ref=f1e870]: "🚀 Intelligent Sliding-Window Prefetcher:"
+                  - text: Multi-threaded read-ahead buffer (default 32MB) with 128KB chunk slicing for butter-smooth playback and sub-second seek times.
+                - listitem [ref=f1e871]:
+                  - strong [ref=f1e872]: "🎯 1-Click Native Player Integration:"
+                  - text: Auto-detects local media players (
+                  - strong [ref=f1e873]: PotPlayer
+                  - text: ","
+                  - strong [ref=f1e874]: MPV
+                  - text: ","
+                  - strong [ref=f1e875]: VLC
+                  - text: ","
+                  - strong [ref=f1e876]: MPC-HC
+                  - text: ","
+                  - strong [ref=f1e877]: MPC-BE
+                  - text: ","
+                  - strong [ref=f1e878]: IINA
+                  - text: ) via Windows Registry and system PATH.
+                - listitem [ref=f1e879]:
+                  - strong [ref=f1e880]: "🌐 In-Browser Web Player & Dark-Mode Dashboard:"
+                  - text: Built-in HTML5 video player with fullscreen mode, playback speed control, and live stream telemetry.
+                - listitem [ref=f1e881]:
+                  - strong [ref=f1e882]: "📺 M3U / M3U8 IPTV Playlist Generator:"
+                  - text: Instantly export complete archive playlists for
+                  - strong [ref=f1e883]: Kodi
+                  - text: ","
+                  - strong [ref=f1e884]: Infuse (Apple TV/iOS)
+                  - text: ", and VLC."
+                - listitem [ref=f1e885]:
+                  - strong [ref=f1e886]:
+                    - text: 💬 Auto Subtitle (.srt
+                    - generic [ref=f1e887]: $\to$
+                    - text: "WebVTT) Engine:"
+                  - text: Automatic subtitle detection and on-the-fly conversion of
+                  - code [ref=f1e888]: .srt
+                  - text: tracks to WebVTT for seamless browser viewing.
+                - listitem [ref=f1e889]:
+                  - strong [ref=f1e890]: "⭐ Archive History & Bookmarks:"
+                  - text: Quick-access storage for frequently inspected archives with 1-click reloading and saved seek positions.
+                - listitem [ref=f1e891]:
+                  - strong [ref=f1e892]: "🪟 Windows 1-Click Launcher:"
+                  - text: Effortless background startup via
+                  - code [ref=f1e893]: launch_zipstream.vbs
+                  - text: ", desktop shortcuts, and automatic browser launch."
+                - listitem [ref=f1e894]:
+                  - strong [ref=f1e895]: "💻 Interactive Terminal Player:"
+                  - text: Colorful ANSI CLI (
+                  - code [ref=f1e896]: cli.py
+                  - text: /
+                  - code [ref=f1e897]: zipplay.bat
+                  - text: ) for keyboard-driven episode selection.
+              - separator [ref=f1e898]
+              - generic [ref=f1e899]:
+                - heading "📊 Benchmark & Performance Comparison" [level=2] [ref=f1e900]
+                - 'link "Permalink: 📊 Benchmark & Performance Comparison" [ref=f1e901] [cursor=pointer]':
+                  - /url: "#-benchmark--performance-comparison"
+              - paragraph [ref=f1e904]:
+                - link [ref=f1e905] [cursor=pointer]:
+                  - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/assets/benchmark-comparison.svg
+                  - img "ZipStreamHub Benchmark Comparison" [ref=f1e906]
+              - table [ref=f1e908]:
+                - rowgroup [ref=f1e909]:
+                  - row [ref=f1e910]:
+                    - columnheader "Metric" [ref=f1e911]
+                    - columnheader "Traditional Download" [ref=f1e912]
+                    - columnheader "ZipStreamHub Streaming" [ref=f1e913]
+                - rowgroup [ref=f1e914]:
+                  - row [ref=f1e915]:
+                    - cell [ref=f1e916]:
+                      - strong [ref=f1e917]: Time to First Frame
+                    - cell "15–45 minutes (waiting for download)" [ref=f1e918]
+                    - cell [ref=f1e919]:
+                      - strong [ref=f1e920]: ~0.6 seconds
+                  - row [ref=f1e921]:
+                    - cell [ref=f1e922]:
+                      - strong [ref=f1e923]: Local Disk Space Used
+                    - cell "50 GB – 100 GB+" [ref=f1e924]
+                    - cell [ref=f1e925]:
+                      - strong [ref=f1e926]: 0 Bytes
+                      - text: (pure in-memory)
+                  - row [ref=f1e927]:
+                    - cell [ref=f1e928]:
+                      - strong [ref=f1e929]: Random Seek Latency
+                    - cell "Instant (after full download)" [ref=f1e930]
+                    - cell [ref=f1e931]:
+                      - strong [ref=f1e932]: < 5ms
+                      - text: (HTTP 206 Range translation)
+                  - row [ref=f1e933]:
+                    - cell [ref=f1e934]:
+                      - strong [ref=f1e935]: Network Data Consumed
+                    - cell "100% of archive size" [ref=f1e936]
+                    - cell "Only streamed portions" [ref=f1e937]
+              - separator [ref=f1e938]
+              - generic [ref=f1e939]:
+                - heading "🏗️ Architecture Pipeline" [level=2] [ref=f1e940]
+                - 'link "Permalink: 🏗️ Architecture Pipeline" [ref=f1e941] [cursor=pointer]':
+                  - /url: "#️-architecture-pipeline"
+              - paragraph [ref=f1e944]:
+                - link [ref=f1e945] [cursor=pointer]:
+                  - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/assets/architecture-diagram.svg
+                  - img "ZipStreamHub Architecture Diagram" [ref=f1e946]
+              - list [ref=f1e947]:
+                - listitem [ref=f1e948]:
+                  - strong [ref=f1e949]: Tail-Parsing Sequence
+                  - text: ": ZipStreamHub requests the final 1MB of the remote file using HTTP Range requests to locate the End of Central Directory (EOCD"
+                  - code [ref=f1e950]: "0x06054b50"
+                  - text: ) and ZIP64 Locator (
+                  - code [ref=f1e951]: "0x07064b50"
+                  - text: ).
+                - listitem [ref=f1e952]:
+                  - strong [ref=f1e953]: Central Directory Resolution
+                  - text: ": Reads file headers ("
+                  - code [ref=f1e954]: "0x02014b50"
+                  - text: ) to construct the in-memory archive index in ~0.6 seconds.
+                - listitem [ref=f1e955]:
+                  - strong [ref=f1e956]: Range Translation
+                  - text: ": Player requests for byte ranges"
+                  - generic [ref=f1e957]: $[S, E]$
+                  - text: are offset against the file's
+                  - code [ref=f1e958]: data_offset
+                  - text: and served via an asynchronous sliding-window prefetcher.
+              - separator [ref=f1e959]
+              - generic [ref=f1e960]:
+                - heading "🚀 Quick Start" [level=2] [ref=f1e961]
+                - 'link "Permalink: 🚀 Quick Start" [ref=f1e962] [cursor=pointer]':
+                  - /url: "#-quick-start"
+              - generic [ref=f1e965]:
+                - heading "Prerequisites" [level=3] [ref=f1e966]
+                - 'link "Permalink: Prerequisites" [ref=f1e967] [cursor=pointer]':
+                  - /url: "#prerequisites"
+              - list [ref=f1e970]:
+                - listitem [ref=f1e971]: Python 3.9 or newer
+                - listitem [ref=f1e972]: (Optional) PotPlayer, MPV, or VLC installed on your machine
+              - generic [ref=f1e973]:
+                - heading "Installation" [level=3] [ref=f1e974]
+                - 'link "Permalink: Installation" [ref=f1e975] [cursor=pointer]':
+                  - /url: "#installation"
+              - generic [ref=f1e978]:
+                - generic [ref=f1e979]:
+                  - text: git clone https://github.com/mermis/zipstreamhub.git cd zipstreamhub pip install -r pyproject.toml
+                  - generic [ref=f1e980]: "# or standard library + urllib3"
+                - button "Copy code to clipboard" [ref=f1e982] [cursor=pointer]
+              - generic [ref=f1e986]:
+                - heading "1. Web GUI Dashboard" [level=3] [ref=f1e987]
+                - 'link "Permalink: 1. Web GUI Dashboard" [ref=f1e988] [cursor=pointer]':
+                  - /url: "#1-web-gui-dashboard"
+              - paragraph [ref=f1e991]: "Start the high-concurrency streaming server:"
+              - generic [ref=f1e992]:
+                - generic [ref=f1e993]: python server.py
+                - button "Copy code to clipboard" [ref=f1e995] [cursor=pointer]
+              - paragraph [ref=f1e999]:
+                - text: Open your browser at
+                - code [ref=f1e1000]: http://127.0.0.1:8787
+                - text: to access the interactive web control panel.
+              - generic [ref=f1e1001]:
+                - heading "2. Interactive CLI Player" [level=3] [ref=f1e1002]
+                - 'link "Permalink: 2. Interactive CLI Player" [ref=f1e1003] [cursor=pointer]':
+                  - /url: "#2-interactive-cli-player"
+              - paragraph [ref=f1e1006]: "Stream directly from your terminal:"
+              - generic [ref=f1e1007]:
+                - generic [ref=f1e1008]:
+                  - generic [ref=f1e1009]: "# Interactive episode browser"
+                  - text: python cli.py
+                  - generic [ref=f1e1010]: "\"https://example.com/anime_season1.zip\""
+                  - generic [ref=f1e1011]: "# Non-interactive direct launch into PotPlayer"
+                  - text: python cli.py
+                  - generic [ref=f1e1012]: "\"https://example.com/anime_season1.zip\""
+                  - text: "--ep 1 --player potplayer"
+                - button "Copy code to clipboard" [ref=f1e1014] [cursor=pointer]
+              - generic [ref=f1e1018]:
+                - heading "3. Docker Deployment" [level=3] [ref=f1e1019]
+                - 'link "Permalink: 3. Docker Deployment" [ref=f1e1020] [cursor=pointer]':
+                  - /url: "#3-docker-deployment"
+              - generic [ref=f1e1023]:
+                - generic [ref=f1e1024]: docker compose up -d
+                - button "Copy code to clipboard" [ref=f1e1026] [cursor=pointer]
+              - separator [ref=f1e1030]
+              - generic [ref=f1e1031]:
+                - heading "🔌 REST API Overview" [level=2] [ref=f1e1032]
+                - 'link "Permalink: 🔌 REST API Overview" [ref=f1e1033] [cursor=pointer]':
+                  - /url: "#-rest-api-overview"
+              - table [ref=f1e1037]:
+                - rowgroup [ref=f1e1038]:
+                  - row [ref=f1e1039]:
+                    - columnheader "Method" [ref=f1e1040]
+                    - columnheader "Endpoint" [ref=f1e1041]
+                    - columnheader "Description" [ref=f1e1042]
+                - rowgroup [ref=f1e1043]:
+                  - row [ref=f1e1044]:
+                    - cell [ref=f1e1045]:
+                      - code [ref=f1e1046]: POST
+                    - cell [ref=f1e1047]:
+                      - code [ref=f1e1048]: /api/inspect
+                    - cell "Inspects remote ZIP URL and returns JSON structure" [ref=f1e1049]
+                  - row [ref=f1e1050]:
+                    - cell [ref=f1e1051]:
+                      - code [ref=f1e1052]: POST
+                    - cell [ref=f1e1053]:
+                      - code [ref=f1e1054]: /api/play
+                    - cell "Launches host media player with stream URL" [ref=f1e1055]
+                  - row [ref=f1e1056]:
+                    - cell [ref=f1e1057]:
+                      - code [ref=f1e1058]: GET
+                    - cell [ref=f1e1059]:
+                      - code [ref=f1e1060]: /stream/<id>/<filename>
+                    - cell "HTTP 206 Byte-Range streaming endpoint" [ref=f1e1061]
+                  - row [ref=f1e1062]:
+                    - cell [ref=f1e1063]:
+                      - code [ref=f1e1064]: HEAD
+                    - cell [ref=f1e1065]:
+                      - code [ref=f1e1066]: /stream/<id>/<filename>
+                    - cell "Returns stream Content-Length and MIME type" [ref=f1e1067]
+              - paragraph [ref=f1e1068]:
+                - text: Detailed OpenAPI specifications are available in
+                - link "docs/API.md" [ref=f1e1069] [cursor=pointer]:
+                  - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/API.md
+                - text: .
+              - separator [ref=f1e1070]
+              - generic [ref=f1e1071]:
+                - heading "📖 Documentation Links" [level=2] [ref=f1e1072]
+                - 'link "Permalink: 📖 Documentation Links" [ref=f1e1073] [cursor=pointer]':
+                  - /url: "#-documentation-links"
+              - list [ref=f1e1076]:
+                - listitem [ref=f1e1077]:
+                  - text: 🎬
+                  - strong [ref=f1e1078]: Complete Media Player & M3U Guide
+                  - text: ":"
+                  - link "docs/PLAYERS.md" [ref=f1e1079] [cursor=pointer]:
+                    - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/PLAYERS.md
+                - listitem [ref=f1e1080]:
+                  - text: 📊
+                  - strong [ref=f1e1081]: Competitive Analysis & Benchmarks
+                  - text: ":"
+                  - link "docs/COMPETITIVE_ANALYSIS.md" [ref=f1e1082] [cursor=pointer]:
+                    - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/COMPETITIVE_ANALYSIS.md
+                - listitem [ref=f1e1083]:
+                  - text: 🤖
+                  - strong [ref=f1e1084]: LLM Reference Files
+                  - text: ":"
+                  - link "llms.txt" [ref=f1e1085] [cursor=pointer]:
+                    - /url: /MHJoy99/ZipStream-Hub/blob/main/llms.txt
+                  - text: "|"
+                  - link "llms-full.txt" [ref=f1e1086] [cursor=pointer]:
+                    - /url: /MHJoy99/ZipStream-Hub/blob/main/llms-full.txt
+                - listitem [ref=f1e1087]:
+                  - text: 🏛️
+                  - strong [ref=f1e1088]: Architecture & Binary Deep Dive
+                  - text: ":"
+                  - link "docs/ARCHITECTURE.md" [ref=f1e1089] [cursor=pointer]:
+                    - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/ARCHITECTURE.md
+                - listitem [ref=f1e1090]:
+                  - text: 🔌
+                  - strong [ref=f1e1091]: REST API Specification
+                  - text: ":"
+                  - link "docs/API.md" [ref=f1e1092] [cursor=pointer]:
+                    - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/API.md
+                - listitem [ref=f1e1093]:
+                  - text: 🛠️
+                  - strong [ref=f1e1094]: Troubleshooting & Optimization
+                  - text: ":"
+                  - link "docs/TROUBLESHOOTING.md" [ref=f1e1095] [cursor=pointer]:
+                    - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/TROUBLESHOOTING.md
+                - listitem [ref=f1e1096]:
+                  - text: 🎬
+                  - strong [ref=f1e1097]: Beginner's Guide (No Coding Required)
+                  - text: ":"
+                  - link "docs/QUICKSTART_NON_CODERS.md" [ref=f1e1098] [cursor=pointer]:
+                    - /url: /MHJoy99/ZipStream-Hub/blob/main/docs/QUICKSTART_NON_CODERS.md
+              - separator [ref=f1e1099]
+              - generic [ref=f1e1100]:
+                - heading "⚙️ Memory & High-Speed Buffer Tuning (Up to 5GB)" [level=2] [ref=f1e1101]
+                - 'link "Permalink: ⚙️ Memory & High-Speed Buffer Tuning (Up to 5GB)" [ref=f1e1102] [cursor=pointer]':
+                  - /url: "#️-memory--high-speed-buffer-tuning-up-to-5gb"
+              - paragraph [ref=f1e1105]:
+                - text: ZipStreamHub is engineered with an intelligent
+                - strong [ref=f1e1106]: asynchronous sliding-window read-ahead prefetching engine
+                - text: . Unlike traditional tools that force a full multi-gigabyte archive download to disk before playback, ZipStreamHub streams on-demand while dynamically buffering uncompressed media chunks directly in system RAM.
+              - generic [ref=f1e1107]:
+                - heading "🔄 Sliding-Window Buffering vs. Full File Download" [level=3] [ref=f1e1108]
+                - 'link "Permalink: 🔄 Sliding-Window Buffering vs. Full File Download" [ref=f1e1109] [cursor=pointer]':
+                  - /url: "#-sliding-window-buffering-vs-full-file-download"
+              - generic [ref=f1e1112]:
+                - code [ref=f1e1114]: "Traditional Download: [████████████████████████████████████████] 50GB written to Disk (Wait 30+ mins) ZipStreamHub Engine: [············►►► [ Sliding Window: 1GB-5GB RAM ] ◄◄◄······················] 0B Disk"
+                - button "Copy code to clipboard" [ref=f1e1116] [cursor=pointer]
+              - list [ref=f1e1120]:
+                - listitem [ref=f1e1121]:
+                  - strong [ref=f1e1122]: Zero Disk I/O
+                  - text: ": Buffers are managed in volatile memory ("
+                  - code [ref=f1e1123]: StreamPrefetcher
+                  - text: ring queues) with zero writes to SSD/HDD.
+                - listitem [ref=f1e1124]:
+                  - strong [ref=f1e1125]: Dynamic Backpressure
+                  - text: ": When your player buffer fills, upstream HTTP requests pause automatically without wasting bandwidth or overflowing RAM."
+                - listitem [ref=f1e1126]:
+                  - strong [ref=f1e1127]: Instant Seek Drain
+                  - text: ": Seeking to a new position immediately signals worker threads via an abort event, drains old queued chunks, and starts prefetching from the new byte offset in"
+                  - generic [ref=f1e1128]: "$&lt; 5\\text{ms}$"
+                  - text: .
+                - listitem [ref=f1e1129]:
+                  - strong [ref=f1e1130]: Bandwidth Efficiency
+                  - text: ": Only the exact video segments you watch are fetched across the network."
+              - generic [ref=f1e1131]:
+                - heading "📊 Recommended RAM-Based Buffer Presets" [level=3] [ref=f1e1132]
+                - 'link "Permalink: 📊 Recommended RAM-Based Buffer Presets" [ref=f1e1133] [cursor=pointer]':
+                  - /url: "#-recommended-ram-based-buffer-presets"
+              - table [ref=f1e1137]:
+                - rowgroup [ref=f1e1138]:
+                  - row [ref=f1e1139]:
+                    - columnheader "System Configuration" [ref=f1e1140]
+                    - columnheader [ref=f1e1141]:
+                      - text: Preset Value (
+                      - code [ref=f1e1142]: ZIPSTREAM_PREFETCH_MB
+                      - text: )
+                    - columnheader "Forward Buffer" [ref=f1e1143]
+                    - columnheader "Ideal Use Case" [ref=f1e1144]
+                - rowgroup [ref=f1e1145]:
+                  - row [ref=f1e1146]:
+                    - cell [ref=f1e1147]:
+                      - strong [ref=f1e1148]: 4GB RAM System
+                      - text: (Raspberry Pi / Low-Memory VPS)
+                    - cell [ref=f1e1149]:
+                      - code [ref=f1e1150]: "64"
+                      - text: (64 MB)
+                    - cell "~30–60 sec" [ref=f1e1151]
+                    - cell "720p / 1080p standard bitrate playback with minimal footprint" [ref=f1e1152]
+                  - row [ref=f1e1153]:
+                    - cell [ref=f1e1154]:
+                      - strong [ref=f1e1155]: 8GB–16GB RAM System
+                      - text: (Standard Desktop / Laptop)
+                    - cell [ref=f1e1156]:
+                      - code [ref=f1e1157]: "1024"
+                      - text: (1 GB)
+                    - cell "~2–5 min" [ref=f1e1158]
+                    - cell "High-bitrate 4K HDR REMUX (60–80 Mbps) with smooth scrubbing" [ref=f1e1159]
+                  - row [ref=f1e1160]:
+                    - cell [ref=f1e1161]:
+                      - strong [ref=f1e1162]: 32GB+ High-End PC & Gigabit Fiber
+                    - cell [ref=f1e1163]:
+                      - code [ref=f1e1164]: "5120"
+                      - text: (5 GB)
+                    - cell "~10–25 min" [ref=f1e1165]
+                    - cell "Saturates Gigabit networks; holds entire movie sections in RAM for instant chapter jumping" [ref=f1e1166]
+              - separator [ref=f1e1167]
+              - generic [ref=f1e1168]:
+                - heading "🛠️ Configuration & Environment Variables" [level=2] [ref=f1e1169]
+                - 'link "Permalink: 🛠️ Configuration & Environment Variables" [ref=f1e1170] [cursor=pointer]':
+                  - /url: "#️-configuration--environment-variables"
+              - paragraph [ref=f1e1173]:
+                - text: ZipStreamHub supports configuration via
+                - strong [ref=f1e1174]: Web UI Settings
+                - text: ","
+                - strong [ref=f1e1175]:
+                  - code [ref=f1e1176]: config.json
+                - text: ", and"
+                - strong [ref=f1e1177]: Environment Variables
+                - text: (
+                - code [ref=f1e1178]: .env
+                - text: ).
+              - paragraph [ref=f1e1179]:
+                - strong [ref=f1e1180]: "Precedence Order:"
+                - code [ref=f1e1181]: Environment Variables
+                - text: ">"
+                - code [ref=f1e1182]: config.json
+                - text: ">"
+                - code [ref=f1e1183]: Default Values
+              - generic [ref=f1e1184]:
+                - heading [level=3] [ref=f1e1185]:
+                  - text: 1. Environment Variables (
+                  - code [ref=f1e1186]: .env
+                  - text: )
+                - 'link "Permalink: 1. Environment Variables (.env)" [ref=f1e1187] [cursor=pointer]':
+                  - /url: "#1-environment-variables-env"
+              - paragraph [ref=f1e1190]:
+                - text: Copy
+                - code [ref=f1e1191]: .env.example
+                - text: to
+                - code [ref=f1e1192]: .env
+                - text: "or pass variables directly:"
+              - generic [ref=f1e1193]:
+                - generic [ref=f1e1194]:
+                  - generic [ref=f1e1195]: "# Example for high-speed 5GB buffering on 32GB+ RAM systems"
+                  - text: export ZIPSTREAM_PREFETCH_MB=5120 export ZIPSTREAM_SLICE_KB=128 export ZIPSTREAM_HOST=0.0.0.0 export ZIPSTREAM_PORT=8787 export ZIPSTREAM_DEFAULT_PLAYER=potplayer
+                - button "Copy code to clipboard" [ref=f1e1197] [cursor=pointer]
+              - generic [ref=f1e1201]:
+                - heading [level=3] [ref=f1e1202]:
+                  - text: 2. Configuration File (
+                  - code [ref=f1e1203]: config.json
+                  - text: )
+                - 'link "Permalink: 2. Configuration File (config.json)" [ref=f1e1204] [cursor=pointer]':
+                  - /url: "#2-configuration-file-configjson"
+              - generic [ref=f1e1207]:
+                - generic [ref=f1e1208]:
+                  - text: "{ \"server\": { \"host\":"
+                  - generic [ref=f1e1209]: "\"0.0.0.0\""
+                  - text: ", \"port\": 8787, \"debug\": false }, \"streaming\": { \"prefetch_buffer_size_mb\": 1024, \"slice_size_kb\": 128, \"max_concurrent_streams\": 8, \"chunk_timeout_seconds\": 30 }, \"players\": { \"default_player\":"
+                  - generic [ref=f1e1210]: "\"potplayer\""
+                  - text: "}, \"ui\": { \"theme\":"
+                  - generic [ref=f1e1211]: "\"dark\""
+                  - text: ", \"accent_color\":"
+                  - generic [ref=f1e1212]: "\"#3b82f6\""
+                  - text: ", \"compact_mode\": false, \"show_thumbnails\": true, \"page_size\": 50, \"autoplay\": false } }"
+                - button "Copy code to clipboard" [ref=f1e1214] [cursor=pointer]
+              - generic [ref=f1e1218]:
+                - heading "3. Web UI Dashboard Configuration" [level=3] [ref=f1e1219]
+                - 'link "Permalink: 3. Web UI Dashboard Configuration" [ref=f1e1220] [cursor=pointer]':
+                  - /url: "#3-web-ui-dashboard-configuration"
+              - paragraph [ref=f1e1223]:
+                - text: Open the web control panel at
+                - code [ref=f1e1224]: http://127.0.0.1:8787
+                - text: and navigate to the
+                - strong [ref=f1e1225]: Settings
+                - text: modal to configure default players, streaming preferences, and UI appearance live.
+              - separator [ref=f1e1226]
+              - generic [ref=f1e1227]:
+                - heading "🤝 Contributing & License" [level=2] [ref=f1e1228]
+                - 'link "Permalink: 🤝 Contributing & License" [ref=f1e1229] [cursor=pointer]':
+                  - /url: "#-contributing--license"
+              - paragraph [ref=f1e1232]:
+                - text: Contributions, issues, and feature requests are welcome! Distributed under the
+                - strong [ref=f1e1233]: MIT License
+                - text: . See
+                - code [ref=f1e1234]: LICENSE
+                - text: for more information.
+      - generic [ref=f1e1237]:
+        - generic [ref=f1e1238]:
+          - heading "About" [level=2] [ref=f1e1239]
+          - paragraph [ref=f1e1240]: ⚡ Stream 4K/1080p video instantly from remote ZIP/ZIP64 archives without downloading. HTTP 206 byte-range proxy, 0ms seek, PotPlayer/VLC/MPV, in-browser HTML5 player & M3U8 playlist export.
+          - generic "https://github.com/MHJoy99/ZipStream-Hub" [ref=f1e1244]:
+            - link "github.com/MHJoy99/ZipStream-Hub" [ref=f1e1245] [cursor=pointer]:
+              - /url: https://github.com/MHJoy99/ZipStream-Hub
+          - heading "Topics" [level=3] [ref=f1e1246]
+          - generic [ref=f1e1247]:
+            - link "cloudflare-workers" [ref=f1e1248] [cursor=pointer]:
+              - /url: /topics/cloudflare-workers
+            - link "google-drive" [ref=f1e1249] [cursor=pointer]:
+              - /url: /topics/google-drive
+            - link "http-range" [ref=f1e1250] [cursor=pointer]:
+              - /url: /topics/http-range
+            - link "iptv" [ref=f1e1251] [cursor=pointer]:
+              - /url: /topics/iptv
+            - link "m3u-playlist" [ref=f1e1252] [cursor=pointer]:
+              - /url: /topics/m3u-playlist
+            - link "media-server" [ref=f1e1253] [cursor=pointer]:
+              - /url: /topics/media-server
+            - link "mpv" [ref=f1e1254] [cursor=pointer]:
+              - /url: /topics/mpv
+            - link "potplayer" [ref=f1e1255] [cursor=pointer]:
+              - /url: /topics/potplayer
+            - link "subtitles-vtt" [ref=f1e1256] [cursor=pointer]:
+              - /url: /topics/subtitles-vtt
+            - link "video-streaming" [ref=f1e1257] [cursor=pointer]:
+              - /url: /topics/video-streaming
+            - link "vlc" [ref=f1e1258] [cursor=pointer]:
+              - /url: /topics/vlc
+            - link "zero-copy" [ref=f1e1259] [cursor=pointer]:
+              - /url: /topics/zero-copy
+            - link "zip-streaming" [ref=f1e1260] [cursor=pointer]:
+              - /url: /topics/zip-streaming
+            - link "zip64" [ref=f1e1261] [cursor=pointer]:
+              - /url: /topics/zip64
+          - heading "Resources" [level=3] [ref=f1e1262]
+          - link "Readme" [ref=f1e1264] [cursor=pointer]:
+            - /url: "#readme-ov-file"
+          - link "MIT license" [ref=f1e1268] [cursor=pointer]:
+            - /url: "#MIT-1-ov-file"
+          - heading "Code of conduct" [level=3] [ref=f1e1271]
+          - link "Code of conduct" [ref=f1e1273] [cursor=pointer]:
+            - /url: /MHJoy99/ZipStream-Hub#coc-ov-file
+          - heading "Contributing" [level=3] [ref=f1e1276]
+          - link "Contributing" [ref=f1e1278] [cursor=pointer]:
+            - /url: "#contributing-ov-file"
+          - heading "Security policy" [level=3] [ref=f1e1281]
+          - link "Security policy" [ref=f1e1283] [cursor=pointer]:
+            - /url: "#security-ov-file"
+          - link "Activity" [ref=f1e1287] [cursor=pointer]:
+            - /url: /MHJoy99/ZipStream-Hub/activity
+          - heading "Stars" [level=3] [ref=f1e1290]
+          - generic [ref=f1e1292]:
+            - strong [ref=f1e1295]: "1"
+            - text: star
+          - heading "Watchers" [level=3] [ref=f1e1296]
+          - generic [ref=f1e1298]:
+            - strong [ref=f1e1301]: "0"
+            - text: watching
+          - heading "Forks" [level=3] [ref=f1e1302]
+          - link [ref=f1e1304] [cursor=pointer]:
+            - /url: /MHJoy99/ZipStream-Hub/forks
+            - strong [ref=f1e1308]: "0"
+            - text: forks
+          - link "Report repository" [ref=f1e1310] [cursor=pointer]:
+            - /url: /contact/report-content?content_url=https%3A%2F%2Fgithub.com%2FMHJoy99%2FZipStream-Hub&report=MHJoy99+%28user%29
+        - heading "Releases" [level=2] [ref=f1e1312]
+        - heading "Packages" [level=2] [ref=f1e1316]
+        - heading "Contributors" [level=2] [ref=f1e1319]
+  - contentinfo [ref=f1e1322]:
+    - heading "Footer" [level=2] [ref=f1e1323]
+    - generic [ref=f1e1324]:
+      - generic [ref=f1e1325]:
+        - link "GitHub Homepage" [ref=f1e1326] [cursor=pointer]:
+          - /url: https://github.com
+        - generic [ref=f1e1329]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=f1e1330]:
+        - heading "Footer navigation" [level=3] [ref=f1e1331]
+        - list "Footer navigation" [ref=f1e1332]:
+          - listitem [ref=f1e1333]:
+            - link "Terms" [ref=f1e1334] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=f1e1335]:
+            - link "Privacy" [ref=f1e1336] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=f1e1337]:
+            - link "Security" [ref=f1e1338] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=f1e1339]:
+            - link "Status" [ref=f1e1340] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=f1e1341]:
+            - link "Community" [ref=f1e1342] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=f1e1343]:
+            - link "Docs" [ref=f1e1344] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=f1e1345]:
+            - link "Contact" [ref=f1e1346] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=f1e1347]:
+            - button "Manage cookies" [ref=f1e1349] [cursor=pointer]
+          - listitem [ref=f1e1350]:
+            - button "Do not share my personal information" [ref=f1e1352] [cursor=pointer]

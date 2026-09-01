@@ -14,8 +14,8 @@ By participating in this project, you agree to abide by the [Code of Conduct](CO
 
 ### 1. Fork and Clone
 ```bash
-git clone https://github.com/ZipStreamHub/ZipStreamHub.git
-cd ZipStreamHub
+git clone https://github.com/MHJoy99/ZipStream-Hub.git
+cd ZipStream-Hub
 ```
 
 ### 2. Create a Virtual Environment

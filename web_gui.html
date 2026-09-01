@@ -311,13 +311,19 @@
 
         .preset-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: 8px;
             margin-top: 4px;
         }
 
+        @media (max-width: 640px) {
+            .preset-grid {
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            }
+        }
+
         .preset-btn {
-            padding: 9px 12px;
+            padding: 9px 8px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border-card);
             border-radius: 10px;
@@ -1355,28 +1361,53 @@
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background: rgba(22, 29, 46, 0.96);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(18, 24, 40, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             color: white;
-            padding: 14px 22px;
-            border-radius: 14px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.7), 0 0 20px rgba(0,0,0,0.4);
+            padding: 14px 20px;
+            border-radius: 16px;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(99, 102, 241, 0.25);
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 600;
-            transform: translateY(100px);
+            transform: translateY(100px) scale(0.95);
             opacity: 0;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 10000;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            pointer-events: none;
+            max-width: 90vw;
         }
 
         .toast.show {
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
             opacity: 1;
+            pointer-events: auto;
+        }
+
+        .toast.toast-success {
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(16, 185, 129, 0.25);
+        }
+
+        .toast.toast-error {
+            border-color: rgba(239, 68, 68, 0.4);
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(239, 68, 68, 0.25);
+        }
+
+        .toast.toast-info {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(99, 102, 241, 0.25);
+        }
+
+        .toast-icon-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .spinner {
@@ -1715,8 +1746,10 @@
 </div>
 
 <!-- Toast Notification -->
-<div id="toast" class="toast">
-    <svg id="toastIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success-color)" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+<div id="toast" class="toast toast-success" role="alert" aria-live="polite">
+    <div id="toastIcon" class="toast-icon-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success-color)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
     <span id="toastMsg">Stream Link copied to clipboard!</span>
 </div>
 
@@ -1961,7 +1994,7 @@
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         ${player.name}
                     </button>
-                    <button class="btn-action btn-copy" onclick="copyLink('${streamUrl}')" title="Copy Direct Stream Link">
+                    <button class="btn-action btn-copy" onclick="copyLink('${streamUrl}')" title="Copy direct stream URL" aria-label="Copy direct stream URL">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                     </button>
                 </div>
@@ -2275,13 +2308,15 @@
     // Playlist Export Functions
     function downloadM3UPlaylist() {
         window.location.href = '/api/playlist.m3u';
-        showToast('📥 Downloading full archive M3U playlist...');
+        showToast('📥 Downloading full archive M3U playlist...', 'info');
     }
 
     function copyM3UUrl() {
         const m3uUrl = `${window.location.origin}/api/playlist.m3u`;
         navigator.clipboard.writeText(m3uUrl).then(() => {
-            showToast('📋 M3U Playlist URL copied! Ready for IPTV/VLC import.');
+            showToast('📋 M3U Playlist URL copied! Ready for IPTV/VLC import.', 'success');
+        }).catch(err => {
+            showToast('Failed to copy M3U URL: ' + err, 'error');
         });
     }
 
@@ -2419,18 +2454,51 @@
     // Utility & Toast
     function copyLink(link) {
         navigator.clipboard.writeText(link).then(() => {
-            showToast('📋 Direct Stream Link copied to clipboard!');
+            showToast('📋 Direct Stream Link copied to clipboard!', 'success');
+        }).catch(err => {
+            showToast('Failed to copy link: ' + err, 'error');
         });
     }
 
-    function showToast(msg, isError = false) {
+    let toastTimeout = null;
+
+    // Unified floating toast notification system
+    function showToast(msg, type = 'success') {
         const toast = document.getElementById('toast');
-        const icon = document.getElementById('toastIcon');
-        document.getElementById('toastMsg').innerText = msg;
-        toast.style.borderColor = isError ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.4)';
-        icon.setAttribute('stroke', isError ? 'var(--danger-color)' : 'var(--success-color)');
+        const iconWrap = document.getElementById('toastIcon');
+        const msgEl = document.getElementById('toastMsg');
+        
+        if (!toast) return;
+
+        // Support boolean isError legacy calls
+        let toastType = type;
+        if (typeof type === 'boolean') {
+            toastType = type ? 'error' : 'success';
+        }
+
+        toast.classList.remove('toast-success', 'toast-error', 'toast-info');
+        toast.classList.add(`toast-${toastType}`);
+
+        let iconSvg = '';
+        if (toastType === 'error') {
+            iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger-color)" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+        } else if (toastType === 'info') {
+            iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+        } else {
+            iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success-color)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        }
+
+        iconWrap.innerHTML = iconSvg;
+        msgEl.innerText = msg;
+
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3600);
+
+        if (toastTimeout) {
+            clearTimeout(toastTimeout);
+        }
+        toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3600);
     }
 
     // Initialization on window load

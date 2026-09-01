@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 💬 GitHub Discussions
-    url: https://github.com/ZipStreamHub/ZipStreamHub/discussions
+    url: https://github.com/MHJoy99/ZipStream-Hub/discussions
     about: Ask questions, share ideas, and connect with the community.
   - name: 🔒 Security Advisories
-    url: https://github.com/ZipStreamHub/ZipStreamHub/security/advisories/new
+    url: https://github.com/MHJoy99/ZipStream-Hub/security/advisories/new
     about: Privately report potential security vulnerabilities.

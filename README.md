@@ -5,10 +5,10 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/mermis/zipstreamhub"><img src="https://img.shields.io/badge/Startup-0.6s_Tail_Parse-00F0FF?style=for-the-badge&logo=fastapi&logoColor=white" alt="Startup Badge" /></a>
-  <a href="https://github.com/mermis/zipstreamhub"><img src="https://img.shields.io/badge/Disk_Usage-0_Bytes-10B981?style=for-the-badge&logo=files&logoColor=white" alt="Disk Usage Badge" /></a>
-  <a href="https://github.com/mermis/zipstreamhub"><img src="https://img.shields.io/badge/ZIP64-16_EB_Limit-C084FC?style=for-the-badge&logo=archive&logoColor=white" alt="ZIP64 Badge" /></a>
-  <a href="https://github.com/mermis/zipstreamhub"><img src="https://img.shields.io/badge/Seeking-0ms_Realtime-F59E0B?style=for-the-badge&logo=speedtest&logoColor=white" alt="Seeking Badge" /></a>
+  <a href="https://github.com/MHJoy99/ZipStream-Hub"><img src="https://img.shields.io/badge/Startup-0.6s_Tail_Parse-00F0FF?style=for-the-badge&logo=fastapi&logoColor=white" alt="Startup Badge" /></a>
+  <a href="https://github.com/MHJoy99/ZipStream-Hub"><img src="https://img.shields.io/badge/Disk_Usage-0_Bytes-10B981?style=for-the-badge&logo=files&logoColor=white" alt="Disk Usage Badge" /></a>
+  <a href="https://github.com/MHJoy99/ZipStream-Hub"><img src="https://img.shields.io/badge/ZIP64-16_EB_Limit-C084FC?style=for-the-badge&logo=archive&logoColor=white" alt="ZIP64 Badge" /></a>
+  <a href="https://github.com/MHJoy99/ZipStream-Hub"><img src="https://img.shields.io/badge/Seeking-0ms_Realtime-F59E0B?style=for-the-badge&logo=speedtest&logoColor=white" alt="Seeking Badge" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="License Badge" /></a>
 </p>
 
@@ -88,7 +88,7 @@
 
 ### Installation
 ```bash
-git clone https://github.com/mermis/zipstreamhub.git
+git clone https://github.com/MHJoy99/ZipStream-Hub.git
 cd zipstreamhub
 pip install -r pyproject.toml # or standard library + urllib3
 ```
