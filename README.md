@@ -29,6 +29,7 @@
 - [🔌 REST API Overview](#-rest-api-overview)
 - [📖 Documentation Links](#-documentation-links)
 - [⚙️ Memory & Buffer Tuning (Up to 5GB)](#️-memory--high-speed-buffer-tuning-up-to-5gb)
+- [📁 Project Layout](#-project-layout)
 - [🛠️ Configuration & Environment Variables](#️-configuration--environment-variables)
 - [🤝 Contributing & License](#-contributing--license)
 
@@ -89,13 +90,17 @@
 ### Installation
 ```bash
 git clone https://github.com/MHJoy99/ZipStream-Hub.git
-cd zipstreamhub
-pip install -r pyproject.toml # or standard library + urllib3
+cd ZipStreamHub
+pip install -e .
+# or for development:
+pip install -e ".[dev]"
 ```
 
 ### 1. Web GUI Dashboard
-Start the high-concurrency streaming server:
+Start the high-concurrency streaming server using the CLI entrypoint or direct script:
 ```bash
+zipstream-server
+# or
 python server.py
 ```
 Open your browser at `http://127.0.0.1:8787` to access the interactive web control panel.
@@ -103,11 +108,13 @@ Open your browser at `http://127.0.0.1:8787` to access the interactive web contr
 ### 2. Interactive CLI Player
 Stream directly from your terminal:
 ```bash
-# Interactive episode browser
+# Interactive episode browser (using installed CLI or script)
+zipstream "https://example.com/anime_season1.zip"
+# or
 python cli.py "https://example.com/anime_season1.zip"
 
 # Non-interactive direct launch into PotPlayer
-python cli.py "https://example.com/anime_season1.zip" --ep 1 --player potplayer
+zipstream "https://example.com/anime_season1.zip" --ep 1 --player potplayer
 ```
 
 ### 3. Docker Deployment
@@ -174,6 +181,35 @@ ZipStreamHub Engine:   [············►►► [ Sliding Window: 1GB-
 | **4GB RAM System** (Raspberry Pi / Low-Memory VPS) | `64` (64 MB) | ~30–60 sec | 720p / 1080p standard bitrate playback with minimal footprint |
 | **8GB–16GB RAM System** (Standard Desktop / Laptop) | `1024` (1 GB) | ~2–5 min | High-bitrate 4K HDR REMUX (60–80 Mbps) with smooth scrubbing |
 | **32GB+ High-End PC & Gigabit Fiber** | `5120` (5 GB) | ~10–25 min | Saturates Gigabit networks; holds entire movie sections in RAM for instant chapter jumping |
+
+---
+
+## 📁 Project Layout
+
+ZipStreamHub follows a clean, standard `src/` layout with backward-compatible root shims for effortless usage as both an installed Python package and direct script execution:
+
+```
+ZipStreamHub/
+├── src/
+│   └── zipstream/               # Core Python package
+│       ├── __init__.py          # Package exports & version
+│       ├── engine.py            # ZIP/ZIP64 tail parser & StreamPrefetcher
+│       ├── server.py            # HTTP/WebDAV multi-threaded streaming server
+│       ├── webdav_bridge.py     # RFC 4918 WebDAV virtual filesystem
+│       ├── cli.py               # Interactive ANSI terminal UI & player
+│       ├── media_inspector.py   # In-memory binary media header parser
+│       ├── strm_generator.py    # Jellyfin / Emby / Kodi .strm generator
+│       ├── subtitle_parser.py   # Subtitle extraction & WebVTT converter
+│       ├── player_detector.py   # Native player detection & launch hooks
+│       ├── history.py           # SQLite history & bookmark manager
+│       ├── config.py            # Configuration loader & dataclasses
+│       └── static/              # Embedded Web UI assets (HTML, Icons)
+├── tests/                       # Complete pytest suite (100% pass)
+├── docs/                        # Detailed guides & protocol specs
+├── engine.py, server.py, ...    # Root shims for standalone script execution
+├── pyproject.toml               # PEP 517/621 package & build configuration
+└── requirements.txt             # Production dependencies
+```
 
 ---
 
