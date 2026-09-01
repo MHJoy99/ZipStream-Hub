@@ -388,6 +388,36 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             sys.stdout.flush()
 
 
+# Backward compatibility aliases
+ThreadedHTTPServer = ThreadedZipStreamServer
+ZipStreamHandler = ZipStreamWebHandler
+
+
+def start_stream_server(url: str, episode_index: int = 1):
+    """
+    Directly binds and serves an archive entry for single-file streaming CLI scripts.
+    """
+    global CURRENT_READER, CACHED_ENTRIES, READERS_BY_URL
+    reader = RemoteZipReader(url)
+    with ARCHIVE_LOCK:
+        CURRENT_READER = reader
+        CACHED_ENTRIES = {e["id"]: e for e in reader.entries}
+        READERS_BY_URL[url] = reader
+
+    if episode_index < 1 or episode_index > len(reader.entries):
+        raise ValueError(f"Invalid episode index. Available: 1 to {len(reader.entries)}")
+
+    entry = reader.entries[episode_index - 1]
+    server_address = ("127.0.0.1", PORT)
+    httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        httpd.server_close()
+
+
 def run_server(port: int = PORT):
     server_address = ("127.0.0.1", port)
     httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)

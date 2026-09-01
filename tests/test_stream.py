@@ -14,7 +14,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from engine import StreamPrefetcher, RemoteZipReader, HTTP_POOL
-from zip_stream_server import ZipStreamHandler, ThreadedHTTPServer
+from server import ZipStreamWebHandler, ThreadedZipStreamServer, ARCHIVE_LOCK, CURRENT_READER, CACHED_ENTRIES, READERS_BY_URL
+import server
 
 
 class MockRangePool:
@@ -137,11 +138,12 @@ def test_stream_prefetcher_abort_and_cleanup():
 
 
 def test_http_206_range_negotiation_handler():
-    """Test ZipStreamHandler range negotiation logic without binding to a network port."""
+    """Test ZipStreamWebHandler range negotiation logic without binding to a network port."""
     payload = b"0123456789" * 100  # 1000 bytes
     
     mock_reader = MagicMock()
     mock_reader.url = "http://mock.test/test.zip"
+    mock_reader.get_data_offset.return_value = 5000
     
     # Test cases: (Range Header, Expected Status, Expected Content-Range, Expected Length)
     cases = [
@@ -157,15 +159,16 @@ def test_http_206_range_negotiation_handler():
         mock_rfile = io.BytesIO()
         mock_wfile = io.BytesIO()
         
-        # Setup ZipStreamHandler class attributes
-        ZipStreamHandler.reader = mock_reader
-        ZipStreamHandler.target_entry = {"name": "test.mkv", "size_bytes": 1000}
-        ZipStreamHandler.data_start_offset = 5000
-        ZipStreamHandler.file_total_size = 1000
+        # Setup server cache state
+        with server.ARCHIVE_LOCK:
+            server.CURRENT_READER = mock_reader
+            server.CACHED_ENTRIES = {1: {"id": 1, "name": "test.mkv", "size_bytes": 1000}}
+            server.READERS_BY_URL["http://mock.test/test.zip"] = mock_reader
 
-        handler = ZipStreamHandler.__new__(ZipStreamHandler)
+        handler = ZipStreamWebHandler.__new__(ZipStreamWebHandler)
         handler.rfile = mock_rfile
         handler.wfile = mock_wfile
+        handler.path = "/stream/1/test.mkv"
         handler.headers = {}
         if range_header:
             handler.headers["Range"] = range_header
@@ -187,7 +190,7 @@ def test_http_206_range_negotiation_handler():
         handler.send_header = mock_send_header
         handler.end_headers = mock_end_headers
 
-        with patch("zip_stream_server.StreamPrefetcher") as mock_prefetcher_cls:
+        with patch("server.StreamPrefetcher") as mock_prefetcher_cls:
             mock_inst = MagicMock()
             mock_inst.stream_chunks.return_value = [b"chunk1", b"chunk2"]
             mock_prefetcher_cls.return_value = mock_inst
@@ -258,3 +261,30 @@ def test_memory_leak_stress():
 
     # Active threads should return to baseline
     assert threading.active_count() <= initial_threads + 1
+
+
+def test_remote_zip_parser_and_offset_lookup():
+    """Verify RemoteZipReader correctly parses stored entries and calculates data start offsets."""
+    import zipfile
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", compression=zipfile.ZIP_STORED) as zf:
+        zf.writestr("test_ep1.mkv", b"STREAM_TEST_CONTENT_12345" * 1000)
+        zf.writestr("test_ep2.mp4", b"ANOTHER_VIDEO_FILE_DATA_67890" * 500)
+        zf.writestr("notes.txt", b"Test note file inside ZIP")
+    zip_bytes = zip_buffer.getvalue()
+
+    from tests.test_zip64 import MockZipRangePool
+    mock_pool = MockZipRangePool(zip_bytes)
+    reader = RemoteZipReader(url="http://mock.test/archive.zip", pool=mock_pool)
+
+    assert reader.total_size == len(zip_bytes)
+    assert len(reader.entries) == 3
+
+    ep1 = next(e for e in reader.entries if e["name"] == "test_ep1.mkv")
+    assert ep1["method_name"] == "STORE"
+    assert ep1["size_bytes"] == len(b"STREAM_TEST_CONTENT_12345" * 1000)
+
+    data_offset = reader.get_data_offset(ep1)
+    assert data_offset > 0
+    actual_slice = zip_bytes[data_offset:data_offset + ep1["size_bytes"]]
+    assert actual_slice == b"STREAM_TEST_CONTENT_12345" * 1000

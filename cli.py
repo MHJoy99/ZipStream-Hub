@@ -146,22 +146,12 @@ def launch_player(stream_url: str, selected_player: Optional[str] = None):
 
 
 def import_streaming_components():
-    """Import engine and server from E:\\ZipStreamHub or fallback to E:\\Mermis."""
+    """Dynamically loads and initializes core engine and server components."""
     try:
-        # Try local ZipStreamHub imports first
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        try:
-            from engine import RemoteZipReader, StreamPrefetcher, HTTP_POOL
-            from server import start_stream_server, ZipStreamHandler, ThreadedHTTPServer, PORT
-            return RemoteZipReader, start_stream_server, ZipStreamHandler, ThreadedHTTPServer, PORT
-        except ImportError:
-            # Fallback to E:\Mermis components if engine.py/server.py not yet populated
-            mermis_dir = r"E:\Mermis"
-            if os.path.exists(mermis_dir):
-                sys.path.insert(0, mermis_dir)
-            from zip_stream_engine import RemoteZipReader, StreamPrefetcher, HTTP_POOL
-            from zip_stream_server import start_stream_server, ZipStreamHandler, ThreadedHTTPServer, PORT
-            return RemoteZipReader, start_stream_server, ZipStreamHandler, ThreadedHTTPServer, PORT
+        from engine import RemoteZipReader, StreamPrefetcher, HTTP_POOL
+        from server import start_stream_server, ZipStreamWebHandler, ThreadedZipStreamServer, PORT
+        return RemoteZipReader, start_stream_server, ZipStreamWebHandler, ThreadedZipStreamServer, PORT
     except Exception as e:
         print(f"{Style.BRIGHT_RED}[!] Error loading streaming engine: {e}{Style.RESET}")
         raise
@@ -233,11 +223,12 @@ def run_interactive_cli():
     print(f"\n{Style.BRIGHT_GREEN}[+] Selected Entry:{Style.RESET} {Style.BOLD}{selected_entry['name']}{Style.RESET}")
     print(f"    {Style.DIM}Size: {format_bytes(file_size)} | ZIP Offset: {data_start} | Compression: {selected_entry.get('method_name', 'STORE')}{Style.RESET}")
 
-    # Set server handlers
-    ZipStreamHandler.reader = reader
-    ZipStreamHandler.target_entry = selected_entry
-    ZipStreamHandler.data_start_offset = data_start
-    ZipStreamHandler.file_total_size = file_size
+    # Set server state
+    import server as server_mod
+    with server_mod.ARCHIVE_LOCK:
+        server_mod.CURRENT_READER = reader
+        server_mod.CACHED_ENTRIES = {e["id"]: e for e in reader.entries}
+        server_mod.READERS_BY_URL[reader.url] = reader
 
     # Build local streaming URL
     encoded_name = selected_entry['name'].split('/')[-1]

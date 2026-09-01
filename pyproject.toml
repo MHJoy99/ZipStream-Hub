@@ -61,7 +61,7 @@ test = [
 
 [project.scripts]
 zipstream = "cli:main"
-zipstream-server = "server:start_server"
+zipstream-server = "server:run_server"
 
 [project.urls]
 Homepage = "https://github.com/ZipStreamHub/ZipStreamHub"
@@ -77,7 +77,7 @@ exclude = ["tests*", "assets*"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-testpaths = ["tests", "test_engine.py"]
+testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 addopts = "-v --strict-markers"
 
@@ -101,7 +101,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["zip_stream_engine", "zip_stream_server", "config", "engine", "server", "cli", "player_detector", "zipplay"]
+known-first-party = ["config", "engine", "server", "cli", "player_detector"]
 
 [tool.black]
 line-length = 100
