@@ -60,8 +60,8 @@ test = [
 ]
 
 [project.scripts]
-zipstream = "cli:main"
-zipstream-server = "server:run_server"
+zipstream = "zipstream.cli:main"
+zipstream-server = "zipstream.server:run_server"
 
 [project.urls]
 Homepage = "https://github.com/MHJoy99/ZipStream-Hub"
@@ -71,13 +71,16 @@ Repository = "https://github.com/MHJoy99/ZipStream-Hub.git"
 Changelog = "https://github.com/MHJoy99/ZipStream-Hub/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["*"]
-exclude = ["tests*", "assets*"]
+where = ["src"]
+include = ["zipstream*"]
+
+[tool.setuptools.package-data]
+"zipstream" = ["static/*", "static/**/*"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests"]
+pythonpath = ["src", "."]
 python_files = ["test_*.py", "*_test.py"]
 addopts = "-v --strict-markers"
 

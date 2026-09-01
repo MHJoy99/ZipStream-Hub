@@ -1,45 +1,30 @@
 """
 ZipStreamHub - High-performance zero-disk streaming server and virtual archive extractor for remote ZIP / ZIP64 files.
 """
-from __future__ import annotations
 
-import sys
-import os
+__version__ = "1.0.0"
+__author__ = "ZipStreamHub Developers"
+__license__ = "MIT"
 
-_src_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src")
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
-
-from zipstream import (
-    __version__,
-    __author__,
-    __license__,
+from .engine import (
     RemoteZipReader,
     StreamPrefetcher,
-    ThreadedZipStreamServer,
-    MediaInspector,
-    HistoryManager,
-    MetricsTracker,
     HTTP_POOL,
+    MetricsTracker,
     METRICS,
     get_streaming_metrics,
     set_bandwidth_limit,
     calculate_adaptive_chunk_size,
-    ZipStreamWebHandler,
-    WebDAVBridge,
-    AppConfig,
-    ServerConfig,
-    StreamingConfig,
-    load_config,
-    inspect_media_header,
-    get_history_manager,
-    main,
 )
+from .server import ThreadedZipStreamServer, ZipStreamWebHandler
+from .webdav_bridge import WebDAVBridge
+from .config import AppConfig, ServerConfig, StreamingConfig, load_config
+from .media_inspector import MediaInspector, inspect_media_header
+from .history import HistoryManager, get_history_manager
+from .cli import main
 
 __all__ = [
     "__version__",
-    "__author__",
-    "__license__",
     "RemoteZipReader",
     "StreamPrefetcher",
     "ThreadedZipStreamServer",

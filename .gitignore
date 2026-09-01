@@ -80,3 +80,14 @@ data/
 history.db
 history.db-journal
 history.json
+.playwright-mcp/
+
+# Exclude GitHub Workflows if pushing via OAuth without workflow scope
+.github/workflows/
+
+# Images / screenshots (exclude all PNGs except inside assets/ or docs/assets/)
+*.png
+**/*.png
+!assets/**
+!docs/assets/**
+

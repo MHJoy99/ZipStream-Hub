@@ -1,4 +1,9 @@
 @echo off
+:: ==============================================================================
+::  ZipStream Hub - 1-Click Interactive Console Launcher
+::  Instant Zero-Disk Remote ZIP Streaming Engine for Windows
+:: ==============================================================================
+
 setlocal EnableDelayedExpansion
 title ZipStream Hub - 1-Click Launcher
 color 0B
