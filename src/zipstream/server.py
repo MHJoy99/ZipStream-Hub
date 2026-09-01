@@ -5,10 +5,14 @@ import json
 import ssl
 import sys
 import os
+import time
 import mimetypes
 import subprocess
 import threading
 import urllib.parse
+import urllib.request
+import urllib.error
+import argparse
 from typing import Dict, Optional, Tuple, List
 
 # Clean intra-package / local directory imports
@@ -28,6 +32,7 @@ try:
     from .media_inspector import MediaInspector, inspect_media_header
     from . import history
     from .config import load_config, AppConfig
+    from . import __version__
 except ImportError:
     from engine import (
         RemoteZipReader,
@@ -44,8 +49,76 @@ except ImportError:
     from media_inspector import MediaInspector, inspect_media_header
     import history
     from config import load_config, AppConfig
+    try:
+        from __init__ import __version__
+    except ImportError:
+        __version__ = "1.0.0"
 
 PORT = 8787
+ACTIVE_PORT_FILE = ".active_port"
+SERVER_START_TIME = time.time()
+
+
+def get_active_port(fallback: int = PORT) -> int:
+    """Reads the active port from .active_port file if present, else fallback."""
+    for base in [os.getcwd(), os.path.dirname(os.path.abspath(__file__)), os.path.dirname(os.path.dirname(os.path.abspath(__file__)))]:
+        path = os.path.join(base, ACTIVE_PORT_FILE)
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    val = int(f.read().strip())
+                    if 1 <= val <= 65535:
+                        return val
+            except Exception:
+                pass
+    return fallback
+
+
+def save_active_port(port: int):
+    """Saves the active port to .active_port in cwd and package directory."""
+    bases = {os.getcwd(), os.path.dirname(os.path.abspath(__file__)), os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}
+    for base in bases:
+        try:
+            path = os.path.join(base, ACTIVE_PORT_FILE)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(str(port))
+        except Exception:
+            pass
+
+
+def remove_active_port_file():
+    """Removes .active_port file on clean shutdown."""
+    bases = {os.getcwd(), os.path.dirname(os.path.abspath(__file__)), os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}
+    for base in bases:
+        try:
+            path = os.path.join(base, ACTIVE_PORT_FILE)
+            if os.path.exists(path):
+                os.remove(path)
+        except Exception:
+            pass
+
+
+def is_port_available(port: int, host: str = "127.0.0.1") -> bool:
+    """Checks if a TCP port can be bound."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.3)
+        try:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind((host, port))
+            return True
+        except OSError:
+            return False
+
+
+def find_free_port(start_port: int = PORT, max_attempts: int = 100, host: str = "127.0.0.1") -> int:
+    """Hunts for the next available port starting from start_port."""
+    for p in range(start_port, start_port + max_attempts):
+        if is_port_available(p, host):
+            return p
+    # Fallback to OS assigned port
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((host, 0))
+        return s.getsockname()[1]
 
 # Multi-Archive Cache & Concurrency Lock
 ARCHIVE_LOCK = threading.Lock()
@@ -139,6 +212,8 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
                 gui_path = fallback_html
                 
             self._serve_file(gui_path, "text/html")
+        elif self.path == "/api/ping" or self.path.startswith("/api/ping?"):
+            self._handle_api_ping()
         elif self.path == "/webdav" or self.path.startswith("/webdav/"):
             self._handle_webdav_get()
         elif self.path == "/api/players":
@@ -258,6 +333,35 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
         except Exception as e:
             import traceback
             traceback.print_exc()
+            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            self.send_response(500)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(err_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(err_bytes)
+
+    def _handle_api_ping(self):
+        try:
+            port = self.server.server_port if hasattr(self.server, "server_port") else PORT
+            resp = {
+                "status": "ok",
+                "app": "zipstream-hub",
+                "version": getattr(sys.modules.get("src.zipstream") or sys.modules.get("zipstream"), "__version__", "1.0.0"),
+                "pid": os.getpid(),
+                "uptime": round(time.time() - SERVER_START_TIME, 2),
+                "port": port
+            }
+            data_bytes = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(data_bytes)
+        except Exception as e:
             err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
             self.send_response(500)
             self._set_cors_headers()
@@ -505,7 +609,8 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             qs = urllib.parse.parse_qs(parsed.query)
             query_url = qs.get("url", [""])[0].strip()
 
-            host_header = self.headers.get("Host", f"127.0.0.1:{PORT}")
+            server_port = getattr(self.server, "server_port", PORT)
+            host_header = self.headers.get("Host", f"127.0.0.1:{server_port}")
             base_url = f"http://{host_header}"
             
             with ARCHIVE_LOCK:
@@ -568,7 +673,8 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             query_url = qs.get("url", [""])[0].strip()
             structure_type = qs.get("structure", ["auto"])[0].strip()
 
-            host_header = self.headers.get("Host", f"127.0.0.1:{PORT}")
+            server_port = getattr(self.server, "server_port", PORT)
+            host_header = self.headers.get("Host", f"127.0.0.1:{server_port}")
             base_url = f"http://{host_header}"
 
             with ARCHIVE_LOCK:
@@ -941,7 +1047,8 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
                 self.end_headers()
                 return
 
-            host_hdr = self.headers.get("Host", f"127.0.0.1:{PORT}")
+            server_port = getattr(self.server, "server_port", PORT)
+            host_hdr = self.headers.get("Host", f"127.0.0.1:{server_port}")
             host_prefix = f"http://{host_hdr}"
             xml_data = WebDAVBridge.build_propfind_xml(
                 req_path=self.path,
@@ -1022,7 +1129,8 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             return
 
         if node_type == "root":
-            host_hdr = self.headers.get("Host", f"127.0.0.1:{PORT}")
+            server_port = getattr(self.server, "server_port", PORT)
+            host_hdr = self.headers.get("Host", f"127.0.0.1:{server_port}")
             base_url = f"http://{host_hdr}"
             html_bytes = WebDAVBridge.build_html_directory(self.path, reader, base_url)
             self.send_response(200)
@@ -1162,17 +1270,78 @@ def start_stream_server(url: str, episode_index: int = 1):
         httpd.server_close()
 
 
-def run_server(port: int = PORT):
-    server_address = ("127.0.0.1", port)
-    httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
-    print(f"ZipStream Hub (High-Performance Engine) running on http://127.0.0.1:{port}")
+def check_running_instance(port: int = PORT) -> Optional[dict]:
+    """
+    Perform an instant HTTP handshake with localhost on the specified port.
+    Returns the ping response dict if ZipStream Hub is already running, or None.
+    """
+    try:
+        req = urllib.request.Request(f"http://127.0.0.1:{port}/api/ping", method="GET")
+        with urllib.request.urlopen(req, timeout=0.8) as resp:
+            if resp.status == 200:
+                data = json.loads(resp.read().decode("utf-8"))
+                if data.get("app") == "zipstream-hub":
+                    return data
+    except Exception:
+        pass
+    return None
+
+
+def run_server(port: int = PORT, auto_port: bool = False):
+    existing = check_running_instance(port)
+    if existing:
+        pid = existing.get("pid", "unknown")
+        ver = existing.get("version", "1.0.0")
+        uptime = existing.get("uptime", 0)
+        actual_port = existing.get("port", port)
+        save_active_port(actual_port)
+        print(f"[ZipStream Hub] Auto-attached to already running instance on http://127.0.0.1:{actual_port} (PID: {pid}, v{ver}, Uptime: {uptime}s).")
+        return
+
+    actual_port = port
+    if auto_port and not is_port_available(actual_port):
+        actual_port = find_free_port(start_port=port)
+        print(f"[ZipStream Hub] Port {port} occupied. Auto-hunted next available port: {actual_port}")
+
+    server_address = ("127.0.0.1", actual_port)
+    try:
+        httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
+    except OSError as e:
+        # Re-check in case another process just bound right before us
+        existing = check_running_instance(actual_port)
+        if existing:
+            pid = existing.get("pid", "unknown")
+            ver = existing.get("version", "1.0.0")
+            save_active_port(actual_port)
+            print(f"[ZipStream Hub] Auto-attached to already running instance on http://127.0.0.1:{actual_port} (PID: {pid}, v{ver}).")
+            return
+        if auto_port:
+            actual_port = find_free_port(start_port=actual_port + 1)
+            server_address = ("127.0.0.1", actual_port)
+            httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
+        else:
+            raise e
+
+    # Persist the dynamic active port for Web GUI and Control Panel
+    save_active_port(actual_port)
+
+    print(f"ZipStream Hub (High-Performance Engine) running on http://127.0.0.1:{actual_port}")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("\nShutting down ZipStream Hub...")
     finally:
+        remove_active_port_file()
         httpd.server_close()
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="ZipStream Hub HTTP / WebDAV Streaming Server")
+    parser.add_argument("--port", type=int, default=PORT, help=f"Port to bind the server to (default: {PORT})")
+    parser.add_argument("--auto-port", action="store_true", help="Automatically hunt next free port (8788, 8789...) if requested port is in use")
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    run_server()
+    args = parse_args()
+    run_server(port=args.port, auto_port=args.auto_port)

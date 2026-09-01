@@ -468,3 +468,74 @@ def test_api_stats_endpoint():
         httpd.shutdown()
         httpd.server_close()
 
+
+def test_api_ping_endpoint_and_auto_attach():
+    """Verify /api/ping endpoint returns correct signature and handshake works."""
+    import urllib.request
+    import os
+    from src.zipstream.server import check_running_instance
+    test_port = 8793
+    server_address = ("127.0.0.1", test_port)
+    httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+    time.sleep(0.2)
+
+    try:
+        # Test direct GET /api/ping
+        req = urllib.request.Request(f"http://127.0.0.1:{test_port}/api/ping")
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+            assert data["status"] == "ok"
+            assert data["app"] == "zipstream-hub"
+            assert data["version"] == "1.0.0"
+            assert data["pid"] == os.getpid()
+            assert "uptime" in data
+            assert data["port"] == test_port
+
+        # Test check_running_instance helper
+        res = check_running_instance(test_port)
+        assert res is not None
+        assert res["app"] == "zipstream-hub"
+        assert res["pid"] == os.getpid()
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
+def test_server_port_helpers_and_auto_port():
+    """Verify dynamic port hunting, availability checks, active port persistence, and CLI arg parsing."""
+    from src.zipstream.server import (
+        is_port_available,
+        find_free_port,
+        save_active_port,
+        get_active_port,
+        remove_active_port_file,
+        parse_args
+    )
+    import socket
+
+    # Test port available check on open socket vs free port
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("127.0.0.1", 0))
+    bound_port = s.getsockname()[1]
+
+    assert not is_port_available(bound_port)
+    next_free = find_free_port(start_port=bound_port)
+    assert next_free != bound_port
+    assert is_port_available(next_free)
+    s.close()
+
+    # Test active port file persistence
+    save_active_port(9999)
+    assert get_active_port(fallback=8787) == 9999
+    remove_active_port_file()
+    assert get_active_port(fallback=8787) == 8787
+
+    # Test CLI argument parsing
+    with patch("sys.argv", ["server.py", "--port", "8990", "--auto-port"]):
+        args = parse_args()
+        assert args.port == 8990
+        assert args.auto_port is True
+

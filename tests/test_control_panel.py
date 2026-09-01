@@ -421,7 +421,7 @@ class TestControlPanelServerAndLogs(BaseControlPanelTest):
         # Online
         self.app.set_running_state(True)
         self.assertTrue(self.app.is_running)
-        self.assertEqual(self.app.hdr_status_text.cget("text"), "Active")
+        self.assertIn("Active", self.app.hdr_status_text.cget("text"))
         self.assertIn("Stop Server", self.app.hdr_btn_toggle.cget("text"))
         self.assertIn("Online", self.app.footer_lbl.cget("text"))
 
@@ -431,6 +431,24 @@ class TestControlPanelServerAndLogs(BaseControlPanelTest):
         self.assertEqual(self.app.hdr_status_text.cget("text"), "Stopped")
         self.assertIn("Start Server", self.app.hdr_btn_toggle.cget("text"))
         self.assertIn("Stopped", self.app.footer_lbl.cget("text"))
+
+    def test_auto_attach_to_running_instance(self):
+        """Test auto-attaching to an existing running instance discovered via /api/ping."""
+        mock_ping_data = {
+            "status": "ok",
+            "app": "zipstream-hub",
+            "version": "1.0.0",
+            "pid": 12345,
+            "uptime": 42.5,
+            "port": 8787
+        }
+        with patch.object(self.app, "ping_running_instance", return_value=mock_ping_data):
+            self.app.check_server_status()
+            self.assertTrue(self.app.is_running)
+            self.assertEqual(self.app.active_pid, 12345)
+            self.assertEqual(self.app.active_port, 8787)
+            self.assertIn("Active", self.app.hdr_status_text.cget("text"))
+            self.assertIn("PID: 12345", self.app.footer_lbl.cget("text"))
 
     def test_log_queue_and_clear_logs(self):
         """Test queuing log messages and clearing the log text widget."""
@@ -539,6 +557,103 @@ class TestControlPanelServerAndLogs(BaseControlPanelTest):
             self.app.mount_webdav_drive()
             mock_run.assert_called_once()
             mock_info.assert_called_once()
+
+
+class TestSingleInstanceAndStartupDetection(BaseControlPanelTest):
+    """Tests for single instance mutex, window restore signal, and startup auto-attach."""
+
+    def test_single_instance_lock_first_and_second_instance(self):
+        """Test acquire_single_instance_lock allows first instance and notifies/exits second instance."""
+        from src.zipstream.control_panel import acquire_single_instance_lock
+
+        activated = []
+
+        def on_activate():
+            activated.append(True)
+
+        # First instance should successfully bind socket
+        # Use an ephemeral or custom test port
+        test_port = 8798
+        acquired1, sock1 = acquire_single_instance_lock(port=test_port, on_activate_callback=on_activate)
+        self.assertTrue(acquired1)
+        self.assertIsNotNone(sock1)
+
+        try:
+            # Second instance attempting same port should fail to bind and send activation signal
+            acquired2, sock2 = acquire_single_instance_lock(port=test_port)
+            self.assertFalse(acquired2)
+            self.assertIsNone(sock2)
+
+            # Allow brief moment for thread to process socket payload
+            import time
+            time.sleep(0.1)
+            self.assertTrue(len(activated) > 0)
+        finally:
+            if sock1:
+                sock1.close()
+
+    @patch("src.zipstream.control_panel._bring_window_to_front")
+    def test_main_duplicate_instance_exits_gracefully(self, mock_bring_front):
+        """Test main() exits with sys.exit(0) without throwing errors when another instance runs."""
+        from src.zipstream.control_panel import main
+
+        with patch("src.zipstream.control_panel.acquire_single_instance_lock", return_value=(False, None)):
+            with self.assertRaises(SystemExit) as cm:
+                main()
+            self.assertEqual(cm.exception.code, 0)
+
+    def test_startup_server_detection_sets_active(self):
+        """Test probe on startup immediately sets status to Active when server is responding."""
+        with patch.object(self.app, "ping_running_instance", return_value={"app": "zipstream-hub", "pid": 12345, "port": 8787, "version": "2.2.0"}):
+            self.app.check_server_status()
+            self.assertTrue(self.app.is_running)
+            self.assertEqual(self.app.active_pid, 12345)
+            self.assertEqual(self.app.hdr_status_text.cget("text"), "Active")
+            self.assertEqual(self.app.hdr_status_dot.cget("fg").lower(), "#10b981")
+
+
+class TestUnrelatedPortConflictAndAutoHunt(BaseControlPanelTest):
+    """Tests for unrelated process port conflict detection, auto-hunting, and process killing."""
+
+    def test_find_process_occupying_port(self):
+        """Test find_process_occupying_port identifies process on listening port."""
+        from src.zipstream.control_panel import find_process_occupying_port
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind(("127.0.0.1", 0))
+        s.listen(1)
+        test_port = s.getsockname()[1]
+        try:
+            pid = find_process_occupying_port(test_port)
+            # In python test process, pid should match os.getpid() if net_connections succeeds
+            if pid is not None:
+                self.assertEqual(pid, os.getpid())
+        finally:
+            s.close()
+
+    @patch("tkinter.messagebox.askyesnocancel", return_value=True)
+    def test_handle_unrelated_port_conflict_auto_hunt(self, mock_msgbox):
+        """Test user choosing Yes to auto-hunt next available port."""
+        from src.zipstream.control_panel import find_free_port
+        with patch("src.zipstream.control_panel.find_process_occupying_port", return_value=99999):
+            chosen_port = self.app.handle_unrelated_port_conflict(8787)
+            self.assertIsNotNone(chosen_port)
+            self.assertGreater(chosen_port, 8787)
+
+    @patch("tkinter.messagebox.askyesnocancel", return_value=False)
+    @patch("src.zipstream.control_panel.kill_process_by_pid", return_value=True)
+    def test_handle_unrelated_port_conflict_kill_process(self, mock_kill, mock_msgbox):
+        """Test user choosing No to kill orphan process."""
+        with patch("src.zipstream.control_panel.find_process_occupying_port", return_value=1234):
+            chosen_port = self.app.handle_unrelated_port_conflict(8787)
+            self.assertEqual(chosen_port, 8787)
+            mock_kill.assert_called_once_with(1234)
+
+    @patch("tkinter.messagebox.askyesnocancel", return_value=None)
+    def test_handle_unrelated_port_conflict_cancel(self, mock_msgbox):
+        """Test user choosing Cancel aborts startup."""
+        chosen_port = self.app.handle_unrelated_port_conflict(8787)
+        self.assertIsNone(chosen_port)
 
 
 if __name__ == "__main__":

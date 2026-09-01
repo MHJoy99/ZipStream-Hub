@@ -8,6 +8,7 @@ import json
 import urllib.request
 import threading
 import time
+from unittest.mock import patch, MagicMock
 import pytest
 
 # Ensure root directory is on python path
@@ -32,9 +33,11 @@ def test_player_detector_detection():
 
 
 def test_player_detector_browser_fallback_launch():
-    res = launch_stream("browser", "http://127.0.0.1:8787/stream/1/test.mkv")
-    assert res["success"] is True
-    assert res["key"] == "browser"
+    with patch("webbrowser.open") as mock_open:
+        res = launch_stream("browser", "http://127.0.0.1:8787/stream/1/test.mkv")
+        assert res["success"] is True
+        assert res["key"] == "browser"
+        mock_open.assert_called_once_with("http://127.0.0.1:8787/stream/1/test.mkv")
 
 
 def test_api_players_and_play_endpoints():
@@ -62,11 +65,14 @@ def test_api_players_and_play_endpoints():
             data=payload,
             headers={"Content-Type": "application/json"}
         )
-        with urllib.request.urlopen(post_req) as resp:
-            assert resp.status == 200
-            res_data = json.loads(resp.read().decode("utf-8"))
-            assert res_data["success"] is True
-            assert res_data["key"] == "browser"
+        with patch("webbrowser.open") as mock_open, \
+             patch("subprocess.Popen") as mock_popen:
+            with urllib.request.urlopen(post_req) as resp:
+                assert resp.status == 200
+                res_data = json.loads(resp.read().decode("utf-8"))
+                assert res_data["success"] is True
+                assert res_data["key"] == "browser"
+            mock_open.assert_called_once_with(f"http://127.0.0.1:{test_port}/stream/0/test.mp4")
 
     finally:
         server.shutdown()

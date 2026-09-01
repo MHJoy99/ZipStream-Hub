@@ -25,7 +25,7 @@ import threading
 import subprocess
 import webbrowser
 import queue
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -46,14 +46,86 @@ try:
     from .player_detector import get_installed_players, launch_stream
     from .strm_generator import generate_strm_zip_bundle
     from .engine import RemoteZipReader
+    from .server import get_active_port, is_port_available, find_free_port, ACTIVE_PORT_FILE
 except ImportError:
     from config import load_config, AppConfig, StreamingConfig
     from player_detector import get_installed_players, launch_stream
     from strm_generator import generate_strm_zip_bundle
     from engine import RemoteZipReader
+    try:
+        from server import get_active_port, is_port_available, find_free_port, ACTIVE_PORT_FILE
+    except ImportError:
+        def get_active_port(fallback: int = 8787) -> int:
+            return fallback
+        def is_port_available(port: int, host: str = "127.0.0.1") -> bool:
+            return True
+        def find_free_port(start_port: int = 8787, max_attempts: int = 100, host: str = "127.0.0.1") -> int:
+            return start_port
+        ACTIVE_PORT_FILE = ".active_port"
 
 PORT = 8787
+SINGLE_INSTANCE_PORT = 8786
+SINGLE_INSTANCE_SOCKET: Optional[socket.socket] = None
 SERVER_PROCESS: Optional[subprocess.Popen] = None
+
+
+def find_process_occupying_port(port: int) -> Optional[int]:
+    """Finds the PID occupying the specified port using psutil or netstat."""
+    try:
+        import psutil
+        for conn in psutil.net_connections(kind="tcp"):
+            if conn.laddr and conn.laddr.port == port and conn.status in (psutil.CONN_LISTEN, "LISTEN"):
+                if conn.pid:
+                    return conn.pid
+    except Exception:
+        pass
+
+    # Windows netstat fallback
+    if sys.platform == "win32":
+        try:
+            cmd = f'netstat -ano -p tcp'
+            res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            if res.returncode == 0:
+                for line in res.stdout.splitlines():
+                    parts = line.strip().split()
+                    # Example: TCP 127.0.0.1:8787 0.0.0.0:0 LISTENING 12345
+                    if len(parts) >= 5 and f":{port}" in parts[1] and parts[3].upper() == "LISTENING":
+                        try:
+                            return int(parts[4])
+                        except ValueError:
+                            pass
+        except Exception:
+            pass
+    return None
+
+
+def kill_process_by_pid(pid: int) -> bool:
+    """Terminates a process by PID cleanly (SIGTERM / taskkill / SIGKILL)."""
+    if pid <= 0:
+        return False
+    try:
+        import psutil
+        proc = psutil.Process(pid)
+        proc.terminate()
+        try:
+            proc.wait(timeout=2.0)
+            return True
+        except psutil.TimeoutExpired:
+            proc.kill()
+            return True
+    except Exception:
+        pass
+
+    # Platform native fallback
+    try:
+        if sys.platform == "win32":
+            res = subprocess.run(f"taskkill /F /PID {pid}", shell=True, capture_output=True, text=True)
+            return res.returncode == 0
+        else:
+            os.kill(pid, 9)
+            return True
+    except Exception:
+        return False
 
 # Styling constants
 COLOR_BG = "#080C14"
@@ -100,6 +172,8 @@ class ZipStreamControlPanel(tk.Tk):
 
         # State & Telemetry tracking
         self.is_running = False
+        self.active_pid: Optional[int] = None
+        self.active_port: int = PORT
         self.tray_icon = None
         self._stats_poll_job = None
         self._is_closing = False
@@ -498,21 +572,27 @@ class ZipStreamControlPanel(tk.Tk):
 
         tk.Label(info_card, text="LOCAL NETWORK ENDPOINTS", font=("Segoe UI", 7, "bold"), fg=COLOR_ACCENT_CYAN, bg=COLOR_CARD_ALT).pack(anchor="w")
 
-        endpoint_text = (
-            f"• Web UI & REST API:   http://127.0.0.1:{PORT}/\n"
-            f"• Native WebDAV Gateway: http://127.0.0.1:{PORT}/webdav/\n"
-            f"• Master M3U Playlist:  http://127.0.0.1:{PORT}/api/playlist.m3u\n"
-            f"• Jellyfin / Kodi STRM: http://127.0.0.1:{PORT}/api/strm.zip"
-        )
         self.lbl_endpoints = tk.Label(
             info_card,
-            text=endpoint_text,
+            text="",
             font=("JetBrains Mono", 8),
             fg=COLOR_TEXT_PRIMARY,
             bg=COLOR_CARD_ALT,
             justify="left"
         )
         self.lbl_endpoints.pack(anchor="w", pady=(4, 0))
+        self._update_endpoints_display()
+
+    def _update_endpoints_display(self):
+        port = getattr(self, "active_port", PORT)
+        endpoint_text = (
+            f"• Web UI & REST API:   http://127.0.0.1:{port}/\n"
+            f"• Native WebDAV Gateway: http://127.0.0.1:{port}/webdav/\n"
+            f"• Master M3U Playlist:  http://127.0.0.1:{port}/api/playlist.m3u\n"
+            f"• Jellyfin / Kodi STRM: http://127.0.0.1:{port}/api/strm.zip"
+        )
+        if hasattr(self, "lbl_endpoints"):
+            self.lbl_endpoints.config(text=endpoint_text)
 
     def _draw_sparkline(self):
         """Renders live anti-aliased throughput sparkline polygon on canvas."""
@@ -757,7 +837,7 @@ class ZipStreamControlPanel(tk.Tk):
             else:
                 return
 
-        stream_url = f"http://127.0.0.1:{PORT}/stream/{eid}"
+        stream_url = f"http://127.0.0.1:{self.active_port}/stream/{eid}"
         self.log(f"Launching stream {stream_url} with player '{player_key}'...")
 
         try:
@@ -1191,7 +1271,7 @@ class ZipStreamControlPanel(tk.Tk):
 
         try:
             req = urllib.request.Request(
-                f"http://127.0.0.1:{PORT}/api/config",
+                f"http://127.0.0.1:{self.active_port}/api/config",
                 data=json.dumps(payload).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
                 method="POST"
@@ -1372,13 +1452,14 @@ class ZipStreamControlPanel(tk.Tk):
         messagebox.showinfo("Clipboard", "Log output copied to clipboard!")
 
     def check_server_health(self):
-        """Pings server on port 8787 via /api/stats to check latency and connectivity."""
-        self.log(f"Pinging server health on http://127.0.0.1:{PORT}/api/stats...", "info")
+        """Pings server on active port via /api/stats to check latency and connectivity."""
+        port = self.active_port
+        self.log(f"Pinging server health on http://127.0.0.1:{port}/api/stats...", "info")
 
         def _do_ping():
             t0 = time.perf_counter()
             try:
-                req = urllib.request.Request(f"http://127.0.0.1:{PORT}/api/stats", method="GET")
+                req = urllib.request.Request(f"http://127.0.0.1:{port}/api/stats", method="GET")
                 with urllib.request.urlopen(req, timeout=2.0) as resp:
                     elapsed_ms = (time.perf_counter() - t0) * 1000.0
                     if resp.status == 200:
@@ -1404,17 +1485,18 @@ class ZipStreamControlPanel(tk.Tk):
         threading.Thread(target=_do_ping, daemon=True).start()
 
     def _on_health_check_result(self, is_healthy: bool, details: str):
+        port = self.active_port
         if is_healthy:
             self.log(f"✓ {details}", "success")
             messagebox.showinfo(
                 "Server Health: Online",
-                f"ZipStream Server is ONLINE & HEALTHY on Port {PORT}!\n\n{details}"
+                f"ZipStream Server is ONLINE & HEALTHY on Port {port}!\n\n{details}"
             )
         else:
             self.log(f"✗ {details}", "error")
             messagebox.showwarning(
                 "Server Health: Offline / Error",
-                f"ZipStream Server health check failed on Port {PORT}:\n\n{details}\n\nTip: Click 'Start Server' to launch the backend."
+                f"ZipStream Server health check failed on Port {port}:\n\n{details}\n\nTip: Click 'Start Server' to launch the backend."
             )
 
     def export_diagnostics_report(self):
@@ -1437,7 +1519,7 @@ class ZipStreamControlPanel(tk.Tk):
                 f"Timestamp:          {time.strftime('%Y-%m-%d %H:%M:%S')}",
                 f"Platform:           {sys.platform} ({os.name})",
                 f"Python Version:     {sys.version}",
-                f"Server Port:        {PORT}",
+                f"Server Port:        {self.active_port}",
                 f"Server Status:      {'ONLINE / ACTIVE' if self.is_running else 'STOPPED / OFFLINE'}",
                 f"Active Archive URL: {self.current_archive_url or 'None loaded'}",
                 f"Loaded Entries:     {len(self.loaded_entries)} files",
@@ -1503,17 +1585,80 @@ class ZipStreamControlPanel(tk.Tk):
     # Server Process Control & System Integrations
     # -------------------------------------------------------------------------
 
+    def handle_unrelated_port_conflict(self, port: int) -> Optional[int]:
+        """
+        Handles port conflict when port is occupied by an unrelated process.
+        Presents options to:
+          - Auto-hunt next available port (e.g. 8788, 8789...)
+          - Kill the orphan/stale PID occupying the port
+          - Cancel
+        Returns the chosen port to bind to (or None if cancelled).
+        """
+        occupying_pid = find_process_occupying_port(port)
+        pid_info = f" (PID: {occupying_pid})" if occupying_pid else ""
+        
+        prompt = (
+            f"Port {port} is occupied by an unrelated process{pid_info}.\n\n"
+            f"Would you like to auto-hunt the next available port (e.g. {port + 1}, {port + 2}...) without failing?\n\n"
+            f"• Click 'Yes' to auto-hunt the next available free port.\n"
+            f"• Click 'No' to kill/terminate the orphan process (PID {occupying_pid or 'unknown'}) occupying port {port}.\n"
+            f"• Click 'Cancel' to abort server startup."
+        )
+        
+        ans = messagebox.askyesnocancel("Port Conflict Detected", prompt)
+        if ans is True:
+            # Auto-hunt next available port
+            free_port = find_free_port(start_port=port + 1)
+            self.log(f"Auto-hunted next available port: {free_port}", "info")
+            return free_port
+        elif ans is False:
+            # Terminate occupying PID
+            if occupying_pid:
+                killed = kill_process_by_pid(occupying_pid)
+                if killed:
+                    self.log(f"Terminated orphan process (PID {occupying_pid}) on port {port}.", "success")
+                    time.sleep(0.5)
+                    return port
+                else:
+                    self.log(f"Failed to kill process PID {occupying_pid}.", "error")
+                    messagebox.showerror("Termination Failed", f"Could not terminate PID {occupying_pid}. Try running as Administrator.")
+                    return None
+            else:
+                # If PID couldn't be resolved, try next port
+                messagebox.showwarning("PID Not Found", f"Could not determine PID occupying port {port}. Auto-hunting next port.")
+                return find_free_port(start_port=port + 1)
+        else:
+            return None
+
     def toggle_server(self):
         global SERVER_PROCESS
         if SERVER_PROCESS is None or SERVER_PROCESS.poll() is not None:
-            if self.is_port_in_use(PORT):
-                if self.check_live_status():
+            target_port = PORT
+            if self.is_port_in_use(target_port):
+                ping_data = self.ping_running_instance(target_port)
+                if ping_data:
+                    self.active_pid = ping_data.get("pid")
+                    self.active_port = ping_data.get("port", target_port)
                     self.set_running_state(True)
-                    messagebox.showinfo("Server Running", f"ZipStreamHub is already actively running on port {PORT}.")
+                    self.log(
+                        f"[Auto-Attach] Connected to running ZipStream Hub instance (PID: {self.active_pid}).",
+                        "success"
+                    )
+                    messagebox.showinfo(
+                        "Service Running (Active)",
+                        f"ZipStream Hub is already running (PID: {self.active_pid}, port {target_port}).\nAuto-attached successfully!"
+                    )
+                    return
+                elif self.check_live_status():
+                    self.set_running_state(True)
+                    messagebox.showinfo("Service Running (Active)", f"ZipStreamHub is already actively running on port {self.active_port}.")
                     return
                 else:
-                    messagebox.showwarning("Port Conflict", f"Port {PORT} is occupied by another application.")
-                    return
+                    # Port 8787 occupied by unrelated process
+                    resolved_port = self.handle_unrelated_port_conflict(target_port)
+                    if resolved_port is None:
+                        return
+                    target_port = resolved_port
 
             base_dir = os.path.dirname(os.path.abspath(__file__))
             backend_script = os.path.join(base_dir, "server.py")
@@ -1523,14 +1668,16 @@ class ZipStreamControlPanel(tk.Tk):
                 if sys.platform == "win32":
                     creation_flags = subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0x08000000
 
+                cmd_args = [python_exe, backend_script, "--port", str(target_port), "--auto-port"]
                 SERVER_PROCESS = subprocess.Popen(
-                    [python_exe, backend_script],
+                    cmd_args,
                     cwd=base_dir,
                     creationflags=creation_flags
                 )
+                self.active_port = target_port
                 self.set_running_state(True)
-                self.log(f"ZipStream server process spawned (PID: {SERVER_PROCESS.pid})", "success")
-                self.footer_lbl.config(text="Server starting up...")
+                self.log(f"ZipStream server process spawned on port {target_port} (PID: {SERVER_PROCESS.pid})", "success")
+                self.footer_lbl.config(text=f"Server starting up on port {target_port}...")
                 self.after(600, self.open_web_gui)
             except Exception as e:
                 self.log(f"Failed to start backend server: {e}", "error")
@@ -1551,13 +1698,16 @@ class ZipStreamControlPanel(tk.Tk):
 
     def set_running_state(self, is_running: bool):
         self.is_running = is_running
+        self._update_endpoints_display()
         if is_running:
             self.hdr_status_dot.config(fg=COLOR_SUCCESS)
             self.hdr_status_text.config(text="Active", fg=COLOR_SUCCESS)
             self.hdr_btn_toggle.config(text="⏹ Stop Server", bg=COLOR_DANGER, activebackground="#DC2626")
             self.btn_main_toggle.config(text="⏹ Stop ZipStream Service", bg=COLOR_DANGER, activebackground="#DC2626")
-            self.footer_lbl.config(text="● Online • WebDAV: http://127.0.0.1:8787/webdav/")
+            pid_info = f" [PID: {self.active_pid}]" if self.active_pid else ""
+            self.footer_lbl.config(text=f"● Online{pid_info} • WebDAV: http://127.0.0.1:{self.active_port}/webdav/")
         else:
+            self.active_pid = None
             self.hdr_status_dot.config(fg=COLOR_DANGER)
             self.hdr_status_text.config(text="Stopped", fg=COLOR_TEXT_MUTED)
             self.hdr_btn_toggle.config(text="▶ Start Server", bg=COLOR_SUCCESS, activebackground="#059669")
@@ -1565,12 +1715,12 @@ class ZipStreamControlPanel(tk.Tk):
             self.footer_lbl.config(text="Service Stopped • Click 'Start Server' to begin.")
 
     def open_web_gui(self):
-        url = f"http://127.0.0.1:{PORT}"
+        url = f"http://127.0.0.1:{self.active_port}"
         self.log(f"Opening Web Dashboard in default browser: {url}")
         webbrowser.open(url)
 
     def mount_webdav_drive(self):
-        webdav_url = f"http://127.0.0.1:{PORT}/webdav"
+        webdav_url = f"http://127.0.0.1:{self.active_port}/webdav"
 
         if not self.check_live_status():
             ans = messagebox.askyesno(
@@ -1642,7 +1792,7 @@ class ZipStreamControlPanel(tk.Tk):
             return
 
         try:
-            history_url = f"http://127.0.0.1:{PORT}/api/history"
+            history_url = f"http://127.0.0.1:{self.active_port}/api/history"
             req = urllib.request.Request(history_url)
             with urllib.request.urlopen(req, timeout=1.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
@@ -1668,7 +1818,7 @@ class ZipStreamControlPanel(tk.Tk):
                 return
 
             reader = RemoteZipReader(target_url)
-            base_url = f"http://127.0.0.1:{PORT}"
+            base_url = f"http://127.0.0.1:{self.active_port}"
             struct_choice = self.strm_structure_var.get()
             zip_bytes = generate_strm_zip_bundle(reader.entries, base_url, structure_type=struct_choice)
 
@@ -1689,9 +1839,28 @@ class ZipStreamControlPanel(tk.Tk):
             s.settimeout(0.3)
             return s.connect_ex(("127.0.0.1", port)) == 0
 
-    def check_live_status(self) -> bool:
+    def ping_running_instance(self, port: int = PORT) -> Optional[dict]:
         try:
-            req = urllib.request.Request(f"http://127.0.0.1:{PORT}/api/stats", method="GET")
+            req = urllib.request.Request(f"http://127.0.0.1:{port}/api/ping", method="GET")
+            with urllib.request.urlopen(req, timeout=0.6) as resp:
+                if resp.status == 200:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    if data.get("app") == "zipstream-hub":
+                        return data
+        except Exception:
+            pass
+        return None
+
+    def check_live_status(self) -> bool:
+        ping_data = self.ping_running_instance(self.active_port)
+        if ping_data:
+            if "pid" in ping_data:
+                self.active_pid = ping_data["pid"]
+            if "port" in ping_data:
+                self.active_port = ping_data["port"]
+            return True
+        try:
+            req = urllib.request.Request(f"http://127.0.0.1:{self.active_port}/api/stats", method="GET")
             with urllib.request.urlopen(req, timeout=0.6) as resp:
                 if resp.status == 200:
                     return True
@@ -1700,8 +1869,30 @@ class ZipStreamControlPanel(tk.Tk):
         return False
 
     def check_server_status(self):
+        # Check active port file or fallback to PORT
+        configured_active_port = get_active_port(PORT)
+        
+        # When control panel boots, handshake /api/ping on active port or default port
+        for check_port in [configured_active_port, PORT]:
+            ping_data = self.ping_running_instance(check_port)
+            if ping_data:
+                self.active_pid = ping_data.get("pid")
+                self.active_port = ping_data.get("port", check_port)
+                self.set_running_state(True)
+                self.log(
+                    f"[Auto-Attach] Discovered active ZipStream Hub on http://127.0.0.1:{self.active_port} "
+                    f"(PID: {self.active_pid}, v{ping_data.get('version', '1.0.0')}) — Synced telemetry seamlessly.",
+                    "success"
+                )
+                return
+
         is_alive = self.check_live_status()
         self.set_running_state(is_alive)
+        if is_alive:
+            self.log(
+                f"[Auto-Attach] Discovered active ZipStream server on http://127.0.0.1:{self.active_port} — Synced status Active.",
+                "success"
+            )
 
     def schedule_stats_poll(self):
         if self._is_closing:
@@ -1709,7 +1900,7 @@ class ZipStreamControlPanel(tk.Tk):
 
         def _fetch_stats():
             try:
-                req = urllib.request.Request(f"http://127.0.0.1:{PORT}/api/stats", method="GET")
+                req = urllib.request.Request(f"http://127.0.0.1:{self.active_port}/api/stats", method="GET")
                 with urllib.request.urlopen(req, timeout=0.8) as resp:
                     if resp.status == 200:
                         data = json.loads(resp.read().decode("utf-8"))
@@ -1988,10 +2179,118 @@ class ZipStreamControlPanel(tk.Tk):
             except Exception:
                 pass
 
+        global SINGLE_INSTANCE_SOCKET
+        if SINGLE_INSTANCE_SOCKET is not None:
+            try:
+                SINGLE_INSTANCE_SOCKET.close()
+            except Exception:
+                pass
+            SINGLE_INSTANCE_SOCKET = None
+
         self.after(100, self.destroy)
 
 
+def _bring_window_to_front(root: Optional[tk.Tk] = None):
+    """
+    Brings the Tkinter window to the foreground, restoring from minimized or tray if needed.
+    Uses Win32 API (ctypes) when on Windows to reliably pop over other applications.
+    """
+    if root is None:
+        return
+
+    try:
+        root.deiconify()
+        root.state("normal")
+        root.lift()
+        root.attributes("-topmost", True)
+        root.after(100, lambda: root.attributes("-topmost", False))
+        root.focus_force()
+    except Exception:
+        pass
+
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            hwnd = root.winfo_id()
+            # If winfo_id returns child, get the toplevel HWND
+            user32 = ctypes.windll.user32
+            parent_hwnd = user32.GetParent(hwnd)
+            target_hwnd = parent_hwnd if parent_hwnd != 0 else hwnd
+
+            SW_RESTORE = 9
+            user32.ShowWindow(target_hwnd, SW_RESTORE)
+            user32.SetForegroundWindow(target_hwnd)
+        except Exception:
+            pass
+
+
+def acquire_single_instance_lock(
+    port: int = SINGLE_INSTANCE_PORT,
+    on_activate_callback: Optional[Any] = None
+) -> Tuple[bool, Optional[socket.socket]]:
+    """
+    Ensures only a single instance of Control Panel runs at any time.
+    Uses a localhost TCP socket on port 8786.
+    If another instance holds the socket, sends a 'FOCUS' signal to bring it to the front
+    and returns (False, None).
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Don't set SO_REUSEADDR on Windows so port cannot be stolen by another process
+    try:
+        sock.bind(("127.0.0.1", port))
+        sock.listen(5)
+
+        def _listener():
+            while True:
+                try:
+                    client, _ = sock.accept()
+                    data = client.recv(1024)
+                    if b"FOCUS" in data or b"ACTIVATE" in data:
+                        if on_activate_callback:
+                            try:
+                                on_activate_callback()
+                            except Exception:
+                                pass
+                    client.close()
+                except Exception:
+                    break
+
+        t = threading.Thread(target=_listener, daemon=True)
+        t.start()
+        return True, sock
+
+    except OSError:
+        # Port already bound: another instance is active
+        try:
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.settimeout(1.0)
+            client.connect(("127.0.0.1", port))
+            client.sendall(b"FOCUS\n")
+            client.close()
+        except Exception:
+            pass
+        return False, None
+
+
 def main():
+    # Attempt to acquire single-instance lock
+    app: Optional[ZipStreamControlPanel] = None
+
+    def _on_activate_remote():
+        if app is not None:
+            try:
+                app.after(0, lambda: _bring_window_to_front(app))
+            except Exception:
+                pass
+
+    acquired, sock = acquire_single_instance_lock(SINGLE_INSTANCE_PORT, on_activate_callback=_on_activate_remote)
+    if not acquired:
+        # Another instance is already running and has been notified to bring its window to front
+        sys.exit(0)
+
+    global SINGLE_INSTANCE_SOCKET
+    SINGLE_INSTANCE_SOCKET = sock
+
     app = ZipStreamControlPanel()
     app.mainloop()
 
