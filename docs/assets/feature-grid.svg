@@ -89,8 +89,10 @@
     <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">0ms Realtime Seek</text>
     <text x="84" y="62" fill="#38BDF8" class="font-mono" font-size="12" font-weight="600">ZERO LATENCY SCRUBBING</text>
 
-    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13" line-height="1.5">
-      Direct mathematical byte offset translation from internal compressed segments to uncompressed video streams. No extraction required to seek anywhere.
+    <text fill="#94A3B8" class="font-sans" font-size="13">
+      <tspan x="24" y="105">Direct mathematical byte offset translation</tspan>
+      <tspan x="24" dy="19">from internal compressed segments to uncompressed</tspan>
+      <tspan x="24" dy="19">video streams. No extraction required to seek.</tspan>
     </text>
 
     <!-- Bottom Highlights Box -->
@@ -111,8 +113,10 @@
     <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">ZIP64 4K HDR Engine</text>
     <text x="84" y="62" fill="#C084FC" class="font-mono" font-size="12" font-weight="600">MASSIVE ARCHIVE PARSER</text>
 
-    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
-      Full 64-bit extension parsing for archives exceeding the 4GB / 65k file barrier. Seamlessly supports 100GB+ 4K Dolby Vision and HDR10+ remux files.
+    <text fill="#94A3B8" class="font-sans" font-size="13">
+      <tspan x="24" y="105">Full 64-bit extension parsing for archives</tspan>
+      <tspan x="24" dy="19">exceeding 4GB / 65k files. Seamlessly supports</tspan>
+      <tspan x="24" dy="19">100GB+ 4K Dolby Vision &amp; HDR10+ remuxes.</tspan>
     </text>
 
     <!-- Bottom Highlights Box -->
@@ -133,8 +137,10 @@
     <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">Zero Disk Space</text>
     <text x="84" y="62" fill="#34D399" class="font-mono" font-size="12" font-weight="600">RAM BUFFERED PIPELINE</text>
 
-    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
-      Zero intermediate temporary files written to SSD or NVMe storage. Eliminates disk wear-leveling exhaustion and saves hundreds of gigabytes locally.
+    <text fill="#94A3B8" class="font-sans" font-size="13">
+      <tspan x="24" y="105">Zero intermediate temporary files written to SSD</tspan>
+      <tspan x="24" dy="19">or NVMe storage. Eliminates wear-leveling</tspan>
+      <tspan x="24" dy="19">exhaustion and saves hundreds of gigabytes.</tspan>
     </text>
 
     <!-- Bottom Highlights Box -->
@@ -154,8 +160,10 @@
     <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">HTTP Connection Pooling</text>
     <text x="84" y="62" fill="#FBBF24" class="font-mono" font-size="12" font-weight="600">PERSISTENT TCP SESSIONS</text>
 
-    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
-      Async Keep-Alive connection recycling with smart speculative prefetching. Eliminates repeated TLS handshakes during dynamic playback.
+    <text fill="#94A3B8" class="font-sans" font-size="13">
+      <tspan x="24" y="105">Async Keep-Alive connection recycling with</tspan>
+      <tspan x="24" dy="19">smart speculative prefetching. Eliminates</tspan>
+      <tspan x="24" dy="19">repeated TLS handshakes during playback.</tspan>
     </text>
 
     <!-- Bottom Highlights Box -->
@@ -177,8 +185,10 @@
     <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">Multi-Client Support</text>
     <text x="84" y="62" fill="#818CF8" class="font-mono" font-size="12" font-weight="600">PARALLEL STREAMS</text>
 
-    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
-      Serve simultaneous streams to multiple local network devices (Living Room Apple TV, PotPlayer desktop, mobile VLC) through a unified local gateway.
+    <text fill="#94A3B8" class="font-sans" font-size="13">
+      <tspan x="24" y="105">Serve simultaneous streams to multiple local</tspan>
+      <tspan x="24" dy="19">network devices (Apple TV, PotPlayer, VLC)</tspan>
+      <tspan x="24" dy="19">through a unified zero-copy streaming gateway.</tspan>
     </text>
 
     <!-- Bottom Highlights Box -->
@@ -199,8 +209,10 @@
     <text x="84" y="44" fill="#F8FAFC" class="font-sans" font-size="17" font-weight="700">Cross-Platform Ready</text>
     <text x="84" y="62" fill="#38BDF8" class="font-mono" font-size="12" font-weight="600">WIN / MACOS / LINUX</text>
 
-    <text x="24" y="105" fill="#94A3B8" class="font-sans" font-size="13">
-      Zero native compilation dependencies. Runs seamlessly on Windows 11/10, macOS (Apple Silicon / Intel), Linux servers, and Raspberry Pi / NAS.
+    <text fill="#94A3B8" class="font-sans" font-size="13">
+      <tspan x="24" y="105">Zero native compilation dependencies. Runs</tspan>
+      <tspan x="24" dy="19">seamlessly on Windows 11/10, macOS (Apple</tspan>
+      <tspan x="24" dy="19">Silicon / Intel), Linux servers, and NAS.</tspan>
     </text>
 
     <!-- Bottom Highlights Box -->
