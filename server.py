@@ -12,9 +12,19 @@ import urllib.parse
 from typing import Dict, Optional, Tuple, List
 
 # Clean intra-package / local directory imports
-from engine import RemoteZipReader, StreamPrefetcher, HTTP_POOL
+from engine import (
+    RemoteZipReader,
+    StreamPrefetcher,
+    HTTP_POOL,
+    METRICS,
+    get_streaming_metrics,
+    set_bandwidth_limit,
+)
 from player_detector import get_installed_players, launch_stream
 from subtitle_parser import is_video_file, is_subtitle_file, convert_to_vtt
+from webdav_bridge import WebDAVBridge
+from strm_generator import generate_strm_zip_bundle
+from media_inspector import MediaInspector, inspect_media_header
 import history
 from config import load_config, AppConfig
 
@@ -61,14 +71,28 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("Access-Control-Expose-Headers", "Content-Range, Content-Length, Accept-Ranges")
 
     def do_OPTIONS(self):
+        if self.path == "/webdav" or self.path.startswith("/webdav/"):
+            self.send_response(200)
+            self._set_cors_headers()
+            for k, v in WebDAVBridge.get_dav_headers().items():
+                self.send_header(k, v)
+            self.send_header("Content-Length", "0")
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            return
         self.send_response(204)
         self._set_cors_headers()
         self.send_header("Content-Length", "0")
         self.send_header("Connection", "keep-alive")
         self.end_headers()
 
+    def do_PROPFIND(self):
+        self._handle_webdav_propfind()
+
     def do_HEAD(self):
-        if self.path.startswith("/stream/"):
+        if self.path == "/webdav" or self.path.startswith("/webdav/"):
+            self._handle_webdav_head()
+        elif self.path.startswith("/stream/"):
             self._handle_stream_head()
         elif self.path in ("/", "/index.html"):
             self.send_response(200)
@@ -90,14 +114,22 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             fallback_html = r"E:\Mermis\web_gui.html"
             gui_path = local_html if os.path.exists(local_html) else fallback_html
             self._serve_file(gui_path, "text/html")
+        elif self.path == "/webdav" or self.path.startswith("/webdav/"):
+            self._handle_webdav_get()
         elif self.path == "/api/players":
             self._handle_api_players()
+        elif self.path == "/api/stats" or self.path.startswith("/api/stats"):
+            self._handle_api_stats_get()
         elif self.path == "/api/config":
             self._handle_api_config_get()
         elif self.path == "/api/history" or self.path.startswith("/api/history?"):
             self._handle_api_history_get()
         elif self.path.startswith("/api/playlist.m3u"):
             self._handle_api_playlist()
+        elif self.path.startswith("/api/strm.zip") or self.path.startswith("/api/strm"):
+            self._handle_api_strm_bundle()
+        elif self.path.startswith("/api/media_inspect") or self.path.startswith("/api/probe"):
+            self._handle_api_media_inspect()
         elif self.path.startswith("/api/subtitle"):
             self._handle_api_subtitle()
         elif self.path.startswith("/stream/"):
@@ -201,6 +233,31 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
         except Exception as e:
             import traceback
             traceback.print_exc()
+            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            self.send_response(500)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(err_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(err_bytes)
+
+    def _handle_api_stats_get(self):
+        try:
+            stats = get_streaming_metrics()
+            resp = {
+                "status": "ok",
+                "stats": stats
+            }
+            data_bytes = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(data_bytes)
+        except Exception as e:
             err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
             self.send_response(500)
             self._set_cors_headers()
@@ -475,6 +532,124 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(str(e).encode("utf-8"))
 
+    def _handle_api_strm_bundle(self):
+        """
+        Generates and serves an in-memory ZIP package containing .strm virtual files for Jellyfin/Emby/Kodi.
+        Format: /api/strm.zip or /api/strm?url=<zip_url>&structure=<auto|flat|mirror>
+        """
+        try:
+            parsed = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed.query)
+            query_url = qs.get("url", [""])[0].strip()
+            structure_type = qs.get("structure", ["auto"])[0].strip()
+
+            host_header = self.headers.get("Host", f"127.0.0.1:{PORT}")
+            base_url = f"http://{host_header}"
+
+            with ARCHIVE_LOCK:
+                if query_url:
+                    if query_url in READERS_BY_URL:
+                        reader = READERS_BY_URL[query_url]
+                    else:
+                        reader = RemoteZipReader(query_url)
+                        READERS_BY_URL[query_url] = reader
+                    entries = reader.entries
+                else:
+                    reader = CURRENT_READER
+                    entries = list(CACHED_ENTRIES.values()) if CACHED_ENTRIES else (reader.entries if reader else [])
+
+            video_entries = [ep for ep in entries if is_video_file(ep.get("name", ""))]
+            if not video_entries and entries:
+                video_entries = entries
+
+            if not video_entries:
+                self.send_response(400)
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(b"No active or queried archive video entries found for STRM export.")
+                return
+
+            zip_bytes = generate_strm_zip_bundle(video_entries, base_url, structure_type=structure_type)
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/zip")
+            self.send_header("Content-Disposition", 'attachment; filename="zipstream_strm_library.zip"')
+            self.send_header("Content-Length", str(len(zip_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(zip_bytes)
+        except Exception as e:
+            self.send_response(500)
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(str(e).encode("utf-8"))
+
+    def _handle_api_media_inspect(self):
+        """
+        Extracts video/audio track metadata (codecs, resolution, container) via fast Range inspection.
+        Format: /api/media_inspect?id=<entry_id>&url=<zip_url>
+        """
+        try:
+            parsed = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed.query)
+            ep_id_str = qs.get("id", [""])[0].strip()
+            query_url = qs.get("url", [""])[0].strip()
+
+            with ARCHIVE_LOCK:
+                if query_url:
+                    if query_url in READERS_BY_URL:
+                        reader = READERS_BY_URL[query_url]
+                    else:
+                        reader = RemoteZipReader(query_url)
+                        READERS_BY_URL[query_url] = reader
+                    cached = {e["id"]: e for e in reader.entries}
+                else:
+                    reader = CURRENT_READER
+                    cached = dict(CACHED_ENTRIES)
+
+            if not reader or not cached:
+                self.send_response(404)
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "error": "No active archive."}).encode("utf-8"))
+                return
+
+            target_entry = None
+            if ep_id_str.isdigit():
+                target_entry = cached.get(int(ep_id_str))
+
+            if not target_entry:
+                self.send_response(404)
+                self._set_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "error": "Media entry not found."}).encode("utf-8"))
+                return
+
+            media_info = inspect_media_header(reader, target_entry)
+            resp = {
+                "status": "ok",
+                "entry_id": target_entry.get("id"),
+                "name": target_entry.get("name"),
+                "media_info": media_info
+            }
+            resp_bytes = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(resp_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(resp_bytes)
+        except Exception as e:
+            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            self.send_response(500)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(err_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(err_bytes)
+
     def _handle_api_subtitle(self):
         """
         Extracts subtitle text (.srt / .vtt / .ass / .ssa) from the archive and converts to WebVTT on the fly.
@@ -701,6 +876,209 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
         # High-Throughput Read-Ahead Prefetch Buffer with Connection Pooling & Memory Safety
+        cfg = load_config()
+        prefetcher = StreamPrefetcher(
+            url=reader.url,
+            start_byte=remote_start,
+            end_byte=remote_end,
+            pool=getattr(reader, "pool", None) or HTTP_POOL,
+            buffer_size_mb=cfg.streaming.prefetch_buffer_size_mb,
+            slice_size_kb=cfg.streaming.slice_size_kb,
+            filename=entry.get("name")
+        )
+        prefetcher.start()
+
+        try:
+            for chunk in prefetcher.stream_chunks():
+                self.wfile.write(chunk)
+                self.wfile.flush()
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+            self.close_connection = True
+        except Exception:
+            self.close_connection = True
+        finally:
+            prefetcher.close()
+
+    def _handle_webdav_propfind(self):
+        try:
+            depth = self.headers.get("Depth", "1")
+            with ARCHIVE_LOCK:
+                node_type, entry, reader = WebDAVBridge.resolve_entry(
+                    self.path,
+                    READERS_BY_URL,
+                    CURRENT_READER,
+                    CACHED_ENTRIES
+                )
+
+            if node_type == "not_found":
+                self.send_response(404)
+                self._set_cors_headers()
+                self.end_headers()
+                return
+
+            host_hdr = self.headers.get("Host", f"127.0.0.1:{PORT}")
+            host_prefix = f"http://{host_hdr}"
+            xml_data = WebDAVBridge.build_propfind_xml(
+                req_path=self.path,
+                node_type=node_type,
+                target_entry=entry,
+                reader=reader,
+                depth=depth,
+                host_prefix=host_prefix
+            )
+
+            self.send_response(207)
+            self._set_cors_headers()
+            for k, v in WebDAVBridge.get_dav_headers().items():
+                self.send_header(k, v)
+            self.send_header("Content-Type", 'application/xml; charset="utf-8"')
+            self.send_header("Content-Length", str(len(xml_data)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(xml_data)
+        except Exception as e:
+            self.send_response(500)
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(str(e).encode("utf-8"))
+
+    def _handle_webdav_head(self):
+        with ARCHIVE_LOCK:
+            node_type, entry, reader = WebDAVBridge.resolve_entry(
+                self.path,
+                READERS_BY_URL,
+                CURRENT_READER,
+                CACHED_ENTRIES
+            )
+
+        if node_type == "not_found":
+            self.send_response(404)
+            self._set_cors_headers()
+            self.end_headers()
+            return
+
+        if node_type == "root":
+            self.send_response(200)
+            self._set_cors_headers()
+            for k, v in WebDAVBridge.get_dav_headers().items():
+                self.send_header(k, v)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            return
+
+        # File node
+        total_file_size = entry["size_bytes"]
+        mime_type = self._get_mime_type(entry["name"])
+
+        self.send_response(200)
+        self._set_cors_headers()
+        for k, v in WebDAVBridge.get_dav_headers().items():
+            self.send_header(k, v)
+        self.send_header("Content-Type", mime_type)
+        self.send_header("Content-Length", str(total_file_size))
+        self.send_header("Connection", "keep-alive")
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+
+    def _handle_webdav_get(self):
+        with ARCHIVE_LOCK:
+            node_type, entry, reader = WebDAVBridge.resolve_entry(
+                self.path,
+                READERS_BY_URL,
+                CURRENT_READER,
+                CACHED_ENTRIES
+            )
+
+        if node_type == "not_found":
+            self.send_response(404)
+            self._set_cors_headers()
+            self.end_headers()
+            return
+
+        if node_type == "root":
+            host_hdr = self.headers.get("Host", f"127.0.0.1:{PORT}")
+            base_url = f"http://{host_hdr}"
+            html_bytes = WebDAVBridge.build_html_directory(self.path, reader, base_url)
+            self.send_response(200)
+            self._set_cors_headers()
+            for k, v in WebDAVBridge.get_dav_headers().items():
+                self.send_header(k, v)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(html_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(html_bytes)
+            return
+
+        # Stream the entry transparently via get_data_offset and prefetcher
+        if not entry or not reader:
+            self.send_response(404)
+            self._set_cors_headers()
+            self.end_headers()
+            return
+
+        try:
+            data_start = reader.get_data_offset(entry)
+        except Exception:
+            self.send_response(500)
+            self._set_cors_headers()
+            self.end_headers()
+            return
+
+        total_file_size = entry["size_bytes"]
+        mime_type = self._get_mime_type(entry["name"])
+        range_header = self.headers.get("Range")
+
+        if not range_header:
+            start_byte = 0
+            end_byte = total_file_size - 1
+            status_code = 200
+        else:
+            try:
+                range_val = range_header.strip().replace("bytes=", "")
+                if range_val.startswith("-"):
+                    suffix = int(range_val[1:])
+                    start_byte = max(0, total_file_size - suffix)
+                    end_byte = total_file_size - 1
+                elif "-" in range_val:
+                    parts = range_val.split("-")
+                    start_byte = int(parts[0])
+                    end_byte = int(parts[1]) if parts[1] else total_file_size - 1
+                else:
+                    start_byte = int(range_val)
+                    end_byte = total_file_size - 1
+
+                if start_byte >= total_file_size or start_byte > end_byte:
+                    self.send_response(416)
+                    self._set_cors_headers()
+                    self.send_header("Content-Range", f"bytes */{total_file_size}")
+                    self.end_headers()
+                    return
+
+                end_byte = min(end_byte, total_file_size - 1)
+                status_code = 206
+            except Exception:
+                start_byte = 0
+                end_byte = total_file_size - 1
+                status_code = 200
+
+        content_length = end_byte - start_byte + 1
+        remote_start = data_start + start_byte
+        remote_end = data_start + end_byte
+
+        self.send_response(status_code)
+        self._set_cors_headers()
+        for k, v in WebDAVBridge.get_dav_headers().items():
+            self.send_header(k, v)
+        self.send_header("Content-Type", mime_type)
+        self.send_header("Content-Length", str(content_length))
+        if status_code == 206:
+            self.send_header("Content-Range", f"bytes {start_byte}-{end_byte}/{total_file_size}")
+        self.send_header("Connection", "keep-alive")
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+
         cfg = load_config()
         prefetcher = StreamPrefetcher(
             url=reader.url,

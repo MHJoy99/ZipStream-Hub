@@ -13,10 +13,23 @@ CORS: Enabled for all origins (`Access-Control-Allow-Origin: *`)
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/inspect` | Parses remote ZIP/ZIP64 and returns file metadata |
+| `GET` | `/api/media_inspect` | Binary media header inspection (video/audio codecs, width, height, duration) |
+| `GET` | `/api/strm.zip` | Generates and downloads virtual `.strm` media library ZIP bundle |
+| `GET` | `/api/stats` | Returns real-time streaming telemetry and throughput metrics |
+| `GET` | `/api/playlist.m3u` | Exports `#EXTM3U` playlist for Kodi, Infuse, and VLC |
+| `GET` | `/api/subtitle` | Extracts and converts subtitle tracks to WebVTT on the fly |
+| `GET` | `/api/players` | Lists installed host media players |
 | `POST` | `/api/play` | Launches host-installed media player for a stream |
+| `GET` | `/api/config` | Retrieves server runtime configuration |
+| `POST` | `/api/config` | Updates server runtime configuration live |
+| `GET` | `/api/history` | Retrieves recent inspected archives and favorites |
+| `POST` | `/api/history/favorite` | Toggles favorite status for an archive |
+| `DELETE` | `/api/history` | Deletes an entry or clears history |
+| `PROPFIND` | `/webdav/` | WebDAV RFC 4918 multistatus XML directory listing for Infuse/Kodi/Windows Explorer |
+| `GET` | `/webdav/` | WebDAV HTTP HTML Directory view and transparent Range file proxy |
 | `GET` | `/stream/<id>/<filename>` | Stream video/audio file with HTTP 206 Range support |
 | `HEAD` | `/stream/<id>/<filename>` | Probe stream headers, content length, and MIME type |
-| `OPTIONS` | `/*` | CORS preflight handler |
+| `OPTIONS` | `/*` | CORS & WebDAV capabilities preflight handler |
 | `GET` | `/` | Web GUI Dashboard HTML interface |
 
 ---
@@ -185,13 +198,112 @@ Access-Control-Allow-Origin: *
 
 ---
 
-## 5. cURL Integration Examples
+## 5. STRM Virtual Media Library Bundle
+
+### `GET /api/strm.zip`
+Generates and downloads an in-memory ZIP package containing structured `.strm` stream pointer files for direct integration into Jellyfin, Emby, and Kodi.
+
+#### Query Parameters
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `url` | `string` | No | *(active archive)* | Remote ZIP archive URL |
+| `structure` | `string` | No | `auto` | Hierarchy layout: `auto` (Show/Season format), `flat`, or `mirror` |
+
+#### Response (`200 OK`)
+- **Content-Type**: `application/zip`
+- **Content-Disposition**: `attachment; filename="zipstream_strm_library.zip"`
+
+---
+
+## 6. Real-Time Streaming Metrics & Telemetry
+
+### `GET /api/stats`
+Returns instantaneous server throughput, active network streams, sliding-window buffer allocation, total bytes served, and average seek latencies.
+
+#### Response (`200 OK`)
+```json
+{
+  "status": "ok",
+  "stats": {
+    "active_streams": 1,
+    "current_bitrate_mbps": 42.8,
+    "total_bytes_streamed": 1073741824,
+    "total_megabytes_streamed": 1024.0,
+    "active_prefetch_buffers_mb": 64.0,
+    "avg_seek_latency_ms": 2.4,
+    "uptime_seconds": 3600
+  }
+}
+```
+
+---
+
+## 7. Binary Media Inspection & Codec Probing
+
+### `GET /api/media_inspect` (or `POST /api/inspect` archive structure)
+Probes media container headers directly from the remote cloud archive using selective byte-range reads without external dependencies (pure Python EBML/ISOBMFF demuxer).
+
+#### Query Parameters
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `id` | `integer` | **Yes** | Target file entry ID |
+| `url` | `string` | No | Archive URL (uses active archive if omitted) |
+
+#### Response (`200 OK`)
+```json
+{
+  "status": "ok",
+  "entry_id": 1,
+  "name": "Episode01_4K.mkv",
+  "media_info": {
+    "format": "mkv",
+    "video_codec": "V_MPEGH/ISO/HEVC",
+    "width": 3840,
+    "height": 2160,
+    "duration_sec": 3540.25,
+    "audio_codecs": ["A_EAC3", "A_AAC"],
+    "size_mb": 4096.0,
+    "compressed": false
+  }
+}
+```
+
+---
+
+## 8. WebDAV Directory & Streaming Proxy
+
+### `PROPFIND /webdav/` & `GET /webdav/`
+RFC 4918 WebDAV interface allowing mounting as a network drive in Windows File Explorer, macOS Finder, Infuse, and Kodi.
+
+#### WebDAV Capabilities:
+- `PROPFIND`: Returns XML multistatus directory tree for Depth `0`, `1`, `infinity`.
+- `GET`: HTML directory view for browsers, transparent HTTP 206 stream proxy for media files.
+- `OPTIONS`: DAV compliance headers (`DAV: 1, 2`).
+
+---
+
+## 9. cURL Integration Examples
 
 ### Inspect Archive:
 ```bash
 curl -X POST http://127.0.0.1:8787/api/inspect \
   -H "Content-Type: application/json" \
   -d '{"url": "https://storage.googleapis.com/demo/sample_videos.zip"}'
+```
+
+### Inspect Media Codecs & Tracks:
+```bash
+curl "http://127.0.0.1:8787/api/media_inspect?id=1"
+```
+
+### Export STRM Virtual Media Library:
+```bash
+curl -O -J "http://127.0.0.1:8787/api/strm.zip?structure=auto"
+```
+
+### Fetch Live Streaming Telemetry:
+```bash
+curl http://127.0.0.1:8787/api/stats
 ```
 
 ### Probe Stream Range:

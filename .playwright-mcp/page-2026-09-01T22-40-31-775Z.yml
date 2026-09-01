@@ -1,0 +1,31 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - banner [ref=f6e3]:
+      - generic [ref=f6e8]:
+        - heading "ZipStream Hub" [level=1] [ref=f6e9]
+        - paragraph [ref=f6e10]: Instant Virtual Remote ZIP Video Streaming Engine
+      - generic [ref=f6e11]:
+        - generic "Click to configure buffer & engine settings" [ref=f6e12] [cursor=pointer]: "⚡ Buffer: 5 GB"
+        - button "Recent Archives 1" [ref=f6e16] [cursor=pointer]:
+          - generic [ref=f6e20]: Recent Archives
+          - generic [ref=f6e21]: "1"
+        - button "Settings" [ref=f6e22] [cursor=pointer]
+        - generic [ref=f6e27]: Core Engine Active
+    - generic [ref=f6e30]:
+      - generic [ref=f6e31]: Remote ZIP Archive URL
+      - generic [ref=f6e36]:
+        - generic [ref=f6e37]:
+          - textbox "Remote ZIP Archive URL" [ref=f6e38]:
+            - /placeholder: https://domain.com/movie-or-series-pack.zip
+            - text: https://motionpicturepro55.mhjoybots.workers.dev/0:findpath?id=1C_oTML7by_QacdPcO6nQ7_jxPDjxygPy
+          - button "✕" [ref=f6e39] [cursor=pointer]
+        - button "Inspect & Extract Links" [ref=f6e40] [cursor=pointer]
+      - generic [ref=f6e44]:
+        - generic [ref=f6e45]:
+          - generic [ref=f6e46]: "1-Click App Player:"
+          - generic [ref=f6e50]: Detecting installed players...
+        - generic [ref=f6e52]:
+          - button "Download M3U Playlist" [ref=f6e53] [cursor=pointer]
+          - button "Copy M3U URL" [ref=f6e58] [cursor=pointer]
+  - alert:
+    - generic: Stream Link copied to clipboard!

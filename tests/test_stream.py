@@ -14,7 +14,16 @@ from pathlib import Path
 # Ensure E:\ZipStreamHub is on the python path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from engine import StreamPrefetcher, RemoteZipReader, HTTP_POOL
+from engine import (
+    StreamPrefetcher,
+    RemoteZipReader,
+    HTTP_POOL,
+    MetricsTracker,
+    METRICS,
+    get_streaming_metrics,
+    set_bandwidth_limit,
+    calculate_adaptive_chunk_size,
+)
 from server import ZipStreamWebHandler, ThreadedZipStreamServer, ARCHIVE_LOCK, CURRENT_READER, CACHED_ENTRIES, READERS_BY_URL
 import server
 
@@ -361,6 +370,100 @@ def test_api_config_get_and_post():
             assert post_data["config"]["streaming"]["prefetch_buffer_size_mb"] == 5120
             assert post_data["config"]["streaming"]["slice_size_kb"] == 256
             assert post_data["config"]["streaming"]["chunk_timeout_seconds"] == 45
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
+def test_adaptive_chunk_sizing_logic():
+    """Verify calculate_adaptive_chunk_size selects optimal chunk sizes."""
+    # Subtitles & text -> 1MB
+    assert calculate_adaptive_chunk_size(media_filename="subs.srt") == 1024 * 1024
+    assert calculate_adaptive_chunk_size(media_filename="subs.vtt") == 1024 * 1024
+    assert calculate_adaptive_chunk_size(media_filename="track.ass") == 1024 * 1024
+
+    # Audio -> 1MB
+    assert calculate_adaptive_chunk_size(media_filename="audio.flac") == 1024 * 1024
+    assert calculate_adaptive_chunk_size(media_filename="music.mp3") == 1024 * 1024
+
+    # Bitrate based
+    assert calculate_adaptive_chunk_size(stream_bitrate_bps=50_000_000) == 8 * 1024 * 1024  # 50 Mbps (4K REMUX)
+    assert calculate_adaptive_chunk_size(stream_bitrate_bps=20_000_000) == 4 * 1024 * 1024  # 20 Mbps (4K high)
+    assert calculate_adaptive_chunk_size(stream_bitrate_bps=8_000_000) == 2 * 1024 * 1024   # 8 Mbps (1080p)
+    assert calculate_adaptive_chunk_size(stream_bitrate_bps=2_000_000) == 1024 * 1024       # 2 Mbps (audio/SD)
+
+    # File size based fallback
+    assert calculate_adaptive_chunk_size(file_size_bytes=10 * 1024 * 1024 * 1024) == 8 * 1024 * 1024  # 10GB
+    assert calculate_adaptive_chunk_size(file_size_bytes=2 * 1024 * 1024 * 1024) == 4 * 1024 * 1024   # 2GB
+    assert calculate_adaptive_chunk_size(file_size_bytes=500 * 1024 * 1024) == 2 * 1024 * 1024        # 500MB
+    assert calculate_adaptive_chunk_size(file_size_bytes=10 * 1024 * 1024) == 1024 * 1024             # 10MB
+
+
+def test_metrics_tracker_and_stats():
+    """Verify MetricsTracker throughput calculation, active streams count, and helper exports."""
+    tracker = MetricsTracker(window_seconds=1.0)
+    tracker.reset()
+
+    tracker.register_stream_start()
+    assert tracker.get_stats()["active_streams_count"] == 1
+
+    tracker.record_bytes(1024 * 1024)  # 1MB
+    stats = tracker.get_stats()
+    assert stats["total_bytes_served"] == 1024 * 1024
+    assert stats["total_mbytes_served"] == 1.0
+    assert stats["current_bandwidth_mbps"] > 0
+
+    tracker.register_stream_end()
+    assert tracker.get_stats()["active_streams_count"] == 0
+
+
+def test_stream_prefetcher_cleanup_hooks_and_context_manager():
+    """Verify cleanup hooks and context manager lifecycle execute completely."""
+    payload = b"H" * (2 * 1024 * 1024)
+    mock_pool = MockRangePool(payload)
+    hook_called = [False]
+
+    def on_cleanup():
+        hook_called[0] = True
+
+    with StreamPrefetcher(
+        url="http://mock.test/hook.mkv",
+        start_byte=0,
+        end_byte=len(payload) - 1,
+        pool=mock_pool,
+        filename="hook.mkv"
+    ) as prefetcher:
+        prefetcher.add_cleanup_hook(on_cleanup)
+        # Read a chunk
+        for chunk in prefetcher.stream_chunks():
+            assert len(chunk) > 0
+            break
+
+    assert hook_called[0] is True
+    assert prefetcher._closed is True
+    assert prefetcher.queue.empty()
+
+
+def test_api_stats_endpoint():
+    """Verify /api/stats endpoint returns real-time metrics."""
+    import urllib.request
+    test_port = 8792
+    server_address = ("127.0.0.1", test_port)
+    httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+    time.sleep(0.2)
+
+    try:
+        req = urllib.request.Request(f"http://127.0.0.1:{test_port}/api/stats")
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+            assert data["status"] == "ok"
+            assert "stats" in data
+            assert "active_streams_count" in data["stats"]
+            assert "current_bandwidth_mbps" in data["stats"]
+            assert "total_bytes_served" in data["stats"]
     finally:
         httpd.shutdown()
         httpd.server_close()

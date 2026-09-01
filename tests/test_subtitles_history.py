@@ -11,12 +11,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from subtitle_parser import (
     match_subtitles_for_video,
+    package_subtitles_for_video,
     pair_archive_subtitles,
     srt_to_vtt,
     ass_to_vtt,
     convert_to_vtt,
     is_subtitle_file,
     is_video_file,
+    normalize_language_code,
+    get_language_display_name,
+    parse_scene_release,
+    sanitize_vtt_cue_text,
+    SubtitleTrack,
+    SubtitlePackage,
     _extract_episode_number,
     _detect_language,
 )
@@ -66,6 +73,135 @@ def test_language_detection():
 
     lang, label = _detect_language("Subs/Chinese/01.srt")
     assert "Chinese" in label
+
+
+def test_iso_language_code_normalization():
+    # ISO 639-2 to 639-1 mappings
+    assert normalize_language_code("eng") == "en"
+    assert normalize_language_code("spa") == "es"
+    assert normalize_language_code("fre") == "fr"
+    assert normalize_language_code("fra") == "fr"
+    assert normalize_language_code("jpn") == "ja"
+    assert normalize_language_code("chi") == "zh"
+    assert normalize_language_code("zho") == "zh"
+    assert normalize_language_code("deu") == "de"
+    assert normalize_language_code("ger") == "de"
+    assert normalize_language_code("ita") == "it"
+    assert normalize_language_code("por") == "pt"
+    assert normalize_language_code("rus") == "ru"
+    assert normalize_language_code("kor") == "ko"
+    assert normalize_language_code("unknown_xyz") == "und"
+
+    # Display name lookup
+    assert get_language_display_name("eng") == "English"
+    assert get_language_display_name("spa") == "Spanish"
+    assert get_language_display_name("fre") == "French"
+    assert get_language_display_name("jpn") == "Japanese"
+    assert get_language_display_name("chi") == "Chinese"
+
+
+def test_complex_scene_release_parsing_and_nlp_matching():
+    video_entry = {
+        "id": 1,
+        "name": "[Group] Show Name - S01E05 - 1080p [Dual-Audio] [A1B2C3D4].mkv",
+        "size_bytes": 1200000000,
+    }
+    archive_entries = [
+        video_entry,
+        {"id": 2, "name": "Show.Name.1x05.en.forced.srt", "size_bytes": 15000},
+        {"id": 3, "name": "Subs/05_English.ass", "size_bytes": 45000},
+        {"id": 4, "name": "Season 1/Ep 5.vtt", "size_bytes": 20000},
+        {"id": 5, "name": "Show.Name.1x06.en.srt", "size_bytes": 16000},  # Episode 6 (should NOT match)
+        {"id": 6, "name": "Subs/06_Japanese.ass", "size_bytes": 40000},   # Episode 6 (should NOT match)
+    ]
+
+    matched = match_subtitles_for_video(video_entry, archive_entries)
+    matched_ids = [t.id for t in matched]
+    
+    assert 2 in matched_ids
+    assert 3 in matched_ids
+    assert 4 in matched_ids
+    assert 5 not in matched_ids
+    assert 6 not in matched_ids
+
+    # Check track flags & languages
+    track_2 = next(t for t in matched if t.id == 2)
+    assert track_2.language == "en"
+    assert track_2.is_forced is True
+    assert "Forced" in track_2.label
+
+    track_3 = next(t for t in matched if t.id == 3)
+    assert track_3.language == "en"
+    assert track_3.is_forced is False
+
+
+def test_subtitle_package_and_multi_track():
+    video_entry = {"id": 10, "name": "Movie.2024.1080p.mkv", "size_bytes": 2000000000}
+    entries = [
+        video_entry,
+        {"id": 11, "name": "Movie.2024.eng.srt", "size_bytes": 50000},
+        {"id": 12, "name": "Movie.2024.spa.srt", "size_bytes": 48000},
+        {"id": 13, "name": "Movie.2024.fre.srt", "size_bytes": 49000},
+        {"id": 14, "name": "Movie.2024.jpn.srt", "size_bytes": 42000},
+        {"id": 15, "name": "Movie.2024.chi.srt", "size_bytes": 41000},
+    ]
+
+    pkg = package_subtitles_for_video(video_entry, entries)
+    assert isinstance(pkg, SubtitlePackage)
+    assert pkg.video_id == 10
+    assert len(pkg.tracks) == 5
+
+    pkg_dict = pkg.to_dict()
+    assert pkg_dict["track_count"] == 5
+
+    # Test track retrieval by language
+    en_track = pkg.get_track_by_language("en")
+    assert en_track is not None
+    assert en_track.id == 11
+    assert en_track.language == "en"
+
+    es_track = pkg.get_track_by_language("spa")
+    assert es_track is not None
+    assert es_track.id == 12
+    assert es_track.language == "es"
+
+    fr_track = pkg.get_track_by_language("fra")
+    assert fr_track is not None
+    assert fr_track.id == 13
+    assert fr_track.language == "fr"
+
+    ja_track = pkg.get_track_by_language("jpn")
+    assert ja_track is not None
+    assert ja_track.id == 14
+    assert ja_track.language == "ja"
+
+    zh_track = pkg.get_track_by_language("zho")
+    assert zh_track is not None
+    assert zh_track.id == 15
+    assert zh_track.language == "zh"
+
+
+def test_vtt_cue_sanitization():
+    # 1. Unsafe script tags & ASS override tags
+    dirty_text = "<script>alert('xss')</script>{\\pos(192,200)}{\\c&H0000FF&}Hello <b>World</b>!\\NSecond Line"
+    clean = sanitize_vtt_cue_text(dirty_text)
+    assert "<script>" not in clean
+    assert "{\\pos" not in clean
+    assert "{\\c&H" not in clean
+    assert "<b>World</b>" in clean
+    assert "Hello" in clean
+    assert "Second Line" in clean
+
+    # 2. SRT with font tags and dirty cues converted to clean VTT
+    dirty_srt = """1
+00:00:01,000 --> 00:00:04,000
+<font color="#ff0000"><b>Red Text</b></font> &amp; More
+<script>malicious()</script>
+"""
+    vtt_res = srt_to_vtt(dirty_srt)
+    assert "<font" not in vtt_res
+    assert "<script" not in vtt_res
+    assert "<b>Red Text</b> & More" in vtt_res
 
 
 def test_subtitle_matching_multi_episode():
@@ -151,7 +287,7 @@ Dialogue: 0,0:01:10.00,0:01:12.30,Default,,0,0,0,,{\\b1}Bold Line{\\b0}
     vtt_output = ass_to_vtt(ass_input)
     assert vtt_output.startswith("WEBVTT")
     assert "00:01:05.120 --> 00:01:08.500" in vtt_output
-    assert "Hello from \nASS Subtitle!" in vtt_output
+    assert "Hello from\nASS Subtitle!" in vtt_output
     assert "{\\pos" not in vtt_output
     assert "00:01:10.000 --> 00:01:12.300" in vtt_output
     assert "Bold Line" in vtt_output
@@ -342,6 +478,31 @@ def test_server_history_and_subtitle_and_playlist_endpoints():
             del_data = json.loads(resp.read().decode("utf-8"))
             assert del_data["status"] == "ok"
             assert del_data["deleted"] is True
+
+        # 7. Test GET /api/strm.zip
+        req_strm = urllib.request.Request(f"{base}/api/strm.zip")
+        with urllib.request.urlopen(req_strm, timeout=5) as resp:
+            assert resp.status == 200
+            assert "application/zip" in resp.headers.get("Content-Type", "")
+            zip_bytes = resp.read()
+            assert len(zip_bytes) > 0
+            import zipfile
+            import io
+            with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zf:
+                namelist = zf.namelist()
+                assert len(namelist) >= 2
+                assert any(name.endswith(".strm") for name in namelist)
+
+        # 8. Test GET /api/media_inspect
+        mock_reader.get_data_offset.return_value = 0
+        mock_reader._fetch_range.return_value = b"\x1a\x45\xdf\xa3\x9f\x42\x86\x81\x01\x42\xf7\x81\x01\x42\xf2\x81\x04\x42\xf3\x81\x08\x42\x82\x88matroska"
+        req_inspect = urllib.request.Request(f"{base}/api/media_inspect?id=1")
+        with urllib.request.urlopen(req_inspect, timeout=5) as resp:
+            assert resp.status == 200
+            assert "application/json" in resp.headers.get("Content-Type", "")
+            insp_data = json.loads(resp.read().decode("utf-8"))
+            assert insp_data["status"] == "ok"
+            assert "media_info" in insp_data
 
     finally:
         httpd.shutdown()

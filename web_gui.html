@@ -772,6 +772,189 @@
             box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
         }
 
+        .btn-toolbar.btn-strm {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
+            border-color: rgba(236, 72, 153, 0.4);
+            color: #fbcfe8;
+        }
+
+        .btn-toolbar.btn-strm:hover {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.35) 0%, rgba(168, 85, 247, 0.35) 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn-toolbar.btn-webdav {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(56, 189, 248, 0.2) 100%);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #a7f3d0;
+        }
+
+        .btn-toolbar.btn-webdav:hover {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(56, 189, 248, 0.35) 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Top Header Live Stats Widget */
+        .header-stats-widget {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(10, 15, 28, 0.7);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 6px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .stat-active-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 7px;
+            border-radius: 9999px;
+            background: rgba(16, 185, 129, 0.18);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: var(--success-color);
+            font-weight: 700;
+        }
+
+        /* Video Inspector Overlay in Player */
+        .video-inspector-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(6, 9, 17, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 12px;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.78rem;
+            color: var(--text-main);
+            z-index: 10;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            pointer-events: auto;
+            transition: opacity 0.3s;
+        }
+
+        .video-inspector-badge .tag {
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            background: rgba(99, 102, 241, 0.25);
+            color: #c7d2fe;
+            border: 1px solid rgba(99, 102, 241, 0.4);
+        }
+
+        .video-inspector-badge .tag-audio {
+            background: rgba(236, 72, 153, 0.2);
+            color: #fbcfe8;
+            border-color: rgba(236, 72, 153, 0.4);
+        }
+
+        .video-inspector-badge .tag-dim {
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        /* Player Control Elements in Footer */
+        .player-speed-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .speed-btn {
+            padding: 5px 9px;
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-card);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .speed-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .speed-btn.active {
+            background: var(--accent-primary);
+            border-color: #818cf8;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        }
+
+        .player-shortcuts-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .kbd-key {
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* WebDAV Modal Styles */
+        .webdav-code-block {
+            background: rgba(6, 9, 17, 0.95);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            color: #a7f3d0;
+            overflow-x: auto;
+        }
+
         /* History & Bookmarks Drawer Section */
         .history-section {
             background: var(--bg-card);
@@ -1472,6 +1655,22 @@
             </div>
         </div>
         <div class="header-actions">
+            <!-- Live Bandwidth & Connection Stats Widget in Header -->
+            <div class="header-stats-widget" id="headerStatsWidget" title="Live Streaming Engine Bandwidth & Active Connections">
+                <div class="stat-item">
+                    <span class="stat-label">Speed:</span>
+                    <span class="stat-value" id="headerStatSpeed" style="color: #38bdf8;">0.00 Mbps</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Active:</span>
+                    <span class="stat-active-pill" id="headerStatActive">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total:</span>
+                    <span class="stat-value" id="headerStatTotal" style="color: #a78bfa;">0 MB</span>
+                </div>
+            </div>
+
             <div id="headerBufferPill" class="buffer-pill" onclick="openSettingsModal()" title="Click to configure buffer & engine settings">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                 <span id="headerBufferText">⚡ Buffer: 32 MB</span>
@@ -1555,8 +1754,16 @@
                 </div>
             </div>
 
-            <!-- Export M3U Playlist -->
+            <!-- Export M3U Playlist, Virtual STRM ZIP Library, and WebDAV Link -->
             <div class="playlist-actions-group">
+                <button class="btn-toolbar btn-strm" onclick="downloadStrmBundle()" title="Download Virtual STRM ZIP Library for Jellyfin, Emby, Kodi">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    <span>Download STRM Virtual Library (ZIP)</span>
+                </button>
+                <button class="btn-toolbar btn-webdav" onclick="openWebDAVModal()" title="WebDAV Stream Link for Infuse, Kodi, VLC, Windows Drive">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                    <span>WebDAV Stream Link</span>
+                </button>
                 <button class="btn-toolbar btn-playlist" onclick="downloadM3UPlaylist()" title="Download M3U for VLC, PotPlayer, Kodi, Infuse">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     <span>Download M3U Playlist</span>
@@ -1721,26 +1928,110 @@
             <button class="player-modal-close" onclick="closePlayerModal()" title="Close (Esc)">✕</button>
         </div>
         <div class="video-wrapper">
-            <video id="html5VideoPlayer" class="video-element" controls controlsList="nodownload" playsinline preload="auto"></video>
+            <!-- Video Track Details Overlay -->
+            <div id="videoInspectorBadge" class="video-inspector-badge">
+                <span id="badgeCodec" class="tag">CODEC: DETECTING...</span>
+                <span id="badgeRes" class="tag tag-dim">RES: --</span>
+                <span id="badgeAudio" class="tag tag-audio">AUDIO: --</span>
+                <span id="badgeDuration" class="tag" style="background: rgba(251, 191, 36, 0.2); color: #fde68a; border-color: rgba(251, 191, 36, 0.4);">--</span>
+            </div>
+            <video id="html5VideoPlayer" class="video-element" controls controlsList="nodownload" playsinline preload="auto" tabindex="0"></video>
         </div>
         <div class="player-modal-footer">
-            <div class="player-sub-selector">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Subtitles:</span>
-                <select id="modalSubSelect" class="select-sub" onchange="switchSubtitleTrack(this.value)">
-                    <option value="">None / Built-in</option>
-                </select>
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                <!-- Speed Selector -->
+                <div class="player-speed-group">
+                    <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-right: 2px;">SPEED:</span>
+                    <button class="speed-btn" onclick="setPlaybackSpeed(0.5, this)">0.5x</button>
+                    <button class="speed-btn active" onclick="setPlaybackSpeed(1.0, this)">1.0x</button>
+                    <button class="speed-btn" onclick="setPlaybackSpeed(1.25, this)">1.25x</button>
+                    <button class="speed-btn" onclick="setPlaybackSpeed(1.5, this)">1.5x</button>
+                    <button class="speed-btn" onclick="setPlaybackSpeed(2.0, this)">2.0x</button>
+                </div>
+
+                <!-- Subtitle Selector -->
+                <div class="player-sub-selector">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">Subs:</span>
+                    <select id="modalSubSelect" class="select-sub" onchange="switchSubtitleTrack(this.value)">
+                        <option value="">None / Built-in</option>
+                    </select>
+                </div>
+
+                <!-- Shortcuts Hint Pill -->
+                <div class="player-shortcuts-hint" title="Space: Play/Pause | ←/→: Seek 5s | ↑/↓: Volume | F: Fullscreen | M: Mute | S: Subtitles">
+                    <span>Keys:</span>
+                    <span class="kbd-key">Space</span>
+                    <span class="kbd-key">←/→</span>
+                    <span class="kbd-key">↑/↓</span>
+                    <span class="kbd-key">F</span>
+                    <span class="kbd-key">M</span>
+                    <span class="kbd-key">S</span>
+                </div>
             </div>
+
             <div class="player-footer-actions">
                 <button class="btn-toolbar" onclick="copyCurrentModalStreamLink()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    <span>Copy Direct Stream URL</span>
+                    <span>Direct Link</span>
                 </button>
                 <button class="btn-toolbar" onclick="launchCurrentInDesktopApp()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                    <span>Open in Desktop Player</span>
+                    <span>Desktop App</span>
                 </button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- WebDAV 1-Click Stream Connection Modal -->
+<div id="webdavModal" class="modal-overlay">
+    <div class="settings-modal-container" style="max-width: 640px;">
+        <div class="settings-header">
+            <div class="settings-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                <span>WebDAV Network Drive Connection</span>
+            </div>
+            <button class="player-modal-close" onclick="closeWebDAVModal()" title="Close (Esc)">✕</button>
+        </div>
+
+        <div class="settings-body">
+            <div class="setting-section">
+                <div class="setting-section-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    <span>1-Click WebDAV Root URL</span>
+                </div>
+                <p class="setting-desc">
+                    Connect <strong>Infuse (Apple TV / iOS)</strong>, <strong>Kodi</strong>, <strong>VLC</strong>, or mount directly as a Windows Network Drive (<code>Map Network Drive</code>). Files stream on-demand directly from the remote ZIP archive.
+                </p>
+                
+                <div class="webdav-code-block">
+                    <span id="webdavUrlDisplay">http://127.0.0.1:8787/webdav/</span>
+                    <button class="btn-toolbar" style="padding: 6px 12px; font-size: 0.8rem;" onclick="copyWebDAVUrl()">Copy URL</button>
+                </div>
+            </div>
+
+            <div class="setting-section">
+                <div class="setting-section-title">
+                    <span>⚡ Quick Setup Guides</span>
+                </div>
+                <ul style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; padding-left: 18px; display: flex; flex-direction: column; gap: 6px;">
+                    <li><strong>Infuse (iOS/tvOS/macOS):</strong> Add Files → Other... → WebDAV → enter server host, port <code>8787</code>, path <code>/webdav/</code> (No username/password).</li>
+                    <li><strong>Kodi:</strong> Videos → Add Videos... → Browse → Add Network Location... → Protocol: <code>WebDAV server (HTTP)</code> → Server address <code>127.0.0.1</code>, Remote path <code>webdav/</code>.</li>
+                    <li><strong>Windows Explorer:</strong> Right click This PC → Map network drive → Connect to a Web site → enter <code>http://127.0.0.1:8787/webdav/</code>.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="settings-footer">
+            <button class="btn-toolbar" onclick="window.open('/webdav/', '_blank')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                <span>Browse WebDAV in Browser</span>
+            </button>
+            <button class="btn-save-settings" onclick="copyWebDAVUrl()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span>Copy WebDAV Link</span>
+            </button>
         </div>
     </div>
 </div>
@@ -2027,7 +2318,7 @@
     }
 
     // In-Browser HTML5 Player Modal Functionality
-    function openPlayerModal(epId, epName) {
+    async function openPlayerModal(epId, epName) {
         const streamUrl = `${window.location.origin}/stream/${epId}/${encodeURIComponent(epName)}`;
         currentModalStreamUrl = streamUrl;
         currentModalVideoName = epName;
@@ -2044,8 +2335,19 @@
             video.removeChild(video.firstChild);
         }
 
-        // Set video source
+        // Set video source & default speed
         video.src = streamUrl;
+        video.playbackRate = 1.0;
+        syncSpeedButtons(1.0);
+
+        // Reset Video Track Details Inspector Overlay
+        document.getElementById('badgeCodec').innerText = 'CODEC: DETECTING...';
+        document.getElementById('badgeRes').innerText = 'RES: --';
+        document.getElementById('badgeAudio').innerText = 'AUDIO: --';
+        document.getElementById('badgeDuration').innerText = '--';
+
+        // Fetch deep binary track details from /api/media_inspect
+        fetchMediaInspectorDetails(epId, epName);
 
         // Auto-detect and attach subtitle tracks
         const matchingSubs = findMatchingSubtitles(epName);
@@ -2072,6 +2374,74 @@
 
         modal.classList.add('active');
         video.play().catch(e => console.log('Autoplay prevented or waiting for interaction:', e));
+    }
+
+    async function fetchMediaInspectorDetails(epId, epName) {
+        const urlInput = document.getElementById('zipUrl');
+        const currentZipUrl = urlInput ? urlInput.value.trim() : '';
+        
+        try {
+            const probeUrl = `/api/media_inspect?id=${epId}${currentZipUrl ? '&url=' + encodeURIComponent(currentZipUrl) : ''}`;
+            const resp = await fetch(probeUrl);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.status === 'ok' && data.media_info) {
+                    const info = data.media_info;
+                    const codecStr = (info.video_codec || info.format || 'H.264/HEVC').toUpperCase();
+                    const resStr = info.width && info.height ? `${info.width}x${info.height}` : (epName.toLowerCase().includes('4k') || epName.toLowerCase().includes('2160p') ? '3840x2160 (4K)' : '1080p / Auto');
+                    const audioStr = info.audio_codecs && info.audio_codecs.length > 0 ? info.audio_codecs.join(', ').toUpperCase() : 'AAC / AC3 / Stereo';
+                    const durStr = info.duration_sec ? formatDurationSec(info.duration_sec) : (info.size_mb ? `${Math.round(info.size_mb)} MB` : '--');
+
+                    document.getElementById('badgeCodec').innerText = `VIDEO: ${codecStr}`;
+                    document.getElementById('badgeRes').innerText = `RES: ${resStr}`;
+                    document.getElementById('badgeAudio').innerText = `AUDIO: ${audioStr}`;
+                    document.getElementById('badgeDuration').innerText = `SIZE/DUR: ${durStr}`;
+                    return;
+                }
+            }
+        } catch (e) {
+            console.log('Media inspect fetch error:', e);
+        }
+
+        // Fallback badge detection from filename
+        const badges = parseFileBadges(epName);
+        const resBadge = badges.find(b => b.class && b.class.startsWith('badge-res-'));
+        const fmtBadge = badges.find(b => b.class === 'badge-fmt');
+        document.getElementById('badgeCodec').innerText = `CONTAINER: ${fmtBadge ? fmtBadge.text : 'VIDEO'}`;
+        document.getElementById('badgeRes').innerText = `RES: ${resBadge ? resBadge.text : 'Auto HD'}`;
+        document.getElementById('badgeAudio').innerText = `AUDIO: Multi-channel`;
+        document.getElementById('badgeDuration').innerText = `RANGE: 206 Direct`;
+    }
+
+    function formatDurationSec(sec) {
+        if (!sec) return '--';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        const h = Math.floor(m / 60);
+        if (h > 0) {
+            return `${h}h ${m % 60}m ${s}s`;
+        }
+        return `${m}m ${s}s`;
+    }
+
+    function setPlaybackSpeed(speed, btn) {
+        const video = document.getElementById('html5VideoPlayer');
+        if (video) {
+            video.playbackRate = speed;
+        }
+        syncSpeedButtons(speed);
+        showToast(`⚡ Playback speed: ${speed}x`);
+    }
+
+    function syncSpeedButtons(speed) {
+        document.querySelectorAll('.speed-btn').forEach(btn => {
+            const val = parseFloat(btn.innerText.replace('x', ''));
+            if (val === speed) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
     }
 
     function closePlayerModal() {
@@ -2101,6 +2471,25 @@
         }
     }
 
+    function toggleSubtitles() {
+        const video = document.getElementById('html5VideoPlayer');
+        if (!video.textTracks || video.textTracks.length === 0) {
+            showToast('No subtitles available for this track', 'info');
+            return;
+        }
+        let anyShowing = false;
+        for (let i = 0; i < video.textTracks.length; i++) {
+            if (video.textTracks[i].mode === 'showing') {
+                anyShowing = true;
+                break;
+            }
+        }
+        for (let i = 0; i < video.textTracks.length; i++) {
+            video.textTracks[i].mode = anyShowing ? 'disabled' : 'showing';
+        }
+        showToast(anyShowing ? '💬 Subtitles turned OFF' : '💬 Subtitles turned ON');
+    }
+
     function copyCurrentModalStreamLink() {
         if (currentModalStreamUrl) {
             copyLink(currentModalStreamUrl);
@@ -2113,6 +2502,127 @@
             launchSelectedPlayer(currentModalStreamUrl, player.key);
         }
     }
+
+    // WebDAV Modal handlers
+    function openWebDAVModal() {
+        const host = window.location.host || '127.0.0.1:8787';
+        const webdavUrl = `${window.location.protocol}//${host}/webdav/`;
+        document.getElementById('webdavUrlDisplay').innerText = webdavUrl;
+        document.getElementById('webdavModal').classList.add('active');
+    }
+
+    function closeWebDAVModal() {
+        document.getElementById('webdavModal').classList.remove('active');
+    }
+
+    function copyWebDAVUrl() {
+        const host = window.location.host || '127.0.0.1:8787';
+        const webdavUrl = `${window.location.protocol}//${host}/webdav/`;
+        navigator.clipboard.writeText(webdavUrl).then(() => {
+            showToast('📋 WebDAV stream URL copied to clipboard! Ready for Infuse/Kodi.', 'success');
+        }).catch(err => {
+            showToast('Failed to copy WebDAV link: ' + err, 'error');
+        });
+    }
+
+    function downloadStrmBundle() {
+        const urlInput = document.getElementById('zipUrl');
+        const zipUrl = urlInput ? urlInput.value.trim() : '';
+        const strmUrl = `/api/strm.zip${zipUrl ? '?url=' + encodeURIComponent(zipUrl) : ''}`;
+        window.location.href = strmUrl;
+        showToast('📥 Generating and downloading Virtual STRM ZIP Library...', 'info');
+    }
+
+    // Global HTML5 Player Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+        const playerModal = document.getElementById('playerModal');
+        const isPlayerActive = playerModal && playerModal.classList.contains('active');
+        const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+
+        // If typing in input or textarea, don't trigger media shortcuts
+        if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') {
+            if (e.key === 'Escape') {
+                if (isPlayerActive) closePlayerModal();
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal && settingsModal.classList.contains('active')) closeSettingsModal();
+                const webdavModal = document.getElementById('webdavModal');
+                if (webdavModal && webdavModal.classList.contains('active')) closeWebDAVModal();
+            }
+            return;
+        }
+
+        if (e.key === 'Escape') {
+            if (isPlayerActive) closePlayerModal();
+            const settingsModal = document.getElementById('settingsModal');
+            if (settingsModal && settingsModal.classList.contains('active')) closeSettingsModal();
+            const webdavModal = document.getElementById('webdavModal');
+            if (webdavModal && webdavModal.classList.contains('active')) closeWebDAVModal();
+            return;
+        }
+
+        if (!isPlayerActive) return;
+
+        const video = document.getElementById('html5VideoPlayer');
+        if (!video) return;
+
+        switch (e.key) {
+            case ' ':
+            case 'k':
+                e.preventDefault();
+                if (video.paused) {
+                    video.play();
+                    showToast('▶️ Play');
+                } else {
+                    video.pause();
+                    showToast('⏸️ Pause');
+                }
+                break;
+            case 'ArrowLeft':
+            case 'j':
+                e.preventDefault();
+                video.currentTime = Math.max(0, video.currentTime - 5);
+                showToast(`⏪ Seek -5s (${Math.round(video.currentTime)}s)`);
+                break;
+            case 'ArrowRight':
+            case 'l':
+                e.preventDefault();
+                video.currentTime = Math.min(video.duration || Infinity, video.currentTime + 5);
+                showToast(`⏩ Seek +5s (${Math.round(video.currentTime)}s)`);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                video.volume = Math.min(1.0, video.volume + 0.1);
+                showToast(`🔊 Volume: ${Math.round(video.volume * 100)}%`);
+                break;
+            case 'ArrowDown':
+                e.preventDefault();
+                video.volume = Math.max(0.0, video.volume - 0.1);
+                showToast(`🔉 Volume: ${Math.round(video.volume * 100)}%`);
+                break;
+            case 'f':
+            case 'F':
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    const wrap = document.querySelector('.video-wrapper') || video;
+                    if (wrap.requestFullscreen) wrap.requestFullscreen();
+                    else if (video.requestFullscreen) video.requestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                }
+                break;
+            case 'm':
+            case 'M':
+                e.preventDefault();
+                video.muted = !video.muted;
+                showToast(video.muted ? '🔇 Muted' : '🔊 Unmuted');
+                break;
+            case 's':
+            case 'S':
+                e.preventDefault();
+                toggleSubtitles();
+                break;
+        }
+    });
 
     // Settings State & Modal Handlers
     let currentConfig = {
@@ -2501,6 +3011,38 @@
         }, 3600);
     }
 
+    // Live Stats Poller
+    let statsInterval = null;
+
+    async function pollLiveStats() {
+        try {
+            const resp = await fetch('/api/stats');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.status === 'ok' && data.stats) {
+                    const stats = data.stats;
+                    const mbps = typeof stats.current_bandwidth_mbps === 'number' ? stats.current_bandwidth_mbps.toFixed(2) : '0.00';
+                    const active = stats.active_streams_count || 0;
+                    const totalMb = stats.total_mbytes_served ? `${stats.total_mbytes_served} MB` : `${Math.round((stats.total_bytes_served || 0) / (1024 * 1024))} MB`;
+
+                    const speedEl = document.getElementById('headerStatSpeed');
+                    const activeEl = document.getElementById('headerStatActive');
+                    const totalEl = document.getElementById('headerStatTotal');
+
+                    if (speedEl) speedEl.innerText = `${mbps} Mbps`;
+                    if (activeEl) {
+                        activeEl.innerText = active;
+                        activeEl.style.background = active > 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.05)';
+                        activeEl.style.color = active > 0 ? '#10b981' : 'var(--text-muted)';
+                    }
+                    if (totalEl) totalEl.innerText = totalMb;
+                }
+            }
+        } catch (e) {
+            // silent fail for stats polling
+        }
+    }
+
     // Initialization on window load
     window.onload = async () => {
         toggleClearBtn();
@@ -2508,6 +3050,10 @@
         await loadServerConfig();
         await loadPlayers();
         parseZipArchive();
+
+        // Start live polling stats every 2 seconds
+        pollLiveStats();
+        statsInterval = setInterval(pollLiveStats, 2000);
     };
 </script>
 

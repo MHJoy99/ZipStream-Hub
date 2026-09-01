@@ -121,17 +121,26 @@ docker compose up -d
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/inspect` | Inspects remote ZIP URL and returns JSON structure |
+| `POST` | `/api/inspect` | Inspects remote ZIP URL and returns JSON archive structure |
+| `GET` | `/api/media_inspect` | Binary media header inspection (video/audio codecs, width, height, duration) |
+| `GET` | `/api/strm.zip` | Generates and downloads virtual `.strm` media library ZIP bundle |
+| `GET` | `/api/stats` | Real-time streaming metrics (bitrate, active streams, buffer, latency) |
+| `PROPFIND` | `/webdav/` | RFC 4918 WebDAV directory tree for Infuse, Kodi, and Windows Explorer |
+| `GET` | `/webdav/` | WebDAV HTML Directory listing and transparent HTTP 206 streaming |
+| `GET` | `/api/playlist.m3u` | Exports `#EXTM3U` playlist for media players |
+| `GET` | `/api/subtitle` | Extracts and converts subtitle tracks to WebVTT on the fly |
 | `POST` | `/api/play` | Launches host media player with stream URL |
 | `GET` | `/stream/<id>/<filename>` | HTTP 206 Byte-Range streaming endpoint |
 | `HEAD` | `/stream/<id>/<filename>` | Returns stream Content-Length and MIME type |
 
-Detailed OpenAPI specifications are available in [docs/API.md](docs/API.md).
+Detailed API specifications are available in [docs/API.md](docs/API.md).
 
 ---
 
 ## 📖 Documentation Links
 
+- 🍿 **Jellyfin, Emby & Kodi STRM Virtual Library**: [docs/JELLYFIN_EMBY_KODI.md](docs/JELLYFIN_EMBY_KODI.md)
+- 🗂️ **WebDAV Network Drive & Infuse / Kodi Setup**: [docs/WEBDAV_INFUSE.md](docs/WEBDAV_INFUSE.md)
 - 🎬 **Complete Media Player & M3U Guide**: [docs/PLAYERS.md](docs/PLAYERS.md)
 - 📊 **Competitive Analysis & Benchmarks**: [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md)
 - 🤖 **LLM Reference Files**: [llms.txt](llms.txt) | [llms-full.txt](llms-full.txt)
