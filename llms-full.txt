@@ -81,14 +81,18 @@ When a client player (e.g., PotPlayer/VLC) requests video data:
 
 ---
 
-## 4. High-Performance Sliding-Window Buffer (`StreamPrefetcher`)
+## 4. Dynamic High-Throughput Buffer Engine (`StreamPrefetcher`)
 
-The engine features an asynchronous sliding-window prefetcher:
+The engine features an asynchronous, dynamic sliding-window prefetcher configurable from 64MB up to 5GB (5120MB):
 - **Upstream Block Size**: 2MB per HTTP range request (`BLOCK_SIZE = 2 * 1024 * 1024`).
-- **Buffer Queue**: Thread-safe queue of up to 16 blocks (32MB RAM max per active stream).
-- **Socket Slicing**: Slices 2MB blocks into 128KB chunks (`SOCKET_SLICE_SIZE = 128 * 1024`) for ultra-low latency socket writes.
+- **Buffer Queue**: Thread-safe queue dynamically sized to system RAM / user settings (up to 5120MB forward buffer).
+- **Socket Slicing**: Slices fetched blocks into fine-grained chunks (`SOCKET_SLICE_SIZE = 128 * 1024` or user-defined `ZIPSTREAM_SLICE_KB`) for ultra-low latency socket writes.
 - **Auto-Backpressure**: When player slows down or pauses, queue fills up and worker thread pauses upstream requests without memory leaks.
-- **Immediate Abort on Seek**: When client disconnects or issues a new Range request, `abort_event` immediately stops background worker thread and drains memory buffers.
+- **Immediate Abort on Seek**: When client disconnects or issues a new Range request, `abort_event` immediately stops background worker thread and drains memory buffers in $< 5\text{ms}$.
+- **RAM Presets**:
+  - `4GB RAM`: `ZIPSTREAM_PREFETCH_MB=64` (64MB lightweight buffer for 1080p).
+  - `8GB–16GB RAM`: `ZIPSTREAM_PREFETCH_MB=1024` (1GB forward buffer for 4K HDR REMUX).
+  - `32GB+ RAM & Gigabit Fiber`: `ZIPSTREAM_PREFETCH_MB=5120` (5GB maximum-throughput buffer).
 
 ---
 
@@ -165,8 +169,20 @@ python cli.py "https://example.com/archive.zip" --list
 
 ---
 
-## 7. Configuration Schema (`config.json`)
+## 7. Configuration Schema (`config.json` & Environment Variables)
 
+ZipStreamHub supports configuration via environment variables (see `.env.example`), `config.json`, or the Web UI.
+
+### Environment Variable Overrides
+- `ZIPSTREAM_HOST`: Server listening interface (default `0.0.0.0`).
+- `ZIPSTREAM_PORT`: Server listening port (default `8787`).
+- `ZIPSTREAM_DEBUG`: Enable debug logs (`true` / `false`).
+- `ZIPSTREAM_PREFETCH_MB`: RAM prefetch buffer size in MB (e.g. `64`, `1024`, `5120`).
+- `ZIPSTREAM_SLICE_KB`: Socket chunk slice size in KB (default `128`).
+- `ZIPSTREAM_DEFAULT_PLAYER`: Default media player (`mpv`, `potplayer`, `vlc`, `iina`, `browser`).
+- `ZIPSTREAM_THEME`: UI color scheme (`dark` / `light`).
+
+### Example `config.json`
 ```json
 {
   "server": {
@@ -175,7 +191,7 @@ python cli.py "https://example.com/archive.zip" --list
     "debug": false
   },
   "streaming": {
-    "prefetch_buffer_size_mb": 32,
+    "prefetch_buffer_size_mb": 1024,
     "slice_size_kb": 128,
     "max_concurrent_streams": 8,
     "chunk_timeout_seconds": 30

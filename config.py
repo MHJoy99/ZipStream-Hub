@@ -21,7 +21,7 @@ class ServerConfig:
 
 @dataclass
 class StreamingConfig:
-    prefetch_buffer_size_mb: int = 32
+    prefetch_buffer_size_mb: int = 1024
     slice_size_kb: int = 128
     max_concurrent_streams: int = 8
     chunk_timeout_seconds: int = 30
@@ -136,13 +136,13 @@ def load_config(config_path: Optional[Path | str] = None) -> AppConfig:
     Load AppConfig from a JSON file with optional environment variable overrides.
     
     Environment variables:
-        ZIPSTREAM_HOST -> server.host
-        ZIPSTREAM_PORT -> server.port
-        ZIPSTREAM_DEBUG -> server.debug
-        ZIPSTREAM_PREFETCH_MB -> streaming.prefetch_buffer_size_mb
-        ZIPSTREAM_SLICE_KB -> streaming.slice_size_kb
-        ZIPSTREAM_DEFAULT_PLAYER -> players.default_player
-        ZIPSTREAM_THEME -> ui.theme
+        ZIPSTREAM_HOST -> server.host (e.g. 0.0.0.0 or 127.0.0.1)
+        ZIPSTREAM_PORT -> server.port (default: 8787)
+        ZIPSTREAM_DEBUG -> server.debug (default: false)
+        ZIPSTREAM_PREFETCH_MB -> streaming.prefetch_buffer_size_mb (default: 1024 MB, supports up to 5120 MB)
+        ZIPSTREAM_SLICE_KB -> streaming.slice_size_kb (default: 128 KB, supports 64-1024 KB)
+        ZIPSTREAM_DEFAULT_PLAYER -> players.default_player (e.g. mpv, potplayer, vlc)
+        ZIPSTREAM_THEME -> ui.theme (e.g. dark, light)
     """
     path = Path(config_path) if config_path else DEFAULT_CONFIG_PATH
     data: Dict[str, Any] = {}
@@ -164,13 +164,24 @@ def load_config(config_path: Optional[Path | str] = None) -> AppConfig:
 
     # Parse Streaming Config
     streaming_data = data.get("streaming", {})
+    prefetch_mb_raw = os.getenv(
+        "ZIPSTREAM_PREFETCH_MB", streaming_data.get("prefetch_buffer_size_mb", 1024)
+    )
+    slice_kb_raw = os.getenv(
+        "ZIPSTREAM_SLICE_KB", streaming_data.get("slice_size_kb", 128)
+    )
+    try:
+        prefetch_mb = int(prefetch_mb_raw)
+    except (ValueError, TypeError):
+        prefetch_mb = 1024
+    try:
+        slice_kb = int(slice_kb_raw)
+    except (ValueError, TypeError):
+        slice_kb = 128
+
     streaming = StreamingConfig(
-        prefetch_buffer_size_mb=int(
-            os.getenv("ZIPSTREAM_PREFETCH_MB", streaming_data.get("prefetch_buffer_size_mb", 32))
-        ),
-        slice_size_kb=int(
-            os.getenv("ZIPSTREAM_SLICE_KB", streaming_data.get("slice_size_kb", 128))
-        ),
+        prefetch_buffer_size_mb=prefetch_mb,
+        slice_size_kb=slice_kb,
         max_concurrent_streams=int(
             streaming_data.get("max_concurrent_streams", 8)
         ),

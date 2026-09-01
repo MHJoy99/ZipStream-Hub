@@ -34,21 +34,46 @@ HTTP_POOL = urllib3.PoolManager(
 
 class StreamPrefetcher:
     """
-    Intelligent Sliding-Window Read-Ahead Buffer (16MB - 32MB forward buffer).
+    Intelligent Sliding-Window Read-Ahead Buffer (16MB - 5GB forward buffer).
     - Fetches upstream chunks ahead of PotPlayer/VLC/browser via persistent connection pooling.
-    - Slices fetched blocks into 128KB socket write units for low-latency delivery.
+    - Slices fetched blocks into socket write units (e.g. 128KB - 1MB) for low-latency delivery.
     - Auto-pauses when buffer fills, immediately frees memory and background threads on seek/disconnect.
     """
     BLOCK_SIZE = 2 * 1024 * 1024       # 2 MB upstream chunk size
-    MAX_QUEUE_BLOCKS = 16              # 16 blocks * 2MB = 32 MB forward buffer capacity
+    MAX_QUEUE_BLOCKS = 16              # 16 blocks * 2MB = 32 MB default buffer capacity
     SOCKET_SLICE_SIZE = 128 * 1024     # 128 KB socket write slices
 
-    def __init__(self, url: str, start_byte: int, end_byte: int, pool: urllib3.PoolManager = HTTP_POOL):
+    def __init__(
+        self,
+        url: str,
+        start_byte: int,
+        end_byte: int,
+        pool: urllib3.PoolManager = HTTP_POOL,
+        buffer_size_mb: Optional[int] = None,
+        slice_size_kb: Optional[int] = None
+    ):
         self.url = url
         self.start_byte = start_byte
         self.end_byte = end_byte
         self.pool = pool
-        self.queue: queue.Queue = queue.Queue(maxsize=self.MAX_QUEUE_BLOCKS)
+        
+        # Dynamic buffer sizing & socket slicing if specified
+        if slice_size_kb is not None and slice_size_kb > 0:
+            self.SOCKET_SLICE_SIZE = slice_size_kb * 1024
+            
+        if buffer_size_mb is not None and buffer_size_mb > 0:
+            # Adjust block size dynamically for large buffers (> 512MB)
+            if buffer_size_mb >= 2048:
+                self.BLOCK_SIZE = 8 * 1024 * 1024  # 8MB chunk for 2GB+
+            elif buffer_size_mb >= 512:
+                self.BLOCK_SIZE = 4 * 1024 * 1024  # 4MB chunk for 512MB+
+            else:
+                self.BLOCK_SIZE = 2 * 1024 * 1024  # 2MB chunk
+            max_blocks = max(4, (buffer_size_mb * 1024 * 1024) // self.BLOCK_SIZE)
+            self.queue: queue.Queue = queue.Queue(maxsize=max_blocks)
+        else:
+            self.queue: queue.Queue = queue.Queue(maxsize=self.MAX_QUEUE_BLOCKS)
+
         self.abort_event = threading.Event()
         self.worker_thread: Optional[threading.Thread] = None
         self.error: Optional[Exception] = None

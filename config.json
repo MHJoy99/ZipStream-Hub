@@ -5,10 +5,10 @@
     "debug": false
   },
   "streaming": {
-    "prefetch_buffer_size_mb": 32,
-    "slice_size_kb": 128,
+    "prefetch_buffer_size_mb": 5120,
+    "slice_size_kb": 256,
     "max_concurrent_streams": 8,
-    "chunk_timeout_seconds": 30
+    "chunk_timeout_seconds": 45
   },
   "players": {
     "default_player": "mpv",
@@ -16,27 +16,38 @@
       "mpv": {
         "name": "MPV Media Player",
         "command": "mpv",
-        "args": ["--force-window=immediate", "{url}"]
+        "args": [
+          "--force-window=immediate",
+          "{url}"
+        ]
       },
       "vlc": {
         "name": "VLC Media Player",
         "command": "vlc",
-        "args": ["{url}"]
+        "args": [
+          "{url}"
+        ]
       },
       "potplayer": {
         "name": "PotPlayer",
         "command": "potplayer",
-        "args": ["{url}"]
+        "args": [
+          "{url}"
+        ]
       },
       "iina": {
         "name": "IINA (macOS)",
         "command": "iina",
-        "args": ["{url}"]
+        "args": [
+          "{url}"
+        ]
       },
       "browser": {
         "name": "Web Browser Player",
         "command": "web",
-        "args": ["{url}"]
+        "args": [
+          "{url}"
+        ]
       }
     }
   },

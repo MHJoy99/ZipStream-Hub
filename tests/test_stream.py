@@ -1,4 +1,5 @@
 import io
+import json
 import time
 import socket
 import threading
@@ -319,3 +320,48 @@ def test_playlist_m3u_endpoint():
     finally:
         httpd.shutdown()
         httpd.server_close()
+
+
+def test_api_config_get_and_post():
+    """Verify GET and POST /api/config runtime settings update."""
+    import urllib.request
+    test_port = 8798
+    server_address = ("127.0.0.1", test_port)
+    httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+    time.sleep(0.1)
+
+    try:
+        # 1. GET /api/config
+        req = urllib.request.Request(f"http://127.0.0.1:{test_port}/api/config")
+        with urllib.request.urlopen(req) as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+            assert data["status"] == "ok"
+            assert "streaming" in data["config"]
+
+        # 2. POST /api/config
+        payload = json.dumps({
+            "streaming": {
+                "prefetch_buffer_size_mb": 5120,
+                "slice_size_kb": 256,
+                "chunk_timeout_seconds": 45
+            }
+        }).encode("utf-8")
+        post_req = urllib.request.Request(
+            f"http://127.0.0.1:{test_port}/api/config",
+            data=payload,
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(post_req) as resp:
+            assert resp.status == 200
+            post_data = json.loads(resp.read().decode("utf-8"))
+            assert post_data["status"] == "ok"
+            assert post_data["config"]["streaming"]["prefetch_buffer_size_mb"] == 5120
+            assert post_data["config"]["streaming"]["slice_size_kb"] == 256
+            assert post_data["config"]["streaming"]["chunk_timeout_seconds"] == 45
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+

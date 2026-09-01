@@ -16,6 +16,7 @@ from engine import RemoteZipReader, StreamPrefetcher, HTTP_POOL
 from player_detector import get_installed_players, launch_stream
 from subtitle_parser import is_video_file, is_subtitle_file, convert_to_vtt
 import history
+from config import load_config, AppConfig
 
 PORT = 8787
 
@@ -91,6 +92,8 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             self._serve_file(gui_path, "text/html")
         elif self.path == "/api/players":
             self._handle_api_players()
+        elif self.path == "/api/config":
+            self._handle_api_config_get()
         elif self.path == "/api/history" or self.path.startswith("/api/history?"):
             self._handle_api_history_get()
         elif self.path.startswith("/api/playlist.m3u"):
@@ -107,6 +110,8 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path == "/api/inspect":
             self._handle_api_inspect()
+        elif self.path == "/api/config":
+            self._handle_api_config_post()
         elif self.path == "/api/play":
             self._handle_api_play()
         elif self.path == "/api/history/favorite":
@@ -212,6 +217,74 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
                 "status": "ok",
                 "players": list(players.values()),
                 "default_player": next((k for k in ["potplayer", "vlc", "mpv", "mpc-hc", "mpc-be", "iina", "browser"] if k in players), "browser")
+            }
+            data_bytes = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(data_bytes)
+        except Exception as e:
+            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            self.send_response(500)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(err_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(err_bytes)
+
+    def _handle_api_config_get(self):
+        try:
+            cfg = load_config()
+            resp = {
+                "status": "ok",
+                "config": cfg.to_dict()
+            }
+            data_bytes = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(data_bytes)
+        except Exception as e:
+            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            self.send_response(500)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(err_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(err_bytes)
+
+    def _handle_api_config_post(self):
+        length = int(self.headers.get("Content-Length", 0))
+        post_data = self.rfile.read(length) if length > 0 else b"{}"
+        try:
+            body = json.loads(post_data.decode("utf-8")) if post_data else {}
+            cfg = load_config()
+
+            streaming_update = body.get("streaming", {})
+            if "prefetch_buffer_size_mb" in streaming_update:
+                cfg.streaming.prefetch_buffer_size_mb = max(1, int(streaming_update["prefetch_buffer_size_mb"]))
+            if "slice_size_kb" in streaming_update:
+                cfg.streaming.slice_size_kb = max(8, int(streaming_update["slice_size_kb"]))
+            if "chunk_timeout_seconds" in streaming_update:
+                cfg.streaming.chunk_timeout_seconds = max(1, int(streaming_update["chunk_timeout_seconds"]))
+            if "max_concurrent_streams" in streaming_update:
+                cfg.streaming.max_concurrent_streams = max(1, int(streaming_update["max_concurrent_streams"]))
+
+            # Save to config.json
+            cfg.save()
+
+            resp = {
+                "status": "ok",
+                "message": "Configuration updated successfully",
+                "config": cfg.to_dict()
             }
             data_bytes = json.dumps(resp).encode("utf-8")
             self.send_response(200)
@@ -628,11 +701,14 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
         # High-Throughput Read-Ahead Prefetch Buffer with Connection Pooling & Memory Safety
+        cfg = load_config()
         prefetcher = StreamPrefetcher(
             url=reader.url,
             start_byte=remote_start,
             end_byte=remote_end,
-            pool=getattr(reader, "pool", None) or HTTP_POOL
+            pool=getattr(reader, "pool", None) or HTTP_POOL,
+            buffer_size_mb=cfg.streaming.prefetch_buffer_size_mb,
+            slice_size_kb=cfg.streaming.slice_size_kb
         )
         prefetcher.start()
 

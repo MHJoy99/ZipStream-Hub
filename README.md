@@ -28,7 +28,8 @@
   - [3. Docker Deployment](#3-docker-deployment)
 - [🔌 REST API Overview](#-rest-api-overview)
 - [📖 Documentation Links](#-documentation-links)
-- [🛠️ Configuration (`config.json`)](#-configuration-configjson)
+- [⚙️ Memory & Buffer Tuning (Up to 5GB)](#️-memory--high-speed-buffer-tuning-up-to-5gb)
+- [🛠️ Configuration & Environment Variables](#️-configuration--environment-variables)
 - [🤝 Contributing & License](#-contributing--license)
 
 ---
@@ -141,8 +142,50 @@ Detailed OpenAPI specifications are available in [docs/API.md](docs/API.md).
 
 ---
 
-## 🛠️ Configuration (`config.json`)
+## ⚙️ Memory & High-Speed Buffer Tuning (Up to 5GB)
 
+ZipStreamHub is engineered with an intelligent **asynchronous sliding-window read-ahead prefetching engine**. Unlike traditional tools that force a full multi-gigabyte archive download to disk before playback, ZipStreamHub streams on-demand while dynamically buffering uncompressed media chunks directly in system RAM.
+
+### 🔄 Sliding-Window Buffering vs. Full File Download
+
+```
+Traditional Download:  [████████████████████████████████████████] 50GB written to Disk (Wait 30+ mins)
+ZipStreamHub Engine:   [············►►► [ Sliding Window: 1GB-5GB RAM ] ◄◄◄······················] 0B Disk
+```
+
+1. **Zero Disk I/O**: Buffers are managed in volatile memory (`StreamPrefetcher` ring queues) with zero writes to SSD/HDD.
+2. **Dynamic Backpressure**: When your player buffer fills, upstream HTTP requests pause automatically without wasting bandwidth or overflowing RAM.
+3. **Instant Seek Drain**: Seeking to a new position immediately signals worker threads via an abort event, drains old queued chunks, and starts prefetching from the new byte offset in $< 5\text{ms}$.
+4. **Bandwidth Efficiency**: Only the exact video segments you watch are fetched across the network.
+
+### 📊 Recommended RAM-Based Buffer Presets
+
+| System Configuration | Preset Value (`ZIPSTREAM_PREFETCH_MB`) | Forward Buffer | Ideal Use Case |
+|---|---|---|---|
+| **4GB RAM System** (Raspberry Pi / Low-Memory VPS) | `64` (64 MB) | ~30–60 sec | 720p / 1080p standard bitrate playback with minimal footprint |
+| **8GB–16GB RAM System** (Standard Desktop / Laptop) | `1024` (1 GB) | ~2–5 min | High-bitrate 4K HDR REMUX (60–80 Mbps) with smooth scrubbing |
+| **32GB+ High-End PC & Gigabit Fiber** | `5120` (5 GB) | ~10–25 min | Saturates Gigabit networks; holds entire movie sections in RAM for instant chapter jumping |
+
+---
+
+## 🛠️ Configuration & Environment Variables
+
+ZipStreamHub supports configuration via **Web UI Settings**, **`config.json`**, and **Environment Variables** (`.env`).
+
+**Precedence Order:** `Environment Variables` > `config.json` > `Default Values`
+
+### 1. Environment Variables (`.env`)
+Copy `.env.example` to `.env` or pass variables directly:
+```bash
+# Example for high-speed 5GB buffering on 32GB+ RAM systems
+export ZIPSTREAM_PREFETCH_MB=5120
+export ZIPSTREAM_SLICE_KB=128
+export ZIPSTREAM_HOST=0.0.0.0
+export ZIPSTREAM_PORT=8787
+export ZIPSTREAM_DEFAULT_PLAYER=potplayer
+```
+
+### 2. Configuration File (`config.json`)
 ```json
 {
   "server": {
@@ -151,16 +194,27 @@ Detailed OpenAPI specifications are available in [docs/API.md](docs/API.md).
     "debug": false
   },
   "streaming": {
-    "prefetch_buffer_size_mb": 32,
+    "prefetch_buffer_size_mb": 1024,
     "slice_size_kb": 128,
     "max_concurrent_streams": 8,
     "chunk_timeout_seconds": 30
   },
   "players": {
     "default_player": "potplayer"
+  },
+  "ui": {
+    "theme": "dark",
+    "accent_color": "#3b82f6",
+    "compact_mode": false,
+    "show_thumbnails": true,
+    "page_size": 50,
+    "autoplay": false
   }
 }
 ```
+
+### 3. Web UI Dashboard Configuration
+Open the web control panel at `http://127.0.0.1:8787` and navigate to the **Settings** modal to configure default players, streaming preferences, and UI appearance live.
 
 ---
 

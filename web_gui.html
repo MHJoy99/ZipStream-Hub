@@ -183,6 +183,301 @@
             animation: pulse 2s infinite;
         }
 
+        .buffer-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            border-radius: 9999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #c7d2fe;
+            font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 0 14px rgba(99, 102, 241, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .buffer-pill:hover {
+            background: rgba(99, 102, 241, 0.22);
+            border-color: rgba(129, 140, 248, 0.6);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* Settings Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(4, 7, 13, 0.88);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .settings-modal-container {
+            width: 100%;
+            max-width: 680px;
+            background: rgba(14, 19, 32, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 22px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 60px -15px rgba(0,0,0,0.8), 0 0 40px rgba(99, 102, 241, 0.2);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.active .settings-modal-container {
+            transform: scale(1);
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 26px;
+            background: rgba(18, 24, 40, 0.95);
+            border-bottom: 1px solid var(--border-card);
+        }
+
+        .settings-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-body {
+            padding: 24px 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        .settings-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .settings-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        .setting-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--border-card);
+            border-radius: 16px;
+            padding: 18px 20px;
+        }
+
+        .setting-section-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .preset-btn {
+            padding: 9px 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .preset-btn.active {
+            background: rgba(99, 102, 241, 0.25);
+            border-color: #818cf8;
+            color: #ffffff;
+            box-shadow: 0 0 14px rgba(99, 102, 241, 0.3);
+        }
+
+        .preset-btn span.preset-val {
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: inherit;
+        }
+
+        .preset-btn span.preset-label {
+            font-size: 0.68rem;
+            opacity: 0.75;
+        }
+
+        .custom-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 4px;
+        }
+
+        .custom-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
+        }
+
+        .custom-num-input {
+            width: 110px;
+            background: rgba(8, 12, 20, 0.85);
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-align: right;
+            outline: none;
+        }
+
+        .custom-num-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+
+        .visual-info-box {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.8rem;
+            color: #c7d2fe;
+            line-height: 1.45;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .control-row-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (max-width: 540px) {
+            .control-row-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-item label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .control-select, .control-input {
+            width: 100%;
+            background: rgba(8, 12, 20, 0.85);
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: var(--text-main);
+            font-size: 0.86rem;
+            outline: none;
+        }
+
+        .control-select:focus, .control-input:focus {
+            border-color: var(--border-focus);
+        }
+
+        .settings-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 18px 26px;
+            background: rgba(18, 24, 40, 0.95);
+            border-top: 1px solid var(--border-card);
+            gap: 12px;
+        }
+
+        .btn-save-settings {
+            padding: 10px 24px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .btn-save-settings:hover {
+            background: var(--accent-gradient-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.35; transform: scale(0.85); }
@@ -1146,10 +1441,18 @@
             </div>
         </div>
         <div class="header-actions">
+            <div id="headerBufferPill" class="buffer-pill" onclick="openSettingsModal()" title="Click to configure buffer & engine settings">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <span id="headerBufferText">⚡ Buffer: 32 MB</span>
+            </div>
             <button class="btn-header-tool" onclick="toggleHistoryDrawer()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 <span>Recent Archives</span>
                 <span id="historyCountBadge" style="background: rgba(99,102,241,0.3); padding: 2px 6px; border-radius: 9999px; font-size: 0.72rem;">0</span>
+            </button>
+            <button class="btn-header-tool" onclick="openSettingsModal()" title="Streaming Engine & Buffer Settings">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>Settings</span>
             </button>
             <div class="status-badge">
                 <div class="status-dot"></div>
@@ -1273,6 +1576,106 @@
 
         <!-- Video Cards List -->
         <div id="episodesList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="modal-overlay">
+    <div class="settings-modal-container">
+        <div class="settings-header">
+            <div class="settings-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>Streaming & Buffer Engine Settings</span>
+            </div>
+            <button class="player-modal-close" onclick="closeSettingsModal()" title="Close (Esc)">✕</button>
+        </div>
+
+        <div class="settings-body">
+            <!-- Read-Ahead Buffer Section -->
+            <div class="setting-section">
+                <div class="setting-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    <span>Read-Ahead Prefetch Buffer Size</span>
+                </div>
+                <p class="setting-desc">
+                    Controls how many megabytes ZipStream Hub downloads ahead of your current playback position into RAM. Higher values saturate fast gigabit connections and allow instant offline-style scrubbing over large segments.
+                </p>
+
+                <!-- Presets -->
+                <div class="preset-grid">
+                    <button type="button" class="preset-btn" data-mb="32" onclick="setBufferPreset(32, this)">
+                        <span class="preset-val">32 MB</span>
+                        <span class="preset-label">Light / Low RAM</span>
+                    </button>
+                    <button type="button" class="preset-btn" data-mb="512" onclick="setBufferPreset(512, this)">
+                        <span class="preset-val">512 MB</span>
+                        <span class="preset-label">Balanced</span>
+                    </button>
+                    <button type="button" class="preset-btn" data-mb="1024" onclick="setBufferPreset(1024, this)">
+                        <span class="preset-val">1 GB</span>
+                        <span class="preset-label">High Speed</span>
+                    </button>
+                    <button type="button" class="preset-btn" data-mb="2048" onclick="setBufferPreset(2048, this)">
+                        <span class="preset-val">2 GB</span>
+                        <span class="preset-label">Ultra 4K</span>
+                    </button>
+                    <button type="button" class="preset-btn" data-mb="5120" onclick="setBufferPreset(5120, this)">
+                        <span class="preset-val">5 GB</span>
+                        <span class="preset-label">Max Cache / Pull</span>
+                    </button>
+                </div>
+
+                <!-- Custom Input Slider & Box -->
+                <div class="custom-slider-row">
+                    <input type="range" id="bufferSlider" class="custom-slider" min="16" max="8192" step="16" value="32" oninput="onBufferSliderChange(this.value)">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <input type="number" id="bufferNumber" class="custom-num-input" min="8" max="16384" step="1" value="32" oninput="onBufferNumberChange(this.value)">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted);">MB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Socket Slice & Timeout Controls -->
+            <div class="setting-section">
+                <div class="setting-section-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                    <span>Socket Slicing & Network Timeout</span>
+                </div>
+                
+                <div class="visual-info-box">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <span>
+                        <strong>Packet Micro-Slicing:</strong> Large upstream range blocks (2MB–8MB) are sliced into fine-grained socket transmission units to deliver immediate steady audio/video packets without player buffering spikes or decoder underrun.
+                    </span>
+                </div>
+
+                <div class="control-row-group">
+                    <div class="control-item">
+                        <label for="sliceSizeSelect">Socket Slice Size</label>
+                        <select id="sliceSizeSelect" class="control-select">
+                            <option value="64">64 KB (Low-latency / Slow WiFi)</option>
+                            <option value="128" selected>128 KB (Optimal Standard)</option>
+                            <option value="256">256 KB (High Bitrate 1080p)</option>
+                            <option value="512">512 KB (4K Remux / 10-bit)</option>
+                            <option value="1024">1024 KB / 1 MB (High Throughput)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-item">
+                        <label for="chunkTimeoutInput">Chunk Timeout (Seconds)</label>
+                        <input type="number" id="chunkTimeoutInput" class="control-input" min="5" max="300" step="5" value="30">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-footer">
+            <button class="btn-toolbar" onclick="closeSettingsModal()">Cancel</button>
+            <button class="btn-save-settings" onclick="saveSettings()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Save & Apply Live</span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1678,20 +2081,158 @@
         }
     }
 
-    // Modal Close Keyboard shortcut (Esc)
+    // Settings State & Modal Handlers
+    let currentConfig = {
+        streaming: {
+            prefetch_buffer_size_mb: parseInt(localStorage.getItem('zipstream_buffer_mb') || '32', 10),
+            slice_size_kb: parseInt(localStorage.getItem('zipstream_slice_kb') || '128', 10),
+            chunk_timeout_seconds: parseInt(localStorage.getItem('zipstream_timeout_sec') || '30', 10),
+            max_concurrent_streams: 8
+        }
+    };
+
+    function formatBufferDisplay(mb) {
+        if (mb >= 1024) {
+            const gb = (mb / 1024).toFixed(mb % 1024 === 0 ? 0 : 1);
+            return `${gb} GB`;
+        }
+        return `${mb} MB`;
+    }
+
+    function updateHeaderBufferPill(mb) {
+        const txt = document.getElementById('headerBufferText');
+        if (txt) {
+            txt.innerText = `⚡ Buffer: ${formatBufferDisplay(mb)}`;
+        }
+    }
+
+    async function loadServerConfig() {
+        try {
+            const resp = await fetch('/api/config');
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.status === 'ok' && data.config) {
+                    if (data.config.streaming) {
+                        currentConfig.streaming = Object.assign({}, currentConfig.streaming, data.config.streaming);
+                        localStorage.setItem('zipstream_buffer_mb', currentConfig.streaming.prefetch_buffer_size_mb);
+                        localStorage.setItem('zipstream_slice_kb', currentConfig.streaming.slice_size_kb);
+                        localStorage.setItem('zipstream_timeout_sec', currentConfig.streaming.chunk_timeout_seconds);
+                    }
+                }
+            }
+        } catch (e) {
+            console.log('Using cached/local config settings:', e);
+        }
+        updateHeaderBufferPill(currentConfig.streaming.prefetch_buffer_size_mb);
+    }
+
+    function openSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        const bufMb = currentConfig.streaming.prefetch_buffer_size_mb;
+        const sliceKb = currentConfig.streaming.slice_size_kb;
+        const timeoutSec = currentConfig.streaming.chunk_timeout_seconds;
+
+        document.getElementById('bufferSlider').value = bufMb;
+        document.getElementById('bufferNumber').value = bufMb;
+        document.getElementById('sliceSizeSelect').value = sliceKb;
+        document.getElementById('chunkTimeoutInput').value = timeoutSec;
+
+        syncPresetButtons(bufMb);
+        modal.classList.add('active');
+    }
+
+    function closeSettingsModal() {
+        const modal = document.getElementById('settingsModal');
+        modal.classList.remove('active');
+    }
+
+    function syncPresetButtons(valMb) {
+        const num = parseInt(valMb, 10);
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            const mb = parseInt(btn.getAttribute('data-mb'), 10);
+            if (mb === num) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    function setBufferPreset(mb, btn) {
+        document.getElementById('bufferSlider').value = mb;
+        document.getElementById('bufferNumber').value = mb;
+        syncPresetButtons(mb);
+    }
+
+    function onBufferSliderChange(val) {
+        document.getElementById('bufferNumber').value = val;
+        syncPresetButtons(val);
+    }
+
+    function onBufferNumberChange(val) {
+        let num = parseInt(val, 10) || 16;
+        if (num < 1) num = 1;
+        document.getElementById('bufferSlider').value = num;
+        syncPresetButtons(num);
+    }
+
+    async function saveSettings() {
+        const bufMb = parseInt(document.getElementById('bufferNumber').value, 10) || 32;
+        const sliceKb = parseInt(document.getElementById('sliceSizeSelect').value, 10) || 128;
+        const timeoutSec = parseInt(document.getElementById('chunkTimeoutInput').value, 10) || 30;
+
+        currentConfig.streaming.prefetch_buffer_size_mb = bufMb;
+        currentConfig.streaming.slice_size_kb = sliceKb;
+        currentConfig.streaming.chunk_timeout_seconds = timeoutSec;
+
+        localStorage.setItem('zipstream_buffer_mb', bufMb);
+        localStorage.setItem('zipstream_slice_kb', sliceKb);
+        localStorage.setItem('zipstream_timeout_sec', timeoutSec);
+
+        updateHeaderBufferPill(bufMb);
+
+        try {
+            const resp = await fetch('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    streaming: {
+                        prefetch_buffer_size_mb: bufMb,
+                        slice_size_kb: sliceKb,
+                        chunk_timeout_seconds: timeoutSec
+                    }
+                })
+            });
+
+            if (resp.ok) {
+                showToast(`⚙️ Buffer updated: ${formatBufferDisplay(bufMb)} (${sliceKb} KB slices)!`);
+            } else {
+                showToast('Settings saved locally (server update failed)', true);
+            }
+        } catch (e) {
+            showToast('Settings saved to localStorage', false);
+        }
+
+        closeSettingsModal();
+    }
+
+    // Modal Keyboard shortcut & Backdrop clicks
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            const modal = document.getElementById('playerModal');
-            if (modal.classList.contains('active')) {
+            const playerModal = document.getElementById('playerModal');
+            if (playerModal && playerModal.classList.contains('active')) {
                 closePlayerModal();
+            }
+            const settingsModal = document.getElementById('settingsModal');
+            if (settingsModal && settingsModal.classList.contains('active')) {
+                closeSettingsModal();
             }
         }
     });
 
-    // Modal Backdrop click to close
-    document.getElementById('playerModal').addEventListener('click', (e) => {
-        if (e.target.id === 'playerModal') {
-            closePlayerModal();
+    document.getElementById('settingsModal').addEventListener('click', (e) => {
+        if (e.target.id === 'settingsModal') {
+            closeSettingsModal();
         }
     });
 
@@ -1896,6 +2437,7 @@
     window.onload = async () => {
         toggleClearBtn();
         updateHistoryUI();
+        await loadServerConfig();
         await loadPlayers();
         parseZipArchive();
     };
