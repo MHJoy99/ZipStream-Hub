@@ -40,13 +40,16 @@ class MetricsTracker:
     """
     Thread-safe real-time throughput metrics & bandwidth monitor.
     Tracks active stream sessions, instantaneous bandwidth (Mbps),
-    and lifetime bytes served.
+    lifetime bytes served, and upstream bytes fetched during scans.
     """
     def __init__(self, window_seconds: float = 3.0):
         self.window_seconds = window_seconds
         self._lock = threading.Lock()
         self._active_streams_count: int = 0
         self._total_bytes_served: int = 0
+        self._total_scan_bytes_fetched: int = 0
+        self._last_scan_bytes_fetched: int = 0
+        self._last_scan_archive_size: int = 0
         self._samples: List[Tuple[float, int]] = []  # (timestamp, byte_count)
         self._max_bandwidth_mbps: Optional[float] = None  # None = unthrottled
 
@@ -77,6 +80,12 @@ class MetricsTracker:
             while self._samples and self._samples[0][0] < cutoff:
                 self._samples.pop(0)
 
+    def record_scan_bytes(self, num_bytes: int, archive_total_size: int = 0):
+        with self._lock:
+            self._total_scan_bytes_fetched += num_bytes
+            self._last_scan_bytes_fetched = num_bytes
+            self._last_scan_archive_size = archive_total_size
+
     def get_current_bandwidth_mbps(self) -> float:
         now = time.time()
         with self._lock:
@@ -100,12 +109,20 @@ class MetricsTracker:
             time_span = max(0.001, now - self._samples[0][0]) if self._samples else 1.0
             mbps = round((bytes_in_window * 8.0) / (time_span * 1_000_000.0), 2) if self._samples else 0.0
             
+            scan_pct = 0.0
+            if self._last_scan_archive_size > 0:
+                scan_pct = round((self._last_scan_bytes_fetched / self._last_scan_archive_size) * 100.0, 5)
+
             return {
                 "active_streams_count": self._active_streams_count,
                 "current_bandwidth_mbps": mbps,
                 "total_bytes_served": self._total_bytes_served,
                 "total_mbytes_served": round(self._total_bytes_served / (1024 * 1024), 2),
                 "total_gbytes_served": round(self._total_bytes_served / (1024 * 1024 * 1024), 3),
+                "total_scan_bytes_fetched": self._total_scan_bytes_fetched,
+                "last_scan_bytes_fetched": self._last_scan_bytes_fetched,
+                "last_scan_archive_size": self._last_scan_archive_size,
+                "last_scan_bandwidth_pct": scan_pct,
                 "max_bandwidth_mbps": self._max_bandwidth_mbps
             }
 
@@ -113,6 +130,9 @@ class MetricsTracker:
         with self._lock:
             self._active_streams_count = 0
             self._total_bytes_served = 0
+            self._total_scan_bytes_fetched = 0
+            self._last_scan_bytes_fetched = 0
+            self._last_scan_archive_size = 0
             self._samples.clear()
             self._max_bandwidth_mbps = None
 
@@ -285,7 +305,11 @@ class StreamPrefetcher:
                 "Connection": "keep-alive"
             }
             try:
+                sys.stdout.write(f"[HTTP Range Upstream] Stream GET Range: bytes={curr}-{chunk_end}\n")
+                sys.stdout.flush()
                 resp = self.pool.request("GET", self.url, headers=headers, preload_content=True)
+                if resp.status in (401, 403):
+                    raise PermissionError(f"HTTP {resp.status}: Link expired or requires authentication (HTTP 401/403). Please generate a fresh download token.")
                 if resp.status not in (200, 206):
                     raise ConnectionError(f"Upstream HTTP range fetch returned status {resp.status}")
 
@@ -404,10 +428,12 @@ class RemoteZipReader:
     - Tail scanning with heuristic recovery.
     - Connection pooling and thread-safe data offset memoization.
     """
-    def __init__(self, url: str, pool: urllib3.PoolManager = HTTP_POOL):
+    def __init__(self, url: str, pool: urllib3.PoolManager = HTTP_POOL, metrics: Optional[MetricsTracker] = METRICS):
         self.url = url
         self.pool = pool
+        self.metrics = metrics
         self.total_size: int = 0
+        self.scan_bytes_fetched: int = 0
         self.entries: List[Dict] = []
         self._lock = threading.Lock()
         self._init_archive()
@@ -417,7 +443,12 @@ class RemoteZipReader:
             "Range": f"bytes={start}-{end}",
             "Connection": "keep-alive"
         }
+        sys.stdout.write(f"[HTTP Range Upstream] GET Range: bytes={start}-{end}\n")
+        sys.stdout.flush()
+
         resp = self.pool.request("GET", self.url, headers=headers, preload_content=True)
+        if resp.status in (401, 403):
+            raise PermissionError(f"HTTP {resp.status}: Link expired or requires authentication (HTTP 401/403). Please generate a fresh download token.")
         if resp.status not in (200, 206):
             raise ConnectionError(f"HTTP Range request failed: {resp.status}")
         return resp.data
@@ -428,7 +459,13 @@ class RemoteZipReader:
             "Range": "bytes=0-0",
             "Connection": "keep-alive"
         }
+        sys.stdout.write("[HTTP Range Upstream] GET Range: bytes=0-0 (Probe total archive size)\n")
+        sys.stdout.flush()
+
         resp = self.pool.request("GET", self.url, headers=headers, preload_content=True)
+        if resp.status in (401, 403):
+            raise PermissionError(f"HTTP {resp.status}: Link expired or requires authentication (HTTP 401/403). Please generate a fresh download token.")
+
         cr = resp.headers.get("Content-Range")
         if cr and "/" in cr:
             self.total_size = int(cr.split("/")[-1])
@@ -439,10 +476,13 @@ class RemoteZipReader:
         if self.total_size <= 0:
             raise ValueError("Could not determine archive total size or server does not support Range requests.")
 
+        fetched_bytes = len(resp.data) if resp.data else 1
+
         # 2. Fetch the tail of the ZIP (1 MB) to locate EOCD / ZIP64 structures
         tail_fetch = min(1048576, self.total_size)
         tail_start = self.total_size - tail_fetch
         tail_data = self._fetch_range(tail_start, self.total_size - 1)
+        fetched_bytes += len(tail_data)
 
         # 3. Check for ZIP64 EOCD Locator
         zip64_loc_pos = tail_data.rfind(b"PK\x06\x07")
@@ -457,6 +497,7 @@ class RemoteZipReader:
                 _, rec_sz, v_made, v_need, d_num, cd_disk, n_disk, n_total, cd_size, cd_offset = struct.unpack("<4sQHHIIQQQQ", end_rec)
             else:
                 end_rec_data = self._fetch_range(end_rec_offset, end_rec_offset + 56)
+                fetched_bytes += len(end_rec_data)
                 _, rec_sz, v_made, v_need, d_num, cd_disk, n_disk, n_total, cd_size, cd_offset = struct.unpack("<4sQHHIIQQQQ", end_rec_data)
         else:
             eocd_pos = tail_data.rfind(b"PK\x05\x06")
@@ -467,6 +508,19 @@ class RemoteZipReader:
 
         # 4. Fetch Central Directory
         cd_data = self._fetch_range(cd_offset, cd_offset + cd_size - 1)
+        fetched_bytes += len(cd_data)
+
+        self.scan_bytes_fetched = fetched_bytes
+        if self.metrics:
+            self.metrics.record_scan_bytes(fetched_bytes, self.total_size)
+
+        fetched_mb = round(fetched_bytes / (1024 * 1024), 2)
+        total_gb = round(self.total_size / (1024 ** 3), 2)
+        pct = (fetched_bytes / self.total_size) * 100.0 if self.total_size > 0 else 0.0
+        sys.stdout.write(
+            f"[Scan Complete] Only fetched {fetched_mb:.2f} MB out of {total_gb:.2f} GB archive ({pct:.3f}% bandwidth used)\n"
+        )
+        sys.stdout.flush()
 
         # 5. Parse Central Directory headers
         ptr = 0

@@ -320,6 +320,8 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
                 "status": "ok",
                 "total_size_gb": round(reader.total_size / (1024 ** 3), 2),
                 "total_size_bytes": reader.total_size,
+                "scan_bytes_fetched": getattr(reader, "scan_bytes_fetched", 0),
+                "scan_bandwidth_pct": round((getattr(reader, "scan_bytes_fetched", 0) / reader.total_size) * 100.0, 5) if reader.total_size > 0 else 0.0,
                 "entries": reader.entries
             }
             data_bytes = json.dumps(resp).encode("utf-8")
@@ -333,7 +335,13 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
         except Exception as e:
             import traceback
             traceback.print_exc()
-            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            err_msg = str(e)
+            if "401" in err_msg or "403" in err_msg or "expired" in err_msg.lower():
+                err_msg = "Link expired or requires authentication (HTTP 401/403). Please generate a fresh download token."
+                sys.stdout.write(f"[Auth Error] {err_msg}\n")
+                sys.stdout.flush()
+
+            err_bytes = json.dumps({"status": "error", "error": err_msg}).encode("utf-8")
             self.send_response(500)
             self._set_cors_headers()
             self.send_header("Content-Type", "application/json")
