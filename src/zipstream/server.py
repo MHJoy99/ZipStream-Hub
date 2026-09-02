@@ -1108,7 +1108,7 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
         try:
             for chunk in prefetcher.stream_chunks():
                 self.wfile.write(chunk)
-                self.wfile.flush()
+            self.wfile.flush()
         except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
             self.close_connection = True
         except Exception:
@@ -1318,7 +1318,7 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
         try:
             for chunk in prefetcher.stream_chunks():
                 self.wfile.write(chunk)
-                self.wfile.flush()
+            self.wfile.flush()
         except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
             self.close_connection = True
         except Exception:

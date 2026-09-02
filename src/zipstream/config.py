@@ -22,7 +22,7 @@ class ServerConfig:
 @dataclass
 class StreamingConfig:
     prefetch_buffer_size_mb: int = 1024
-    slice_size_kb: int = 128
+    slice_size_kb: int = 512
     max_concurrent_streams: int = 8
     chunk_timeout_seconds: int = 30
 
@@ -168,7 +168,7 @@ def load_config(config_path: Optional[Path | str] = None) -> AppConfig:
         "ZIPSTREAM_PREFETCH_MB", streaming_data.get("prefetch_buffer_size_mb", 1024)
     )
     slice_kb_raw = os.getenv(
-        "ZIPSTREAM_SLICE_KB", streaming_data.get("slice_size_kb", 128)
+        "ZIPSTREAM_SLICE_KB", streaming_data.get("slice_size_kb", 512)
     )
     try:
         prefetch_mb = int(prefetch_mb_raw)
@@ -177,7 +177,7 @@ def load_config(config_path: Optional[Path | str] = None) -> AppConfig:
     try:
         slice_kb = int(slice_kb_raw)
     except (ValueError, TypeError):
-        slice_kb = 128
+        slice_kb = 512
 
     streaming = StreamingConfig(
         prefetch_buffer_size_mb=prefetch_mb,

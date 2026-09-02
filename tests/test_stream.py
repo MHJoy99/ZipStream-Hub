@@ -592,3 +592,90 @@ def test_server_port_helpers_and_auto_port():
         assert args.port == 8990
         assert args.auto_port is True
 
+
+def test_pipelined_streaming_direct_passthrough():
+    """Verify continuous streaming pipeline with large byte ranges and direct slice pass-through."""
+    # 4 MB payload
+    payload_size = 4 * 1024 * 1024
+    payload = bytes([i % 256 for i in range(payload_size)])
+    mock_pool = MockRangePool(payload)
+
+    prefetcher = StreamPrefetcher(
+        url="http://mock.test/pipeline.mkv",
+        start_byte=0,
+        end_byte=payload_size - 1,
+        pool=mock_pool,
+        slice_size_kb=512
+    )
+    prefetcher.start()
+
+    collected = bytearray()
+    for chunk in prefetcher.stream_chunks():
+        collected.extend(chunk)
+
+    assert len(collected) == payload_size
+    assert bytes(collected) == payload
+    assert len(mock_pool.requests) >= 1
+    # Check that initial request opened the full byte range for continuous streaming
+    assert mock_pool.requests[0]["headers"]["Range"] == f"bytes=0-{payload_size - 1}"
+    prefetcher.close()
+
+
+def test_concurrent_idm_multi_connection_streaming():
+    """Verify ThreadedZipStreamServer handles multiple simultaneous range requests (IDM simulation)."""
+    import urllib.request
+    import concurrent.futures
+
+    test_port = 8796
+    server_address = ("127.0.0.1", test_port)
+    httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+    time.sleep(0.15)
+
+    try:
+        # Create an 8 MB synthetic video payload with 1000-byte archive header offset
+        total_len = 8 * 1024 * 1024
+        file_payload = bytes([i % 251 for i in range(total_len)])
+        archive_padding = b"P" * 1000
+        mock_pool = MockRangePool(archive_padding + file_payload)
+
+        mock_reader = MagicMock()
+        mock_reader.url = "http://mock.test/idm_video.zip"
+        mock_reader.pool = mock_pool
+        mock_reader.get_data_offset.return_value = 1000
+
+        with server.ARCHIVE_LOCK:
+            server.CURRENT_READER = mock_reader
+            server.CACHED_ENTRIES = {10: {"id": 10, "name": "IDM_Test.mkv", "size_bytes": total_len}}
+            server.READERS_BY_URL[mock_reader.url] = mock_reader
+
+        # Simulate IDM 8-part segmented download in parallel
+        part_size = 1024 * 1024  # 1 MB each part
+        num_parts = 8
+
+        def fetch_part(part_idx):
+            start = part_idx * part_size
+            end = start + part_size - 1
+            req = urllib.request.Request(f"http://127.0.0.1:{test_port}/stream/10/IDM_Test.mkv")
+            req.add_header("Range", f"bytes={start}-{end}")
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                assert resp.status == 206
+                data = resp.read()
+                assert len(data) == part_size
+                assert data == file_payload[start:end + 1]
+                return part_idx, data
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [executor.submit(fetch_part, i) for i in range(num_parts)]
+            results = [f.result() for f in futures]
+
+        assert len(results) == 8
+        results.sort(key=lambda x: x[0])
+        combined = b"".join(r[1] for r in results)
+        assert combined == file_payload
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
