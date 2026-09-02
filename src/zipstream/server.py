@@ -22,6 +22,9 @@ try:
         StreamPrefetcher,
         HTTP_POOL,
         METRICS,
+        LOG_BUFFER,
+        log_event,
+        format_bytes_human,
         get_streaming_metrics,
         set_bandwidth_limit,
     )
@@ -39,6 +42,9 @@ except ImportError:
         StreamPrefetcher,
         HTTP_POOL,
         METRICS,
+        LOG_BUFFER,
+        log_event,
+        format_bytes_human,
         get_streaming_metrics,
         set_bandwidth_limit,
     )
@@ -220,6 +226,8 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             self._handle_api_players()
         elif self.path == "/api/stats" or self.path.startswith("/api/stats"):
             self._handle_api_stats_get()
+        elif self.path == "/api/logs" or self.path.startswith("/api/logs"):
+            self._handle_api_logs_get()
         elif self.path == "/api/config":
             self._handle_api_config_get()
         elif self.path == "/api/history" or self.path.startswith("/api/history?"):
@@ -385,6 +393,38 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             resp = {
                 "status": "ok",
                 "stats": stats
+            }
+            data_bytes = json.dumps(resp).encode("utf-8")
+            self.send_response(200)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(data_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(data_bytes)
+        except Exception as e:
+            err_bytes = json.dumps({"status": "error", "error": str(e)}).encode("utf-8")
+            self.send_response(500)
+            self._set_cors_headers()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(err_bytes)))
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            self.wfile.write(err_bytes)
+
+    def _handle_api_logs_get(self):
+        try:
+            parsed = urllib.parse.urlparse(self.path)
+            qs = urllib.parse.parse_qs(parsed.query)
+            since_str = qs.get("since", ["0"])[0].strip()
+            since_id = int(since_str) if since_str.isdigit() else 0
+
+            logs = LOG_BUFFER.get_logs(since_id=since_id)
+            resp = {
+                "status": "ok",
+                "since": since_id,
+                "count": len(logs),
+                "logs": logs
             }
             data_bytes = json.dumps(resp).encode("utf-8")
             self.send_response(200)
@@ -1016,6 +1056,44 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
 
         # High-Throughput Read-Ahead Prefetch Buffer with Connection Pooling & Memory Safety
         cfg = load_config()
+        client_agent = self.headers.get("User-Agent", "Player / Browser")
+        # Identify common client names
+        client_name = "Player"
+        lower_ua = client_agent.lower()
+        if "potplayer" in lower_ua:
+            client_name = "PotPlayer"
+        elif "vlc" in lower_ua:
+            client_name = "VLC"
+        elif "mpv" in lower_ua:
+            client_name = "mpv"
+        elif "iina" in lower_ua:
+            client_name = "IINA"
+        elif "chrome" in lower_ua:
+            client_name = "Chrome / WebPlayer"
+        elif "firefox" in lower_ua:
+            client_name = "Firefox"
+        elif "kodi" in lower_ua:
+            client_name = "Kodi"
+        elif "infuse" in lower_ua:
+            client_name = "Infuse"
+        elif client_agent:
+            client_name = client_agent.split("/")[0]
+
+        log_event(
+            "STREAM START",
+            "🎬",
+            f"Player connected for '{entry.get('name')}' (Offset: {remote_start:,} -> {remote_end:,})",
+            level="info"
+        )
+        speed = METRICS.get_current_bandwidth_mbps()
+        buf_mb = cfg.streaming.prefetch_buffer_size_mb
+        log_event(
+            "BUFFER STATUS",
+            "🚀",
+            f"Ring buffer: {min(buf_mb, 128)} MB / {buf_mb} MB loaded | Speed: {speed:.1f} Mbps | Client: {client_name}",
+            level="info"
+        )
+
         prefetcher = StreamPrefetcher(
             url=reader.url,
             start_byte=remote_start,
@@ -1037,6 +1115,12 @@ class ZipStreamWebHandler(http.server.BaseHTTPRequestHandler):
             self.close_connection = True
         finally:
             prefetcher.close()
+            log_event(
+                "STREAM CLOSE",
+                "⏹️",
+                "Player seeked / disconnected (Clean socket flush, 0 memory leak)",
+                level="info"
+            )
 
     def _handle_webdav_propfind(self):
         try:

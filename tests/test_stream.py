@@ -469,6 +469,59 @@ def test_api_stats_endpoint():
         httpd.server_close()
 
 
+def test_api_logs_endpoint_and_ring_buffer():
+    """Verify in-memory LogBuffer ring buffer, logging tags/emojis, and /api/logs endpoint."""
+    from engine import LogBuffer, LOG_BUFFER, log_event, format_bytes_human
+    import urllib.request
+    
+    # Unit test LogBuffer operations
+    buf = LogBuffer(capacity=5)
+    e1 = buf.append("SCAN START", "🔍", "Testing 1", level="info")
+    e2 = buf.append("ARCHIVE SIZE", "🎯", "Testing 2", level="info")
+    e3 = buf.append("TAIL FETCH", "⚡", "Testing 3", level="info")
+    
+    assert len(buf.get_logs()) == 3
+    assert buf.get_logs(since_id=e1["id"]) == [e2, e3]
+    
+    # Capacity wrapping
+    buf.append("CENTRAL DIR", "📂", "Testing 4")
+    buf.append("SCAN STATS", "📊", "Testing 5")
+    buf.append("STREAM START", "🎬", "Testing 6")
+    logs = buf.get_logs()
+    assert len(logs) == 5
+    assert logs[0]["message"] == "Testing 2"  # Testing 1 evicted
+
+    # Server integration test for /api/logs?since=...
+    log_event("STREAM START", "🎬", "Integration test log event", level="info")
+    test_port = 8794
+    server_address = ("127.0.0.1", test_port)
+    httpd = ThreadedZipStreamServer(server_address, ZipStreamWebHandler)
+    t = threading.Thread(target=httpd.serve_forever, daemon=True)
+    t.start()
+    time.sleep(0.2)
+
+    try:
+        req = urllib.request.Request(f"http://127.0.0.1:{test_port}/api/logs")
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            assert resp.status == 200
+            data = json.loads(resp.read().decode("utf-8"))
+            assert data["status"] == "ok"
+            assert "logs" in data
+            assert isinstance(data["logs"], list)
+            assert len(data["logs"]) > 0
+
+            latest_id = data["logs"][-1]["id"]
+            req_since = urllib.request.Request(f"http://127.0.0.1:{test_port}/api/logs?since={latest_id}")
+            with urllib.request.urlopen(req_since, timeout=5) as resp_since:
+                assert resp_since.status == 200
+                data_since = json.loads(resp_since.read().decode("utf-8"))
+                assert data_since["status"] == "ok"
+                assert len(data_since["logs"]) == 0
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
 def test_api_ping_endpoint_and_auto_attach():
     """Verify /api/ping endpoint returns correct signature and handshake works."""
     import urllib.request

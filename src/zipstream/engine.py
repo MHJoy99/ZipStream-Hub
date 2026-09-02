@@ -8,7 +8,9 @@ import time
 import socket
 import zlib
 import urllib3
-from typing import List, Dict, Optional, Generator, Tuple
+import collections
+from typing import List, Dict, Optional, Generator, Tuple, Any
+from datetime import datetime
 
 # Disable unverified HTTPS warning for maximum throughput
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -135,6 +137,77 @@ class MetricsTracker:
             self._last_scan_archive_size = 0
             self._samples.clear()
             self._max_bandwidth_mbps = None
+
+
+# ==============================================================================
+# High-Clarity Rich Logging Engine & Ring Buffer
+# ==============================================================================
+
+class LogBuffer:
+    """
+    Thread-safe in-memory circular ring buffer holding the last N structured log events.
+    Supports querying logs produced since a specific sequential ID for seamless SSE / polling.
+    """
+    def __init__(self, capacity: int = 200):
+        self.capacity = capacity
+        self._lock = threading.Lock()
+        self._buffer: collections.deque = collections.deque(maxlen=capacity)
+        self._counter: int = 0
+
+    def append(self, tag: str, emoji: str, message: str, level: str = "info", details: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        with self._lock:
+            self._counter += 1
+            entry_id = self._counter
+            timestamp_str = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+            raw_text = f"{emoji} [{tag}] {message}"
+            entry = {
+                "id": entry_id,
+                "timestamp": timestamp_str,
+                "time": time.time(),
+                "tag": tag,
+                "emoji": emoji,
+                "message": message,
+                "raw": raw_text,
+                "level": level,
+                "details": details or {}
+            }
+            self._buffer.append(entry)
+
+        # Mirror formatted line to terminal
+        sys.stdout.write(f"{timestamp_str} {raw_text}\n")
+        sys.stdout.flush()
+        return entry
+
+    def get_logs(self, since_id: int = 0) -> List[Dict[str, Any]]:
+        """Returns all log entries with id > since_id in chronological order."""
+        with self._lock:
+            if since_id <= 0:
+                return list(self._buffer)
+            return [log for log in self._buffer if log["id"] > since_id]
+
+    def clear(self):
+        with self._lock:
+            self._buffer.clear()
+
+
+# Global in-memory log buffer singleton
+LOG_BUFFER = LogBuffer(capacity=200)
+
+
+def log_event(tag: str, emoji: str, message: str, level: str = "info", details: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Helper function to record a structured rich log event."""
+    return LOG_BUFFER.append(tag=tag, emoji=emoji, message=message, level=level, details=details)
+
+
+def format_bytes_human(num_bytes: int) -> str:
+    """Formats raw bytes into a clean human-readable representation."""
+    if num_bytes >= 1024 ** 3:
+        return f"{num_bytes / (1024 ** 3):.2f} GB"
+    elif num_bytes >= 1024 ** 2:
+        return f"{num_bytes / (1024 ** 2):.2f} MB"
+    elif num_bytes >= 1024:
+        return f"{num_bytes / 1024:.2f} KB"
+    return f"{num_bytes} B"
 
 
 # Global singleton metrics tracker
@@ -305,8 +378,7 @@ class StreamPrefetcher:
                 "Connection": "keep-alive"
             }
             try:
-                sys.stdout.write(f"[HTTP Range Upstream] Stream GET Range: bytes={curr}-{chunk_end}\n")
-                sys.stdout.flush()
+                log_event("STREAM RANGE", "⚡", f"Fetching block bytes {curr:,} - {chunk_end:,} ({chunk_end - curr + 1:,} bytes)", level="debug")
                 resp = self.pool.request("GET", self.url, headers=headers, preload_content=True)
                 if resp.status in (401, 403):
                     raise PermissionError(f"HTTP {resp.status}: Link expired or requires authentication (HTTP 401/403). Please generate a fresh download token.")
@@ -443,8 +515,7 @@ class RemoteZipReader:
             "Range": f"bytes={start}-{end}",
             "Connection": "keep-alive"
         }
-        sys.stdout.write(f"[HTTP Range Upstream] GET Range: bytes={start}-{end}\n")
-        sys.stdout.flush()
+        log_event("HTTP RANGE", "⚡", f"GET Range: bytes={start:,}-{end:,} ({end - start + 1:,} bytes)", level="debug")
 
         resp = self.pool.request("GET", self.url, headers=headers, preload_content=True)
         if resp.status in (401, 403):
@@ -459,8 +530,7 @@ class RemoteZipReader:
             "Range": "bytes=0-0",
             "Connection": "keep-alive"
         }
-        sys.stdout.write("[HTTP Range Upstream] GET Range: bytes=0-0 (Probe total archive size)\n")
-        sys.stdout.flush()
+        log_event("SCAN START", "🔍", "Inspecting remote ZIP (Range: 0-0 probe)", level="info")
 
         resp = self.pool.request("GET", self.url, headers=headers, preload_content=True)
         if resp.status in (401, 403):
@@ -477,10 +547,13 @@ class RemoteZipReader:
             raise ValueError("Could not determine archive total size or server does not support Range requests.")
 
         fetched_bytes = len(resp.data) if resp.data else 1
+        total_size_human = format_bytes_human(self.total_size)
+        log_event("ARCHIVE SIZE", "🎯", f"Remote file is {total_size_human} ({self.total_size:,} bytes)", level="info")
 
         # 2. Fetch the tail of the ZIP (1 MB) to locate EOCD / ZIP64 structures
         tail_fetch = min(1048576, self.total_size)
         tail_start = self.total_size - tail_fetch
+        log_event("TAIL FETCH", "⚡", f"Reading {format_bytes_human(tail_fetch)} tail (Bytes {tail_start:,} - {self.total_size - 1:,})", level="info")
         tail_data = self._fetch_range(tail_start, self.total_size - 1)
         fetched_bytes += len(tail_data)
 
@@ -507,6 +580,7 @@ class RemoteZipReader:
             _, d_num, cd_disk, n_disk, n_total, cd_size, cd_offset, comm_len = struct.unpack("<4sHHHHIIH", eocd)
 
         # 4. Fetch Central Directory
+        log_event("CENTRAL DIR", "📂", f"Fetching Central Directory ({cd_size:,} bytes at offset {cd_offset:,})", level="info")
         cd_data = self._fetch_range(cd_offset, cd_offset + cd_size - 1)
         fetched_bytes += len(cd_data)
 
@@ -514,13 +588,8 @@ class RemoteZipReader:
         if self.metrics:
             self.metrics.record_scan_bytes(fetched_bytes, self.total_size)
 
-        fetched_mb = round(fetched_bytes / (1024 * 1024), 2)
-        total_gb = round(self.total_size / (1024 ** 3), 2)
+        fetched_human = format_bytes_human(fetched_bytes)
         pct = (fetched_bytes / self.total_size) * 100.0 if self.total_size > 0 else 0.0
-        sys.stdout.write(
-            f"[Scan Complete] Only fetched {fetched_mb:.2f} MB out of {total_gb:.2f} GB archive ({pct:.3f}% bandwidth used)\n"
-        )
-        sys.stdout.flush()
 
         # 5. Parse Central Directory headers
         ptr = 0
@@ -573,6 +642,9 @@ class RemoteZipReader:
                 })
 
             ptr += 46 + name_len + extra_len + comm_len
+
+        log_event("CENTRAL DIR", "📂", f"Parsed Central Directory ({len(cd_data):,} bytes) -> Found {len(self.entries)} files", level="info")
+        log_event("SCAN STATS", "📊", f"100% Zero-Download Complete! Fetched only {fetched_human} ({pct:.4f}% of total archive)", level="info")
 
     def get_data_offset(self, entry: Dict) -> int:
         if entry.get("data_offset") is not None:
