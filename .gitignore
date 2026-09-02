@@ -81,6 +81,8 @@ history.db
 history.db-journal
 history.json
 .playwright-mcp/
+.active_port
+**/.active_port
 
 # Exclude GitHub Workflows if pushing via OAuth without workflow scope
 .github/workflows/
