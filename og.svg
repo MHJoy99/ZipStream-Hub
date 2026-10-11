@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1b44"/><stop offset=".6" stop-color="#061028"/><stop offset="1" stop-color="#05261f"/></linearGradient>
+<linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#5db0ff"/><stop offset=".5" stop-color="#38cfd0"/><stop offset="1" stop-color="#2de2b0"/></linearGradient>
+<linearGradient id="au" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c2a6b"/><stop offset=".55" stop-color="#0d6a96"/><stop offset="1" stop-color="#14c79a"/></linearGradient>
+<radialGradient id="r1" cx=".15" cy="0" r=".7"><stop offset="0" stop-color="#3a82ff" stop-opacity=".35"/><stop offset="1" stop-color="#3a82ff" stop-opacity="0"/></radialGradient>
+<radialGradient id="r2" cx=".95" cy="1" r=".6"><stop offset="0" stop-color="#2de2b0" stop-opacity=".3"/><stop offset="1" stop-color="#2de2b0" stop-opacity="0"/></radialGradient>
+<clipPath id="sc"><rect x="720" y="150" width="400" height="225" rx="14"/></clipPath>
+<style>.s{font-family:'Segoe UI',system-ui,Arial,sans-serif}.m{font-family:Consolas,'Courier New',monospace}</style>
+</defs>
+<rect width="1200" height="630" fill="url(#bg)"/><rect width="1200" height="630" fill="url(#r1)"/><rect width="1200" height="630" fill="url(#r2)"/>
+<!-- brand -->
+<rect x="64" y="60" width="52" height="52" rx="13" fill="#071230" stroke="#24427a"/>
+<g fill="url(#g)"><rect x="73" y="76" width="8" height="5" rx="1.5" opacity=".55"/><rect x="73" y="88" width="8" height="5" rx="1.5" opacity=".75"/><rect x="73" y="100" width="8" height="5" rx="1.5" opacity=".55"/><rect x="83" y="82" width="8" height="5" rx="1.5" opacity=".65"/><path d="M93 78v24l16-12z"/></g>
+<text class="s" x="132" y="96" font-size="32" font-weight="700" fill="#e8f1ff">ZipStreamHub</text>
+<!-- headline -->
+<text class="s" x="64" y="236" font-size="68" font-weight="800" fill="#e8f1ff" letter-spacing="-2">Play video inside</text>
+<text class="s" x="64" y="312" font-size="68" font-weight="800" fill="#e8f1ff" letter-spacing="-2">remote ZIPs.</text>
+<text class="s" x="64" y="388" font-size="68" font-weight="800" fill="url(#g)" letter-spacing="-2">Download nothing.</text>
+<text class="s" x="64" y="446" font-size="25" fill="#9bb0d6">HTTP 206 range requests &#183; ZIP64 &#183; instant seek</text>
+<text class="s" x="64" y="482" font-size="25" fill="#9bb0d6">PotPlayer &#183; MPV &#183; VLC &#183; M3U &#183; WebDAV &#183; STRM</text>
+<!-- player -->
+<rect x="700" y="90" width="440" height="360" rx="22" fill="#0b1a3d" stroke="#24427a" stroke-width="2"/>
+<g clip-path="url(#sc)"><rect x="720" y="150" width="400" height="225" fill="url(#au)"/>
+<path d="M700 330c70-50 130 20 220-14s130-30 240 14v70H700z" fill="#2de2b0" opacity=".28"/><path d="M700 350c80-26 140 30 230 0s120-24 230 6v40H700z" fill="#4aa3ff" opacity=".3"/></g>
+<circle cx="920" cy="262" r="34" fill="#04121f" fill-opacity=".45" stroke="#fff" stroke-opacity=".8" stroke-width="2.5"/><path d="M910 244v36l30-18z" fill="#fff"/>
+<rect x="736" y="164" width="86" height="26" rx="8" fill="#04121f" fill-opacity=".6"/><text class="m" x="779" y="182" font-size="15" text-anchor="middle" fill="#2de2b0">HTTP 206</text>
+<rect x="720" y="398" width="400" height="8" rx="4" fill="#1a2f5a"/><rect x="800" y="398" width="76" height="8" rx="4" fill="#2de2b0" opacity=".5"/><rect x="800" y="398" width="76" height="8" rx="4" fill="#2de2b0" opacity=".0"/><circle cx="800" cy="402" r="11" fill="#fff" stroke="#2de2b0" stroke-width="4"/>
+<text class="m" x="720" y="432" font-size="15" fill="#8fa7cf">Range: bytes=1460289104-</text>
+<!-- archive bar + stream -->
+<rect x="64" y="540" width="1072" height="34" rx="9" fill="#12285a" stroke="#24427a"/>
+<g fill="#1d4fa8" opacity=".6"><rect x="70" y="546" width="990" height="22" rx="5"/></g>
+<rect x="1066" y="546" width="64" height="22" rx="5" fill="#2de2b0" opacity=".55"/>
+<rect x="420" y="536" width="130" height="42" rx="8" fill="#2de2b0" fill-opacity=".22" stroke="#2de2b0" stroke-width="2.5"/>
+<g fill="#2de2b0"><rect x="560" y="520" width="26" height="6" rx="3"/><rect x="600" y="500" width="26" height="6" rx="3"/><rect x="640" y="480" width="26" height="6" rx="3"/></g>
+<path d="M500 536C520 470 640 470 700 440" stroke="#2de2b0" stroke-opacity=".55" stroke-width="3" stroke-dasharray="4 10" fill="none"/>
+<text class="s" x="64" y="606" font-size="18" fill="#6f87b3">remote.zip &#183; only the bytes you watch are fetched</text>
+<text class="s" x="1136" y="606" font-size="18" fill="#2de2b0" text-anchor="end">mhjoy99.github.io/ZipStream-Hub</text>
+</svg>

@@ -1,0 +1,23 @@
+# ZipStreamHub
+
+> ZipStreamHub is an open-source (MIT) zero-download streaming server and virtual archive extractor for remote ZIP and ZIP64 files. It reads the ZIP index with HTTP Range requests and serves seekable HTTP 206 streams to media players (PotPlayer, MPV, VLC, MPC-HC, MPC-BE, IINA), web browsers, M3U/M3U8 playlists, WebDAV clients and Jellyfin/Emby/Kodi via STRM files, without downloading or unpacking the archive. Python 3.9+, runs on Windows, macOS, Linux and Docker.
+
+Key facts: the ZIP Central Directory is read from the last 1 MB of the remote file; each player byte-range request is offset by the entry's data offset (exact 1:1 mapping for the STORE method); a RAM-only sliding-window prefetcher buffers ahead and is drained on seek; no video data is written to disk.
+
+## Project
+- [Website](https://mhjoy99.github.io/ZipStream-Hub/): overview, animated architecture, quick start and FAQ
+- [GitHub repository](https://github.com/MHJoy99/ZipStream-Hub): source code, README, issues, MIT license
+- [Full explanation for LLMs](https://mhjoy99.github.io/ZipStream-Hub/llms-full.txt): complete plain-text description
+
+## Documentation (in the repository)
+- [Architecture and binary deep dive](https://github.com/MHJoy99/ZipStream-Hub/blob/main/docs/ARCHITECTURE.md)
+- [REST API reference](https://github.com/MHJoy99/ZipStream-Hub/blob/main/docs/API.md)
+- [Media players and M3U guide](https://github.com/MHJoy99/ZipStream-Hub/blob/main/docs/PLAYERS.md)
+- [WebDAV and Infuse/Kodi setup](https://github.com/MHJoy99/ZipStream-Hub/blob/main/docs/WEBDAV_INFUSE.md)
+- [Jellyfin, Emby and Kodi STRM guide](https://github.com/MHJoy99/ZipStream-Hub/blob/main/docs/JELLYFIN_EMBY_KODI.md)
+- [Troubleshooting](https://github.com/MHJoy99/ZipStream-Hub/blob/main/docs/TROUBLESHOOTING.md)
+- [Beginner guide, no coding](https://github.com/MHJoy99/ZipStream-Hub/blob/main/docs/QUICKSTART_NON_CODERS.md)
+
+## Optional
+- [Changelog](https://github.com/MHJoy99/ZipStream-Hub/blob/main/CHANGELOG.md)
+- [More projects by MHJoy99](https://github.com/MHJoy99)

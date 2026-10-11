@@ -1,0 +1,76 @@
+ZipStreamHub: complete description (plain text)
+Website: https://mhjoy99.github.io/ZipStream-Hub/
+Repository: https://github.com/MHJoy99/ZipStream-Hub
+Author: MHJoy99 (https://github.com/MHJoy99)
+License: MIT
+Version in the repository: 1.0.0 (CHANGELOG dated 2026-09-02)
+Source of this text: the project's README and docs. Performance figures are as stated by the project and were not independently measured.
+
+WHAT IT IS
+ZipStreamHub is a streaming server and virtual archive extractor for remote ZIP and ZIP64 files. It lets media players (PotPlayer, MPV, VLC, MPC-HC, MPC-BE, IINA) or a web browser play and seek inside video files that are stored inside a ZIP archive on an HTTP/HTTPS server, without downloading or unpacking the archive. It is written in Python (3.9 or newer); urllib3 is the only runtime dependency. It runs on Windows, macOS and Linux, and in Docker.
+
+HOW IT WORKS
+1. Tail parsing. A ZIP stores its index (the Central Directory) at the end of the file. ZipStreamHub first probes the remote file size with a Range request (bytes=0-0), then requests the last 1 MB with an HTTP Range request. In that tail it finds the End of Central Directory record (signature 0x06054b50) and, for archives over 4 GB, the ZIP64 End of Central Directory Locator (0x07064b50) and record (0x06064b50).
+2. Central Directory resolution. It reads the Central Directory file headers (0x02014b50) and builds an in-memory index of the archive's entries. The README states this takes about 0.6 seconds. For ZIP64, 32-bit fields set to 0xFFFFFFFF are replaced by the 64-bit values from the ZIP64 extra field (ID 0x0001).
+3. Data offset. The Central Directory gives the offset of each Local File Header, not of the payload. ZipStreamHub reads the 30-byte local header once and caches data_offset = local_header_offset + 30 + name_len + extra_len.
+4. Range translation. When a player requests bytes [S, E] of a file from the local server, ZipStreamHub requests [data_offset + S, data_offset + E] from the remote server and relays the bytes as an HTTP 206 Partial Content response. For files stored with the STORE method (method 0, no compression) byte X of the video is byte data_offset + X of the remote file, so seeking is an offset calculation. The server also answers HEAD, honours Accept-Ranges: bytes and returns 416 for out-of-range requests.
+5. Prefetching. A StreamPrefetcher runs a worker thread that fetches 2 MB blocks over a keep-alive urllib3 connection pool into a bounded queue; the consumer slices the blocks into small writes (ZIPSTREAM_SLICE_KB, 128 KB in the README) for the player socket. When the queue is full, upstream fetching pauses (backpressure). When the player seeks or disconnects, the client socket closes, an abort event stops the worker, queued blocks are drained and freed, and a new request starts at the new offset.
+
+STORE VS DEFLATE
+STORE gives instant seeking. The engine can read both STORE and DEFLATE entries, but the troubleshooting guide states that when the ZIP uses DEFLATE (method 8), seeking to an arbitrary byte requires decompressing preceding data and playback seeking can stutter or fail. Recommendation: re-pack with Store, for example with 7-Zip: 7z a -mx0 output.zip "path/to/videos/*". Video files are usually already compressed, so a Store ZIP is similar in size.
+
+REQUIREMENTS ON THE REMOTE SERVER
+A direct link to the ZIP file (not an HTML landing page) and support for HTTP Range requests (206 Partial Content, Accept-Ranges: bytes). Typical errors: "Valid ZIP End of Central Directory record not found" (not a direct link, 403/404, or corrupt ZIP) and "Server does not support Range requests". CDN rate limits (429/503) can occur with frequent range requests.
+
+FEATURES
+- Zero-download streaming over HTTP 206 byte-range requests.
+- ZIP and ZIP64 (archives above 4 GB, up to 16 exabytes), STORE and DEFLATE methods.
+- Sliding-window read-ahead prefetcher with a configurable RAM buffer (ZIPSTREAM_PREFETCH_MB, up to 5 GB).
+- One-click native player launch: PotPlayer, MPV, VLC, MPC-HC, MPC-BE, IINA (detected via Windows Registry and PATH).
+- Web GUI dashboard (default http://127.0.0.1:8787) with HTML5 player, fullscreen, playback speed, live telemetry, settings, live console, history/favourites.
+- M3U / M3U8 playlist export (#EXTM3U) for Kodi, Infuse and VLC, via GET /api/playlist.m3u or the CLI option --export-m3u.
+- WebDAV bridge (RFC 4918) at /webdav/ for Infuse, Kodi and Windows Explorer (PROPFIND, GET, HEAD, OPTIONS).
+- STRM virtual library bundles (GET /api/strm.zip, CLI --export-strm) so Jellyfin, Emby and Kodi can index and play the archive's videos.
+- Automatic .srt to WebVTT subtitle conversion (GET /api/subtitle).
+- Binary media header inspection: codecs, resolution, duration (GET /api/media_inspect).
+- Archive history and bookmarks (SQLite).
+- Windows one-click launcher (launch_zipstream.vbs), interactive ANSI terminal player (zipstream / cli.py), Docker (docker compose up -d).
+
+README-STATED FIGURES (not independently verified)
+- Time to first frame about 0.6 seconds (tail parse), versus 15-45 minutes for a full download.
+- 0 bytes of local disk used for the video (RAM buffer only).
+- Random seek latency below 5 ms (HTTP 206 range translation).
+- Network data consumed: only the streamed portions.
+
+INSTALL AND RUN (from the README)
+  git clone https://github.com/MHJoy99/ZipStream-Hub.git
+  cd ZipStream-Hub
+  pip install -e .
+  # development: pip install -e ".[dev]"
+
+Web GUI:
+  zipstream-server        (or: python server.py)
+  then open http://127.0.0.1:8787
+
+Terminal player:
+  zipstream "https://example.com/anime_season1.zip"
+  zipstream "https://example.com/anime_season1.zip" --ep 1 --player potplayer
+
+Docker:
+  docker compose up -d
+
+CONFIGURATION
+Precedence: environment variables > config.json > defaults. Environment variables (see .env.example): ZIPSTREAM_HOST, ZIPSTREAM_PORT (default 8787), ZIPSTREAM_DEBUG, ZIPSTREAM_PREFETCH_MB, ZIPSTREAM_SLICE_KB, ZIPSTREAM_DEFAULT_PLAYER, ZIPSTREAM_THEME. README RAM presets for ZIPSTREAM_PREFETCH_MB: 64 (4 GB RAM systems, about 30-60 seconds forward buffer), 1024 (8-16 GB RAM, about 2-5 minutes), 5120 (32 GB+ and gigabit fiber, about 10-25 minutes). Note: the README and .env.example give 32 MB as the baseline default, while the config.json example shows 1024; check your own config.json. Port conflict: python server.py --port 9090 (or --auto-port).
+
+REST API (base http://localhost:8787, CORS enabled)
+POST /api/inspect (body {"url": "<zip url>"}), GET /api/media_inspect, GET /api/strm.zip, GET /api/stats, GET /api/playlist.m3u, GET /api/subtitle, GET /api/players, POST /api/play, GET/POST /api/config, GET /api/history, POST /api/history/favorite, DELETE /api/history, PROPFIND and GET /webdav/, GET and HEAD /stream/<id>/<filename>, OPTIONS /*, GET / (web GUI).
+Stream URL form: http://<host>:<port>/stream/<entry_id>/<url_encoded_filename>
+
+PROJECT LAYOUT
+src/zipstream/: engine.py (tail parser, RemoteZipReader, StreamPrefetcher), server.py (HTTP/WebDAV server), webdav_bridge.py, cli.py, media_inspector.py, strm_generator.py, subtitle_parser.py, player_detector.py, history.py, config.py, static/web_gui.html. Tests live in tests/ (pytest).
+
+RESPONSIBLE USE
+ZipStreamHub is a neutral tool. Only stream archives you are entitled to access and respect the terms of service and rate limits of the hosts and CDNs you connect to.
+
+NOT AFFILIATED
+Not affiliated with PotPlayer, MPV, VLC, IINA, Kodi, Infuse, Jellyfin, Emby or other products named; all names belong to their owners.

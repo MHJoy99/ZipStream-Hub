@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ZipStreamHub: Stream Video from Remote ZIPs, No Download</title>
+<meta name="description" content="Play video inside remote ZIP and ZIP64 archives with HTTP 206 range requests. Instant seeking, zero disk use, PotPlayer/MPV/VLC, M3U, WebDAV. MIT.">
+<link rel="canonical" href="https://mhjoy99.github.io/ZipStream-Hub/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="MHJoy99">
+<meta name="keywords" content="stream video from zip, remote zip streaming, zip64 http range requests, play video inside zip without downloading, potplayer mpv vlc zip stream, m3u playlist from zip, webdav zip, strm jellyfin">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f3faf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#050c1d" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="site.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ZipStreamHub">
+<meta property="og:title" content="ZipStreamHub: Stream Video from Remote ZIPs, No Download">
+<meta property="og:description" content="Play video inside remote ZIP and ZIP64 archives with HTTP 206 range requests. Instant seeking, zero disk use, PotPlayer/MPV/VLC, M3U, WebDAV. MIT.">
+<meta property="og:url" content="https://mhjoy99.github.io/ZipStream-Hub/">
+<meta property="og:image" content="https://mhjoy99.github.io/ZipStream-Hub/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ZipStreamHub: bytes streaming out of a remote ZIP archive into a video player over HTTP 206 range requests">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ZipStreamHub: Stream Video from Remote ZIPs, No Download">
+<meta name="twitter:description" content="Play video inside remote ZIP and ZIP64 archives with HTTP 206 range requests. Instant seeking, zero disk use, PotPlayer/MPV/VLC, M3U, WebDAV. MIT.">
+<meta name="twitter:image" content="https://mhjoy99.github.io/ZipStream-Hub/og-image.png">
+<meta name="twitter:image:alt" content="ZipStreamHub: bytes streaming out of a remote ZIP archive into a video player over HTTP 206 range requests">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://mhjoy99.github.io/ZipStream-Hub/#app",
+  "name": "ZipStreamHub",
+  "url": "https://mhjoy99.github.io/ZipStream-Hub/",
+  "description": "Zero-download streaming server and virtual archive extractor for remote ZIP and ZIP64 files. It reads the ZIP index with HTTP range requests and serves seekable HTTP 206 streams to media players such as PotPlayer, MPV, VLC and IINA, to browsers, to M3U/M3U8 playlists, to WebDAV clients and to Jellyfin/Emby/Kodi via STRM files.",
+  "applicationCategory": "MultimediaApplication",
+  "applicationSubCategory": "Remote ZIP video streaming server",
+  "operatingSystem": "Windows, macOS, Linux, Docker",
+  "softwareVersion": "1.0.0",
+  "softwareRequirements": "Python 3.9 or newer (urllib3 is the only runtime dependency); optionally PotPlayer, MPV, VLC, MPC-HC, MPC-BE or IINA; Docker optional",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "codeRepository": "https://github.com/MHJoy99/ZipStream-Hub",
+  "downloadUrl": "https://github.com/MHJoy99/ZipStream-Hub",
+  "installUrl": "https://github.com/MHJoy99/ZipStream-Hub#-quick-start",
+  "screenshot": "https://mhjoy99.github.io/ZipStream-Hub/dashboard.jpg",
+  "image": "https://mhjoy99.github.io/ZipStream-Hub/og-image.png",
+  "featureList": [
+    "Zero-download streaming from remote HTTP/HTTPS ZIP archives over HTTP 206 range requests",
+    "ZIP and ZIP64 support with STORE and DEFLATE methods",
+    "Sliding-window read-ahead prefetcher with a configurable RAM buffer",
+    "One-click launch into PotPlayer, MPV, VLC, MPC-HC, MPC-BE and IINA",
+    "Built-in web dashboard and HTML5 player with live stream telemetry",
+    "M3U / M3U8 playlist export for Kodi, Infuse and VLC",
+    "WebDAV bridge (RFC 4918) and STRM bundles for Jellyfin, Emby and Kodi",
+    "Automatic .srt to WebVTT subtitle conversion",
+    "Archive history and bookmarks",
+    "Interactive terminal player and Docker deployment"
+  ],
+  "author": { "@type": "Person", "name": "MHJoy99", "url": "https://github.com/MHJoy99" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://mhjoy99.github.io/ZipStream-Hub/#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is ZipStreamHub?",
+      "acceptedAnswer": { "@type": "Answer", "text": "ZipStreamHub is an open-source streaming server and virtual archive extractor for remote ZIP and ZIP64 files. It lets media players such as PotPlayer, MPV, VLC and IINA, or a web browser, play and seek through video stored inside a ZIP archive on a web server, without downloading or unpacking the archive first." }
+    },
+    {
+      "@type": "Question",
+      "name": "How can it play a video without downloading the whole ZIP?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A ZIP keeps its index (the Central Directory) at the end of the file. ZipStreamHub uses HTTP Range requests to read only the last 1 MB, finds the End of Central Directory record and the ZIP64 locator, then reads the Central Directory to build an in-memory index. When a player asks for a byte range of a video, ZipStreamHub adds the entry's data offset and fetches just that range from the remote server, so only the parts you watch cross the network." }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does seeking only work well on ZIPs packed with Store?",
+      "acceptedAnswer": { "@type": "Answer", "text": "With the STORE method (method 0, no compression) byte X of the video corresponds 1:1 to byte data_offset + X in the ZIP, so a seek is a simple offset calculation. With DEFLATE the data is compressed, and the project's troubleshooting guide says seeking to an arbitrary byte can stutter or fail. Re-pack the archive with Store, for example 7z a -mx0 output.zip with your videos, and seeking becomes instant. Video files are usually already compressed, so a Store ZIP is about the same size." }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it write the video to my disk?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No video data is written to disk. Streamed data passes through an in-memory sliding-window prefetch buffer (StreamPrefetcher) whose size you set with ZIPSTREAM_PREFETCH_MB. When you seek or stop, the old buffer is drained. The app does keep small local files of its own, such as config.json and an SQLite database for archive history and bookmarks." }
+    },
+    {
+      "@type": "Question",
+      "name": "What does the remote server need to support?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The URL must be a direct link to the ZIP file, and the server or CDN must honour HTTP Range requests (it must answer with 206 Partial Content and Accept-Ranges: bytes). HTML landing pages, confirmation pages and servers without Range support will fail with errors such as \"Valid ZIP End of Central Directory record not found\" or \"Server does not support Range requests\"." }
+    },
+    {
+      "@type": "Question",
+      "name": "Which players and apps does it work with?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It auto-detects and launches PotPlayer, MPV, VLC, MPC-HC, MPC-BE and IINA, and it has a built-in HTML5 browser player. Any app that can open an HTTP URL works with the /stream endpoint. Playlists exported as M3U/M3U8 work in players such as Kodi, Infuse and VLC, the WebDAV bridge serves Infuse, Kodi and Windows Explorer, and STRM bundles let Jellyfin, Emby and Kodi index the archive as a virtual library." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I install and run it?",
+      "acceptedAnswer": { "@type": "Answer", "text": "You need Python 3.9 or newer. Clone https://github.com/MHJoy99/ZipStream-Hub.git, run pip install -e . inside the folder, then start the server with zipstream-server (or python server.py) and open http://127.0.0.1:8787. From the terminal you can also run zipstream followed by the ZIP URL, or start it with docker compose up -d." }
+    },
+    {
+      "@type": "Question",
+      "name": "How much RAM should I give the buffer?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Set ZIPSTREAM_PREFETCH_MB. The README suggests 64 MB for 4 GB RAM systems (about 30 to 60 seconds of forward buffer), 1024 MB for 8 to 16 GB systems, and 5120 MB for 32 GB and gigabit-fiber machines. The precedence is environment variables, then config.json, then defaults." }
+    },
+    {
+      "@type": "Question",
+      "name": "Is ZipStreamHub free, and which platforms does it run on?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. It is free and released under the MIT License. It is a Python 3.9+ package with urllib3 as its only dependency, and it runs on Windows, macOS and Linux, or as a Docker container. Use it only with archives you are entitled to access and respect the terms of the hosts and services involved." }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "MHJoy99 projects", "item": "https://github.com/MHJoy99" },
+    { "@type": "ListItem", "position": 2, "name": "ZipStreamHub", "item": "https://mhjoy99.github.io/ZipStream-Hub/" }
+  ]
+}
+</script>
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+    <symbol id="i-cc" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 10c-1-1-3-.6-3 2s2 3 3 2M17 10c-1-1-3-.6-3 2s2 3 3 2"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></symbol>
+    <symbol id="i-win" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/></symbol>
+    <symbol id="i-term" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/></symbol>
+  </defs>
+</svg>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="favicon.svg" alt="" width="28" height="28">ZipStreamHub</a>
+    <nav class="nav" aria-label="Primary">
+      <a class="hide-s" href="#features">Features</a>
+      <a class="hide-s" href="#how">How it works</a>
+      <a class="hide-s" href="#architecture">Architecture</a>
+      <a class="hide-s" href="#players">Players</a>
+      <a href="#quickstart">Quick start</a>
+      <a class="hide-s" href="#faq">FAQ</a>
+      <a class="gh" href="https://github.com/MHJoy99/ZipStream-Hub">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<div id="top"></div>
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><i></i>Open source &middot; MIT &middot; Python 3.9+ &middot; Windows, macOS, Linux, Docker</span>
+    <h1>Play video inside remote ZIPs. <span class="grad">Download nothing.</span></h1>
+    <p class="lede">ZipStreamHub is a zero-download streaming server for remote ZIP and ZIP64 archives. It reads the ZIP index with HTTP range requests and serves seekable HTTP 206 streams to PotPlayer, MPV, VLC, IINA, your browser, M3U playlists, WebDAV and media servers.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/MHJoy99/ZipStream-Hub"><svg><use href="#i-github" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Get it on GitHub</a>
+      <a class="btn" href="https://github.com/MHJoy99/ZipStream-Hub/tree/main/docs"><svg><use href="#i-book" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Read the docs</a>
+    </div>
+    <div class="install" aria-label="Install">
+      <div class="cmd"><code><span class="p">$</span>git clone https://github.com/MHJoy99/ZipStream-Hub.git</code><button class="copy" type="button" data-copy="git clone https://github.com/MHJoy99/ZipStream-Hub.git">Copy</button></div>
+    </div>
+
+    <figure class="cinema" aria-labelledby="herocap">
+      <!-- DESKTOP HERO VISUAL -->
+      <svg class="hero-d hero-svg" viewBox="0 0 1000 430" role="img" aria-label="Animation: a remote ZIP archive on the left, the ZipStreamHub range proxy in the middle and a video player on the right. The player seeks along its scrubber and a highlighted byte window jumps to the matching place in the archive; each move is an HTTP Range request answered with 206 Partial Content.">
+        <defs>
+          <linearGradient id="bar-d" x1="0" x2="1"><stop offset="0" stop-color="#1d4fa8"/><stop offset="1" stop-color="#2a7bd6"/></linearGradient>
+          <linearGradient id="au-d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c2a6b"/><stop offset=".55" stop-color="#0d6a96"/><stop offset="1" stop-color="#14c79a"/></linearGradient>
+          <clipPath id="scr-d"><rect x="692" y="64" width="272" height="153" rx="10"/></clipPath>
+          <clipPath id="bar-clip-d"><rect x="46" y="262" width="260" height="40" rx="8"/></clipPath>
+        </defs>
+        <!-- Remote ZIP -->
+        <rect class="card-bg" x="16" y="30" width="312" height="370" rx="18"/>
+        <text class="t-h" x="36" y="66" font-size="17">Season01.zip</text>
+        <text class="t-d" x="36" y="86" font-size="12">remote file &middot; HTTP/HTTPS &middot; ZIP / ZIP64</text>
+        <g class="t" font-size="11.5">
+          <rect x="36" y="108" width="272" height="26" rx="7" fill="#102553" stroke="#24427a"/><text x="48" y="125">Episode01.mkv</text><text class="t-m" x="296" y="125" text-anchor="end">STORE</text>
+          <rect x="36" y="140" width="272" height="26" rx="7" fill="#102553" stroke="#24427a"/><text x="48" y="157">Episode02.mkv</text><text class="t-m" x="296" y="157" text-anchor="end">STORE</text>
+          <rect x="36" y="172" width="272" height="26" rx="7" fill="#102553" stroke="#24427a"/><text x="48" y="189">Episode03.mkv</text><text class="t-m" x="296" y="189" text-anchor="end">STORE</text>
+        </g>
+        <text class="t-d" x="46" y="244" font-size="11.5">archive bytes</text>
+        <g clip-path="url(#bar-clip-d)">
+          <rect x="46" y="262" width="247" height="40" fill="url(#bar-d)" opacity=".55"/>
+          <path d="M46 262h247" stroke="#0a1b44" stroke-width="40" stroke-dasharray="2 38" opacity=".5"/>
+          <rect class="tail-glow" x="293" y="262" width="13" height="40" fill="#2de2b0"/>
+        </g>
+        <rect x="293" y="262" width="13" height="40" rx="3" fill="#2de2b0" opacity=".35"/>
+        <rect class="win" x="46" y="256" width="34" height="52" rx="6"/>
+        <text class="t-d" x="46" y="326" font-size="11.5">file data, never fully fetched</text>
+        <text class="t-m t" x="306" y="344" font-size="11.5" text-anchor="end">tail: ZIP index</text>
+        <text class="t-d" x="36" y="378" font-size="12">only the bytes you watch are read</text>
+        <!-- links -->
+        <path class="flow" d="M328 222 H412"/>
+        <path class="flow flow-b" d="M412 150 H328" style="stroke-opacity:.45"/>
+        <text class="t" x="370" y="141" font-size="10.5" text-anchor="middle">GET Range</text>
+        <text class="t t-m" x="370" y="240" font-size="10.5" text-anchor="middle">206</text>
+        <path class="flow" d="M588 222 H672"/>
+        <path class="flow flow-b" d="M672 150 H588" style="stroke-opacity:.45"/>
+        <text class="t" x="630" y="141" font-size="10.5" text-anchor="middle">GET Range</text>
+        <text class="t t-m" x="630" y="240" font-size="10.5" text-anchor="middle">206</text>
+        <g class="packets">
+          <g class="packet"><rect x="-7" y="-2.5" width="14" height="5" rx="2.5"/><animateMotion path="M328 222 H412" dur="1.4s" begin="0s" repeatCount="indefinite"/></g>
+          <g class="packet"><rect x="-7" y="-2.5" width="14" height="5" rx="2.5"/><animateMotion path="M328 222 H412" dur="1.4s" begin="0.35s" repeatCount="indefinite"/></g>
+          <g class="packet"><rect x="-7" y="-2.5" width="14" height="5" rx="2.5"/><animateMotion path="M328 222 H412" dur="1.4s" begin="0.7s" repeatCount="indefinite"/></g>
+          <g class="packet"><rect x="-7" y="-2.5" width="14" height="5" rx="2.5"/><animateMotion path="M328 222 H412" dur="1.4s" begin="1.05s" repeatCount="indefinite"/></g>
+          <g class="packet"><rect x="-7" y="-2.5" width="14" height="5" rx="2.5"/><animateMotion path="M588 222 H672" dur="1.4s" begin="0.2s" repeatCount="indefinite"/></g>
+          <g class="packet"><rect x="-7" y="-2.5" width="14" height="5" rx="2.5"/><animateMotion path="M588 222 H672" dur="1.4s" begin="0.55s" repeatCount="indefinite"/></g>
+          <g class="packet"><rect x="-7" y="-2.5" width="14" height="5" rx="2.5"/><animateMotion path="M588 222 H672" dur="1.4s" begin="0.9s" repeatCount="indefinite"/></g>
+          <g class="packet"><rect x="-7" y="-2.5" width="14" height="5" rx="2.5"/><animateMotion path="M588 222 H672" dur="1.4s" begin="1.25s" repeatCount="indefinite"/></g>
+          <g class="packet-b"><circle r="3.2"/><animateMotion path="M412 150 H328" dur="1.6s" begin="0.4s" repeatCount="indefinite"/></g>
+          <g class="packet-b"><circle r="3.2"/><animateMotion path="M672 150 H588" dur="1.6s" begin="0.9s" repeatCount="indefinite"/></g>
+        </g>
+        <!-- Proxy -->
+        <rect class="proxy-bg" x="412" y="100" width="176" height="236" rx="18"/>
+        <text class="t-h" x="500" y="132" font-size="16" text-anchor="middle">ZipStreamHub</text>
+        <text class="t t-m" x="500" y="150" font-size="11.5" text-anchor="middle">127.0.0.1:8787</text>
+        <rect x="428" y="166" width="144" height="28" rx="8" fill="#0e2a52" stroke="#24427a"/>
+        <text class="t" x="500" y="185" font-size="11.5" text-anchor="middle">S + data_offset</text>
+        <text class="t-d" x="500" y="226" font-size="11" text-anchor="middle">sliding-window buffer</text>
+        <g fill="#2de2b0">
+          <rect class="buf-blk" x="430" y="238" width="14" height="18" rx="3"/><rect class="buf-blk" x="448" y="238" width="14" height="18" rx="3"/><rect class="buf-blk" x="466" y="238" width="14" height="18" rx="3"/><rect class="buf-blk" x="484" y="238" width="14" height="18" rx="3"/>
+          <rect class="buf-blk" x="502" y="238" width="14" height="18" rx="3"/><rect class="buf-blk" x="520" y="238" width="14" height="18" rx="3"/><rect class="buf-blk" x="538" y="238" width="14" height="18" rx="3"/><rect class="buf-blk" x="556" y="238" width="14" height="18" rx="3"/>
+        </g>
+        <text class="t pulse206" x="500" y="288" font-size="11.5" text-anchor="middle" fill="#2de2b0" style="fill:#2de2b0">206 Partial Content</text>
+        <text class="t-d" x="500" y="308" font-size="10.5" text-anchor="middle">Accept-Ranges: bytes</text>
+        <!-- ticker -->
+        <rect x="338" y="352" width="324" height="56" rx="12" fill="#071a33" stroke="#24427a"/>
+        <g class="t" font-size="11.5">
+          <g class="s0"><text x="350" y="375">&gt; Range: bytes=-1048576</text><text class="t-m" x="350" y="395" style="fill:#2de2b0">&lt; 206 &middot; EOCD + central directory</text></g>
+          <g class="s1"><text x="350" y="375">&gt; Range: bytes=0-</text><text class="t-m" x="350" y="395" style="fill:#2de2b0">&lt; 206 &middot; 2 MB blocks, 128 KB slices</text></g>
+          <g class="s2"><text x="350" y="375">player: Range: bytes=2920577761-</text><text class="t-m" x="350" y="395" style="fill:#2de2b0">remote: Range: bytes=2920577985-</text></g>
+          <g class="s3"><text x="350" y="375">player: Range: bytes=1460288880-</text><text class="t-m" x="350" y="395" style="fill:#2de2b0">remote: Range: bytes=1460289104-</text></g>
+        </g>
+        <!-- Player -->
+        <rect class="card-bg" x="672" y="30" width="312" height="370" rx="18"/>
+        <g clip-path="url(#scr-d)">
+          <rect x="692" y="64" width="272" height="153" fill="url(#au-d)"/>
+          <g class="aurora" opacity=".55"><path d="M660 170c50-40 90 20 150-10s90-30 170 10v60H660z" fill="#2de2b0" opacity=".35"/><path d="M660 190c60-20 100 30 160 0s80-20 160 5v40H660z" fill="#4aa3ff" opacity=".35"/></g>
+          <rect x="692" y="64" width="272" height="153" fill="none" stroke="#fff" stroke-opacity=".06"/>
+        </g>
+        <circle cx="828" cy="140" r="24" fill="#04121f" fill-opacity=".45" stroke="#fff" stroke-opacity=".75" stroke-width="1.6"/>
+        <path d="M821 128v24l20-12z" fill="#fff"/>
+        <rect x="702" y="74" width="54" height="20" rx="6" fill="#04121f" fill-opacity=".6"/>
+        <text class="t pulse206" x="729" y="88" font-size="10.5" text-anchor="middle" style="fill:#2de2b0">HTTP 206</text>
+        <rect x="692" y="244" width="272" height="6" rx="3" fill="#1a2f5a"/>
+        <rect class="buf" x="692" y="244" width="52" height="6" rx="3" fill="#2de2b0" opacity=".55"/>
+        <circle class="ph" cx="692" cy="247" r="8" fill="#fff" stroke="#2de2b0" stroke-width="3"/>
+        <path d="M698 272v16l12-8z" fill="#c9dcff"/>
+        <path d="M722 276h5l6-5v18l-6-5h-5z" fill="#8fa7cf"/>
+        <rect x="940" y="272" width="16" height="14" rx="3" fill="none" stroke="#8fa7cf" stroke-width="1.6"/>
+        <g class="seek-chip"><rect x="820" y="270" width="112" height="22" rx="11" fill="#2de2b0"/><text class="t-h" x="876" y="285" font-size="11.5" text-anchor="middle" style="fill:#04121f">SEEK &rarr; new range</text></g>
+        <text class="t-d" x="692" y="326" font-size="12">player seeks, socket closes, old buffer</text>
+        <text class="t-d" x="692" y="344" font-size="12">drains, a new Range request opens</text>
+        <text class="t-h" x="692" y="372" font-size="14">Any player</text>
+        <text class="t-d" x="692" y="390" font-size="11.5">PotPlayer &middot; MPV &middot; VLC &middot; IINA &middot; browser</text>
+      </svg>
+
+      <!-- MOBILE HERO VISUAL -->
+      <svg class="hero-m hero-svg-m" viewBox="0 0 360 610" role="img" aria-label="Animation: a remote ZIP archive at the top, the ZipStreamHub range proxy in the middle and a video player at the bottom. The player seeks and a highlighted byte window jumps to the matching place in the archive; each move is an HTTP Range request answered with 206 Partial Content.">
+        <defs>
+          <linearGradient id="bar-m" x1="0" x2="1"><stop offset="0" stop-color="#1d4fa8"/><stop offset="1" stop-color="#2a7bd6"/></linearGradient>
+          <linearGradient id="au-m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c2a6b"/><stop offset=".55" stop-color="#0d6a96"/><stop offset="1" stop-color="#14c79a"/></linearGradient>
+          <clipPath id="scr-m"><rect x="24" y="436" width="312" height="100" rx="10"/></clipPath>
+          <clipPath id="bar-clip-m"><rect x="30" y="78" width="300" height="36" rx="8"/></clipPath>
+        </defs>
+        <rect class="card-bg" x="8" y="6" width="344" height="176" rx="16"/>
+        <text class="t-h" x="24" y="34" font-size="16">Season01.zip</text>
+        <text class="t-d" x="24" y="52" font-size="11.5">remote file &middot; HTTP/HTTPS &middot; ZIP / ZIP64</text>
+        <text class="t-d" x="30" y="70" font-size="11">archive bytes</text>
+        <g clip-path="url(#bar-clip-m)">
+          <rect x="30" y="78" width="285" height="36" fill="url(#bar-m)" opacity=".55"/>
+          <path d="M30 78h285" stroke="#0a1b44" stroke-width="36" stroke-dasharray="2 38" opacity=".5"/>
+          <rect class="tail-glow" x="315" y="78" width="15" height="36" fill="#2de2b0"/>
+        </g>
+        <rect x="315" y="78" width="15" height="36" rx="3" fill="#2de2b0" opacity=".35"/>
+        <rect class="win" x="30" y="72" width="36" height="48" rx="6"/>
+        <text class="t-d" x="30" y="140" font-size="11">file data, never fully fetched</text>
+        <text class="t t-m" x="330" y="140" font-size="11" text-anchor="end">tail: ZIP index</text>
+        <text class="t-d" x="30" y="166" font-size="11.5">only the bytes you watch are read</text>
+
+        <path class="flow" d="M200 182 V 220"/>
+        <path class="flow flow-b" d="M150 220 V 182" style="stroke-opacity:.45"/>
+        <text class="t" x="140" y="205" font-size="10" text-anchor="end">GET Range</text>
+        <text class="t t-m" x="210" y="205" font-size="10">206</text>
+        <g class="packets">
+          <g class="packet"><rect x="-6" y="-2.5" width="12" height="5" rx="2.5" transform="rotate(90)"/><animateMotion path="M200 182 V 220" dur="1.2s" begin="0s" repeatCount="indefinite"/></g>
+          <g class="packet"><rect x="-6" y="-2.5" width="12" height="5" rx="2.5" transform="rotate(90)"/><animateMotion path="M200 182 V 220" dur="1.2s" begin="0.4s" repeatCount="indefinite"/></g>
+          <g class="packet"><rect x="-6" y="-2.5" width="12" height="5" rx="2.5" transform="rotate(90)"/><animateMotion path="M200 182 V 220" dur="1.2s" begin="0.8s" repeatCount="indefinite"/></g>
+          <g class="packet-b"><circle r="3"/><animateMotion path="M150 220 V 182" dur="1.5s" begin="0.4s" repeatCount="indefinite"/></g>
+        </g>
+
+        <rect class="proxy-bg" x="8" y="220" width="344" height="176" rx="16"/>
+        <text class="t-h" x="180" y="246" font-size="15" text-anchor="middle">ZipStreamHub</text>
+        <text class="t t-m" x="180" y="262" font-size="11" text-anchor="middle">127.0.0.1:8787</text>
+        <rect x="100" y="272" width="160" height="24" rx="8" fill="#0e2a52" stroke="#24427a"/>
+        <text class="t" x="180" y="289" font-size="11" text-anchor="middle">S + data_offset</text>
+        <g fill="#2de2b0">
+          <rect class="buf-blk" x="102" y="308" width="14" height="14" rx="3"/><rect class="buf-blk" x="120" y="308" width="14" height="14" rx="3"/><rect class="buf-blk" x="138" y="308" width="14" height="14" rx="3"/><rect class="buf-blk" x="156" y="308" width="14" height="14" rx="3"/>
+          <rect class="buf-blk" x="174" y="308" width="14" height="14" rx="3"/><rect class="buf-blk" x="192" y="308" width="14" height="14" rx="3"/><rect class="buf-blk" x="210" y="308" width="14" height="14" rx="3"/><rect class="buf-blk" x="228" y="308" width="14" height="14" rx="3"/>
+        </g>
+        <text class="t-d" x="180" y="338" font-size="10.5" text-anchor="middle">sliding-window buffer &middot; 206 Partial Content</text>
+        <g class="t" font-size="11">
+          <g class="s0"><text x="24" y="362">&gt; Range: bytes=-1048576</text><text class="t-m" x="24" y="381" style="fill:#2de2b0">&lt; 206 &middot; EOCD + central directory</text></g>
+          <g class="s1"><text x="24" y="362">&gt; Range: bytes=0-</text><text class="t-m" x="24" y="381" style="fill:#2de2b0">&lt; 206 &middot; 2 MB blocks, 128 KB slices</text></g>
+          <g class="s2"><text x="24" y="362">player: Range: bytes=2920577761-</text><text class="t-m" x="24" y="381" style="fill:#2de2b0">remote: Range: bytes=2920577985-</text></g>
+          <g class="s3"><text x="24" y="362">player: Range: bytes=1460288880-</text><text class="t-m" x="24" y="381" style="fill:#2de2b0">remote: Range: bytes=1460289104-</text></g>
+        </g>
+
+        <rect class="card-bg" x="8" y="408" width="344" height="196" rx="16"/>
+        <g clip-path="url(#scr-m)">
+          <rect x="24" y="424" width="312" height="100" fill="url(#au-m)"/>
+          <g class="aurora" opacity=".55"><path d="M0 490c50-30 90 14 150-8s90-24 180 8v50H0z" fill="#2de2b0" opacity=".35"/><path d="M0 505c60-14 100 24 160 0s80-16 170 4v30H0z" fill="#4aa3ff" opacity=".35"/></g>
+        </g>
+        <circle cx="180" cy="474" r="20" fill="#04121f" fill-opacity=".45" stroke="#fff" stroke-opacity=".75" stroke-width="1.6"/>
+        <path d="M174 464v20l17-10z" fill="#fff"/>
+        <rect x="32" y="432" width="52" height="18" rx="6" fill="#04121f" fill-opacity=".6"/>
+        <text class="t pulse206" x="58" y="445" font-size="10" text-anchor="middle" style="fill:#2de2b0">HTTP 206</text>
+        <rect x="30" y="544" width="300" height="6" rx="3" fill="#1a2f5a"/>
+        <rect class="buf" x="30" y="544" width="54" height="6" rx="3" fill="#2de2b0" opacity=".55"/>
+        <circle class="ph" cx="30" cy="547" r="8" fill="#fff" stroke="#2de2b0" stroke-width="3"/>
+        <g class="seek-chip"><rect x="214" y="560" width="116" height="22" rx="11" fill="#2de2b0"/><text class="t-h" x="272" y="575" font-size="11" text-anchor="middle" style="fill:#04121f">SEEK &rarr; new range</text></g>
+        <path d="M32 562v16l12-8z" fill="#c9dcff"/>
+      </svg>
+      <figcaption id="herocap">Illustrative animation of the mechanism (the numbers are an example). A seek becomes a new <code style="background:none;border:0;color:#2de2b0;padding:0">Range</code> request shifted by the entry's data offset.</figcaption>
+    </figure>
+
+    <div class="stats" role="list">
+      <div class="stat" role="listitem"><b>~0.6 s</b><span>tail parse to build the index</span></div>
+      <div class="stat" role="listitem"><b>0 bytes</b><span>of video written to disk</span></div>
+      <div class="stat" role="listitem"><b>ZIP64</b><span>archives up to 16 EB</span></div>
+      <div class="stat" role="listitem"><b>&lt; 5 ms</b><span>seek translation</span></div>
+    </div>
+    <p class="fine">Figures are as stated in the project README, not independently measured here.</p>
+  </div>
+</header>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="center rv"><p class="kicker">Key features</p>
+    <h2>Everything between a cloud ZIP and your <span class="grad">player</span></h2>
+    <p class="sub">Ten capabilities straight from the README, from the byte-range engine to one-click player launch, playlists and a dark-mode dashboard.</p></div>
+    <div class="grid">
+      <article class="card rv"><div class="ico"><svg><use href="#i-bolt"/></svg></div><h3>Zero-download streaming</h3><p>Streams media directly from remote HTTP/HTTPS ZIP archives over standard HTTP 206 byte-range requests.</p></article>
+      <article class="card rv"><div class="ico"><svg><use href="#i-box"/></svg></div><h3>ZIP, ZIP64 and Store</h3><p>Handles archives larger than 4 GB (up to 16 exabytes by the ZIP64 format) with STORE and DEFLATE methods.</p></article>
+      <article class="card rv"><div class="ico"><svg><use href="#i-layers"/></svg></div><h3>Sliding-window prefetcher</h3><p>Multi-threaded read-ahead buffer with 128 KB chunk slicing for smooth playback and fast seeks. Size is tunable up to 5 GB of RAM.</p></article>
+      <article class="card rv"><div class="ico"><svg><use href="#i-play"/></svg></div><h3>1-click native players</h3><p>Auto-detects PotPlayer, MPV, VLC, MPC-HC, MPC-BE and IINA via the Windows Registry and your system PATH.</p></article>
+      <article class="card rv"><div class="ico"><svg><use href="#i-globe"/></svg></div><h3>Web player and dashboard</h3><p>Dark-mode control panel with a built-in HTML5 player, fullscreen, playback speed and live stream telemetry.</p></article>
+      <article class="card rv"><div class="ico"><svg><use href="#i-list"/></svg></div><h3>M3U / M3U8 playlists</h3><p>Export a playlist of every video in the archive for Kodi, Infuse (Apple TV and iOS) and VLC.</p></article>
+      <article class="card rv"><div class="ico"><svg><use href="#i-cc"/></svg></div><h3>Subtitle auto-conversion</h3><p>Detects subtitle tracks and converts <code>.srt</code> to WebVTT on the fly for in-browser viewing.</p></article>
+      <article class="card rv"><div class="ico"><svg><use href="#i-star"/></svg></div><h3>History and bookmarks</h3><p>Quick-access storage for frequently inspected archives, with one-click reload and saved seek positions.</p></article>
+      <article class="card rv"><div class="ico"><svg><use href="#i-win"/></svg></div><h3>Windows 1-click launcher</h3><p>Background startup via <code>launch_zipstream.vbs</code>, desktop shortcuts and automatic browser launch.</p></article>
+      <article class="card wide rv"><div class="ico"><svg><use href="#i-term"/></svg></div><h3>Interactive terminal player</h3><p>A colourful ANSI CLI (<code>zipstream</code>) for keyboard-driven episode selection or direct launch into a player.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="alt">
+  <div class="wrap">
+    <div class="rv"><p class="kicker">How it works</p>
+    <h2>The ZIP index lives at the <span class="grad">end</span> of the file</h2>
+    <p class="sub">A ZIP is built for random access. So ZipStreamHub never needs the whole archive: it reads the tail, builds an index in memory, then turns every player seek into one precise range request.</p></div>
+    <ol class="steps">
+      <li class="rv"><h3>Tail-parse the archive</h3><p>Request the final 1 MB with an HTTP Range request. Locate the End of Central Directory (<code>0x06054b50</code>) and the ZIP64 Locator (<code>0x07064b50</code>).</p></li>
+      <li class="rv"><h3>Resolve the Central Directory</h3><p>Read the file headers (<code>0x02014b50</code>) and build the in-memory archive index. The README states this takes about 0.6 seconds.</p></li>
+      <li class="rv"><h3>Translate ranges</h3><p>A player request for bytes <code>[S, E]</code> is offset against the file's <code>data_offset</code> and served through the asynchronous sliding-window prefetcher.</p></li>
+    </ol>
+    <div class="zip rv" role="img" aria-label="Layout of a ZIP file: file data, then Central Directory, ZIP64 end of central directory record, ZIP64 locator and end of central directory record. The tail is read first.">
+      <div class="seg data"><div><b>Local headers + file data</b>Untouched until a player asks for a range</div><code>0x04034b50</code></div>
+      <div class="seg cd"><div><b>Central Directory</b>One header per file</div><code>0x02014b50</code></div>
+      <div class="seg z64"><div><b>ZIP64 EOCD</b>optional</div><code>0x06064b50</code></div>
+      <div class="seg loc"><div><b>ZIP64 Locator</b>optional</div><code>0x07064b50</code></div>
+      <div class="seg eocd"><div><b>EOCD</b><span class="tag">read first</span></div><code>0x06054b50</code></div>
+    </div>
+    <p class="legend">Schematic, not to scale. The highlight sweeps in the order ZipStreamHub reads: tail first, then the index, then only the file data you play.</p>
+
+    <div class="two">
+      <div class="formula rv">
+        <h3>Range translation</h3>
+        <p>The Central Directory points to the <em>local file header</em>, so ZipStreamHub reads those 30 bytes once and caches the real payload offset. With the STORE method, byte <code>X</code> of the video is byte <code>data_offset + X</code> of the remote file.</p>
+<pre><span class="c"># per entry (cached after the first lookup)</span>
+<span class="k">data_offset</span> = local_header_offset + 30 + name_len + extra_len
+
+<span class="c"># player asks for [S_client, E_client]</span>
+<span class="k">S_remote</span> = data_offset + S_client
+<span class="k">E_remote</span> = data_offset + E_client</pre>
+      </div>
+      <div class="formula rv">
+        <h3>Store vs. Deflate</h3>
+        <p><b>STORE</b> (method 0, no compression) gives 1:1 byte offsets and instant seeking. <b>DEFLATE</b> (method 8) compresses the data, so, per the troubleshooting guide, seeking to an arbitrary byte can stutter or fail.</p>
+        <p>Videos are already compressed, so a Store ZIP is about the same size. To re-pack with 7-Zip:</p>
+<pre><span class="c"># 0% compression = instant streaming</span>
+7z a -mx0 output.zip "path/to/videos/*"</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="rv"><p class="kicker">Architecture</p>
+    <h2>A byte-range proxy with <span class="grad">many front doors</span></h2>
+    <p class="sub">One engine reads the remote archive; one multi-threaded server exposes it as streams, playlists, WebDAV and STRM bundles. No FUSE or kernel driver involved.</p></div>
+    <div class="pipe rv">
+      <div class="node"><span class="file">remote server</span><h3>Remote ZIP / ZIP64</h3><p>Any HTTP/HTTPS direct link that honours <code>Range</code>. Only the tail, the index and the played ranges are read.</p></div>
+      <div class="arrow" aria-hidden="true"></div>
+      <div class="node core"><span class="file">engine.py</span><h3>RemoteZipReader</h3><p>Probes size with <code>Range: bytes=0-0</code>, tail-parses EOCD / ZIP64, builds the index, caches each <code>data_offset</code>.</p></div>
+      <div class="arrow" aria-hidden="true"></div>
+      <div class="node core"><span class="file">engine.py</span><h3>StreamPrefetcher</h3><p>Worker thread pulls 2 MB blocks over a keep-alive urllib3 pool into a bounded queue; the consumer slices them into 128 KB writes.</p></div>
+      <div class="arrow" aria-hidden="true"></div>
+      <div class="node"><span class="file">server.py</span><h3>HTTP / WebDAV server</h3><p>Answers <code>206 Partial Content</code> at <code>/stream/&lt;id&gt;/&lt;filename&gt;</code>, plus the REST API, M3U, STRM and WebDAV.</p></div>
+    </div>
+
+    <div class="two" style="margin-bottom:26px">
+      <div class="formula rv">
+        <h3>Sliding-window buffer, with instant seek drain</h3>
+        <p>Data is buffered ahead of the player in RAM only. When the buffer is full, upstream fetching pauses (backpressure). On a seek the socket closes, an abort event stops the worker, queued blocks are drained, and prefetching restarts at the new offset.</p>
+        <div class="ring" role="img" aria-label="Animation of a RAM ring buffer: blocks fill ahead of the playback cursor, then a seek drains them and refills from the new position."><div class="track"></div><div class="fill"></div><div class="cur"></div></div>
+        <p class="ring-legend"><span>prefetched in RAM</span><span>playback cursor</span><span>not fetched</span></p>
+      </div>
+      <div class="formula rv">
+        <h3>Memory presets</h3>
+        <p>Set <code>ZIPSTREAM_PREFETCH_MB</code> (README presets):</p>
+        <table class="tbl fit">
+          <thead><tr><th>System</th><th>Value</th><th>Forward buffer</th></tr></thead>
+          <tbody>
+            <tr><td>4 GB RAM (Raspberry Pi, small VPS)</td><td><code>64</code></td><td>~30-60 sec</td></tr>
+            <tr><td>8-16 GB RAM (desktop, laptop)</td><td><code>1024</code></td><td>~2-5 min</td></tr>
+            <tr><td>32 GB+ and gigabit fiber</td><td><code>5120</code></td><td>~10-25 min</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mods">
+      <div class="mod rv"><span class="file">engine.py</span><h3>Byte-range proxy</h3><p>ZIP/ZIP64 tail parser, <code>RemoteZipReader</code>, <code>StreamPrefetcher</code> and stream metrics.</p></div>
+      <div class="mod rv"><span class="file">server.py</span><h3>Streaming server</h3><p>Threaded HTTP server on port 8787 with CORS, the REST API and the web GUI at <code>/</code>.</p></div>
+      <div class="mod rv"><span class="file">player_detector.py</span><h3>Players</h3><p>Detects installed players (Windows Registry and PATH) and launches them with the stream URL.</p></div>
+      <div class="mod rv"><span class="file">/api/playlist.m3u</span><h3>M3U / M3U8 export</h3><p>An <code>#EXTM3U</code> playlist of the archive's video entries, each pointing at a <code>/stream/</code> URL.</p></div>
+      <div class="mod rv"><span class="file">webdav_bridge.py</span><h3>WebDAV bridge</h3><p>RFC 4918 virtual filesystem at <code>/webdav/</code> for Infuse, Kodi and Windows Explorer.</p></div>
+      <div class="mod rv"><span class="file">strm_generator.py</span><h3>STRM bundles</h3><p>Virtual <code>.strm</code> library ZIPs so Jellyfin, Emby and Kodi can index the archive.</p></div>
+      <div class="mod rv"><span class="file">static/web_gui.html</span><h3>Web GUI</h3><p>Dashboard, settings, history, live console and an HTML5 player with a codec/resolution badge.</p></div>
+      <div class="mod rv"><span class="file">subtitle_parser.py, media_inspector.py</span><h3>Subtitles and inspection</h3><p><code>.srt</code> to WebVTT on the fly, plus binary media-header inspection (codecs, size, duration).</p></div>
+      <div class="mod rv"><span class="file">history.py, config.py, cli.py</span><h3>State and CLI</h3><p>SQLite history and bookmarks, JSON/env configuration, and the interactive terminal player.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section id="gui" class="alt">
+  <div class="wrap">
+    <div class="rv"><p class="kicker">Web GUI</p>
+    <h2>Paste a link. Inspect. <span class="grad">Watch.</span></h2>
+    <p class="sub">Open <code>http://127.0.0.1:8787</code>, paste a direct ZIP URL and the dashboard lists every video with its compression method and offset. Play it in the browser or send it to your desktop player.</p></div>
+    <div class="shot-main">
+      <figure class="shot rv"><div class="bar"><i></i><i></i><i></i><span>127.0.0.1:8787</span></div><img src="dashboard.jpg" width="1140" height="940" loading="lazy" alt="ZipStreamHub web dashboard after inspecting a remote ZIP: archive size, video count, subtitle track count, Instant Seek mode, buttons for STRM library, WebDAV link and M3U playlist, and a list of three episodes with Watch in Browser and PotPlayer buttons."><figcaption>The real dashboard inspecting a small demo ZIP (fictional test clips). Each entry shows <code>STORE (0ms Seek)</code> and its offset.</figcaption></figure>
+    </div>
+    <div class="shots">
+      <figure class="shot rv"><div class="bar"><i></i><i></i><i></i><span>127.0.0.1:8787 &middot; in-browser player</span></div><img src="player.jpg" width="1080" height="800" loading="lazy" alt="ZipStreamHub in-browser video player playing a test pattern with H.264, 1280x720 and duration badges, speed controls and a subtitle selector."><figcaption>Built-in HTML5 player: codec and resolution badge, speed control, subtitles, keyboard shortcuts and a direct-link copy.</figcaption></figure>
+      <div class="rv">
+        <h3>What the dashboard gives you</h3>
+            <ul class="feat-list">
+      <li>Live bandwidth, active streams and total transferred</li>
+      <li>Buffer and slice size settings you can change live</li>
+      <li>Live console of range requests and stream events</li>
+      <li>Recent archives with favourites</li>
+      <li>Filter by name, extension, STORE/DEFLATE or subtitled</li>
+      <li>WebDAV link, M3U download and STRM bundle buttons</li>
+    </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAYERS -->
+<section id="players">
+  <div class="wrap">
+    <div class="rv"><p class="kicker">Players and export</p>
+    <h2>Your player, your <span class="grad">playlist</span>, your library</h2>
+    <p class="sub">Every file in an inspected archive gets a stable stream URL: <code>http://&lt;host&gt;:&lt;port&gt;/stream/&lt;entry_id&gt;/&lt;url_encoded_filename&gt;</code>. Anything that can open an HTTP URL can play it.</p></div>
+    <ul class="chips rv" aria-label="Supported players">
+      <li>PotPlayer<small>Windows</small></li><li>MPV<small>all</small></li><li>VLC<small>all</small></li><li>MPC-HC<small>Windows</small></li><li>MPC-BE<small>Windows</small></li><li>IINA<small>macOS</small></li><li>Web browser<small>built-in</small></li><li>Kodi<small>M3U, WebDAV, STRM</small></li><li>Infuse<small>M3U, WebDAV</small></li><li>Jellyfin / Emby<small>STRM</small></li>
+    </ul>
+    <div class="cols">
+      <div class="rv">
+        <h3>M3U / M3U8 export</h3>
+        <div class="codeblock"><div class="head"><span>/api/playlist.m3u</span></div>
+<pre><span class="k">#EXTM3U</span>
+<span class="k">#EXT-X-VERSION:3</span>
+<span class="c"># PLAYLIST GENERATED BY ZIPSTREAM HUB (2 items)</span>
+#EXTINF:-1 tvg-name="Episode 01 - Pilot.mkv" group-title="ZipStream Hub",Episode 01 - Pilot.mkv
+http://127.0.0.1:8787/stream/1/Episode%2001%20-%20Pilot.mkv
+#EXTINF:-1 tvg-name="Episode 02 - The Journey.mkv" group-title="ZipStream Hub",Episode 02 - The Journey.mkv
+http://127.0.0.1:8787/stream/2/Episode%2002%20-%20The%20Journey.mkv</pre></div>
+        <p style="color:var(--text-2);font-size:.95rem;margin:0">Drop the file into a player, or serve the URL to IPTV-style apps. From the CLI: <code>--export-m3u</code> and <code>--export-strm</code>.</p>
+      </div>
+      <div class="rv">
+        <h3>WebDAV and STRM</h3>
+        <p style="color:var(--text-2);font-size:.95rem;margin:0 0 12px">The WebDAV bridge at <code>http://127.0.0.1:8787/webdav/</code> answers <code>PROPFIND</code>, <code>GET</code>, <code>HEAD</code> and <code>OPTIONS</code>, so the archive can be mounted as a network drive in Windows Explorer and used as a source in Infuse and Kodi, with transparent range streaming.</p>
+        <p style="color:var(--text-2);font-size:.95rem;margin:0">The <code>/api/strm.zip</code> endpoint generates a bundle of tiny <code>.strm</code> files (each holds one stream URL). Jellyfin, Emby and Kodi then scrape and play the videos from the remote archive with no video stored locally.</p>
+        <p class="note"><b>Subtitles:</b> <code>.srt</code> tracks found in the archive are converted to WebVTT on the fly via <code>/api/subtitle</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUICK START -->
+<section id="quickstart" class="alt">
+  <div class="wrap">
+    <div class="rv"><p class="kicker">Quick start</p>
+    <h2>From clone to first frame in <span class="grad">three commands</span></h2>
+    <p class="sub">Requires Python 3.9 or newer. A desktop player such as PotPlayer, MPV or VLC is optional (the browser player is built in).</p></div>
+    <div class="cols">
+      <div class="rv">
+        <h3>1. Install</h3>
+        <div class="codeblock"><div class="head"><span>bash</span><button class="copy" type="button" data-copy="git clone https://github.com/MHJoy99/ZipStream-Hub.git&#10;cd ZipStream-Hub&#10;pip install -e .">Copy</button></div>
+<pre>git clone https://github.com/MHJoy99/ZipStream-Hub.git
+cd ZipStream-Hub
+pip install -e .
+<span class="c"># or for development:</span>
+<span class="c"># pip install -e ".[dev]"</span></pre></div>
+        <h3>2. Web GUI dashboard</h3>
+        <div class="codeblock"><div class="head"><span>bash</span><button class="copy" type="button" data-copy="zipstream-server">Copy</button></div>
+<pre>zipstream-server
+<span class="c"># or</span>
+python server.py</pre></div>
+        <p style="color:var(--text-2);font-size:.95rem;margin:0">Open <code>http://127.0.0.1:8787</code>. On Windows you can also double-click <code>launch_zipstream.vbs</code>.</p>
+      </div>
+      <div class="rv">
+        <h3>3. Or use the terminal player</h3>
+        <div class="codeblock"><div class="head"><span>bash</span><button class="copy" type="button" data-copy="zipstream &quot;https://example.com/anime_season1.zip&quot;">Copy</button></div>
+<pre><span class="c"># Interactive episode browser</span>
+zipstream "https://example.com/anime_season1.zip"
+
+<span class="c"># Non-interactive direct launch into PotPlayer</span>
+zipstream "https://example.com/anime_season1.zip" --ep 1 --player potplayer</pre></div>
+        <h3>Docker</h3>
+        <div class="codeblock"><div class="head"><span>bash</span><button class="copy" type="button" data-copy="docker compose up -d">Copy</button></div>
+<pre>docker compose up -d</pre></div>
+        <p class="note"><b>Tip:</b> for instant seeking, the video ZIP must be packed with <b>Store</b> (no compression). See "Store vs. Deflate" above.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONFIG + API -->
+<section id="config">
+  <div class="wrap">
+    <div class="rv"><p class="kicker">Configuration and API</p>
+    <h2>Tune it live, or <span class="grad">script it</span></h2>
+    <p class="sub">Precedence is <b>Environment variables</b> &gt; <b><code>config.json</code></b> &gt; defaults. Everything is also editable from the Settings modal in the web UI.</p></div>
+    <div class="cols">
+      <div class="rv">
+        <h3>Environment (<code>.env.example</code>)</h3>
+        <div class="codeblock"><div class="head"><span>.env</span><button class="copy" type="button" data-copy="export ZIPSTREAM_PREFETCH_MB=5120&#10;export ZIPSTREAM_SLICE_KB=128&#10;export ZIPSTREAM_HOST=0.0.0.0&#10;export ZIPSTREAM_PORT=8787&#10;export ZIPSTREAM_DEFAULT_PLAYER=potplayer">Copy</button></div>
+<pre><span class="c"># high-speed 5 GB buffering on 32 GB+ RAM systems</span>
+export ZIPSTREAM_PREFETCH_MB=5120
+export ZIPSTREAM_SLICE_KB=128
+export ZIPSTREAM_HOST=0.0.0.0
+export ZIPSTREAM_PORT=8787
+export ZIPSTREAM_DEFAULT_PLAYER=potplayer</pre></div>
+        <div class="codeblock"><div class="head"><span>config.json</span></div>
+<pre>{
+  "server":    { "host": "0.0.0.0", "port": 8787, "debug": false },
+  "streaming": { "prefetch_buffer_size_mb": 1024, "slice_size_kb": 128,
+                 "max_concurrent_streams": 8, "chunk_timeout_seconds": 30 },
+  "players":   { "default_player": "potplayer" },
+  "ui":        { "theme": "dark", "accent_color": "#3b82f6", "page_size": 50 }
+}</pre></div>
+        <p style="color:var(--text-2);font-size:.9rem;margin:0">Excerpt of the README example. Port conflict? Run <code>python server.py --port 9090</code>.</p>
+      </div>
+      <div class="rv">
+        <h3>REST API</h3>
+        <table class="tbl api fit">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><span class="m post">POST</span></td><td><code>/api/inspect</code></td><td>Inspect a remote ZIP URL, return the archive structure as JSON</td></tr>
+            <tr><td><span class="m">GET</span></td><td><code>/stream/&lt;id&gt;/&lt;file&gt;</code></td><td>HTTP 206 byte-range stream</td></tr>
+            <tr><td><span class="m other">HEAD</span></td><td><code>/stream/&lt;id&gt;/&lt;file&gt;</code></td><td>Content-Length and MIME type</td></tr>
+            <tr><td><span class="m">GET</span></td><td><code>/api/playlist.m3u</code></td><td>Export an <code>#EXTM3U</code> playlist</td></tr>
+            <tr><td><span class="m">GET</span></td><td><code>/api/strm.zip</code></td><td>Virtual <code>.strm</code> library bundle</td></tr>
+            <tr><td><span class="m">GET</span></td><td><code>/api/subtitle</code></td><td>Subtitle to WebVTT on the fly</td></tr>
+            <tr><td><span class="m">GET</span></td><td><code>/api/media_inspect</code></td><td>Codec, size and duration from media headers</td></tr>
+            <tr><td><span class="m">GET</span></td><td><code>/api/stats</code></td><td>Bitrate, active streams, buffer, latency</td></tr>
+            <tr><td><span class="m post">POST</span></td><td><code>/api/play</code></td><td>Launch the host media player with a stream URL</td></tr>
+            <tr><td><span class="m other">PROPFIND</span></td><td><code>/webdav/</code></td><td>RFC 4918 directory tree for Infuse, Kodi, Explorer</td></tr>
+          </tbody>
+        </table>
+        <p style="color:var(--text-2);font-size:.9rem;margin:10px 0 0">More endpoints (config, history, players) are in <a href="https://github.com/MHJoy99/ZipStream-Hub/blob/main/docs/API.md">docs/API.md</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="alt">
+  <div class="narrow">
+    <div class="center rv"><p class="kicker">FAQ</p>
+    <h2>Questions, answered from the <span class="grad">docs</span></h2></div>
+    <div class="faq">
+      <details class="rv"><summary>What is ZipStreamHub?</summary><div><p>ZipStreamHub is an open-source streaming server and virtual archive extractor for remote ZIP and ZIP64 files. It lets media players such as PotPlayer, MPV, VLC and IINA, or a web browser, play and seek through video stored inside a ZIP archive on a web server, without downloading or unpacking the archive first.</p></div></details>
+      <details class="rv"><summary>How can it play a video without downloading the whole ZIP?</summary><div><p>A ZIP keeps its index (the Central Directory) at the end of the file. ZipStreamHub uses HTTP Range requests to read only the last 1 MB, finds the End of Central Directory record and the ZIP64 locator, then reads the Central Directory to build an in-memory index. When a player asks for a byte range of a video, ZipStreamHub adds the entry's data offset and fetches just that range from the remote server, so only the parts you watch cross the network.</p></div></details>
+      <details class="rv"><summary>Why does seeking only work well on ZIPs packed with Store?</summary><div><p>With the STORE method (method 0, no compression) byte X of the video corresponds 1:1 to byte data_offset + X in the ZIP, so a seek is a simple offset calculation. With DEFLATE the data is compressed, and the project's troubleshooting guide says seeking to an arbitrary byte can stutter or fail. Re-pack the archive with Store, for example <code>7z a -mx0 output.zip</code> with your videos, and seeking becomes instant. Video files are usually already compressed, so a Store ZIP is about the same size.</p></div></details>
+      <details class="rv"><summary>Does it write the video to my disk?</summary><div><p>No video data is written to disk. Streamed data passes through an in-memory sliding-window prefetch buffer (StreamPrefetcher) whose size you set with <code>ZIPSTREAM_PREFETCH_MB</code>. When you seek or stop, the old buffer is drained. The app does keep small local files of its own, such as <code>config.json</code> and an SQLite database for archive history and bookmarks.</p></div></details>
+      <details class="rv"><summary>What does the remote server need to support?</summary><div><p>The URL must be a direct link to the ZIP file, and the server or CDN must honour HTTP Range requests (it must answer with 206 Partial Content and <code>Accept-Ranges: bytes</code>). HTML landing pages, confirmation pages and servers without Range support will fail with errors such as "Valid ZIP End of Central Directory record not found" or "Server does not support Range requests".</p></div></details>
+      <details class="rv"><summary>Which players and apps does it work with?</summary><div><p>It auto-detects and launches PotPlayer, MPV, VLC, MPC-HC, MPC-BE and IINA, and it has a built-in HTML5 browser player. Any app that can open an HTTP URL works with the <code>/stream</code> endpoint. Playlists exported as M3U/M3U8 work in players such as Kodi, Infuse and VLC, the WebDAV bridge serves Infuse, Kodi and Windows Explorer, and STRM bundles let Jellyfin, Emby and Kodi index the archive as a virtual library.</p></div></details>
+      <details class="rv"><summary>How do I install and run it?</summary><div><p>You need Python 3.9 or newer. Clone <code>https://github.com/MHJoy99/ZipStream-Hub.git</code>, run <code>pip install -e .</code> inside the folder, then start the server with <code>zipstream-server</code> (or <code>python server.py</code>) and open <code>http://127.0.0.1:8787</code>. From the terminal you can also run <code>zipstream</code> followed by the ZIP URL, or start it with <code>docker compose up -d</code>.</p></div></details>
+      <details class="rv"><summary>How much RAM should I give the buffer?</summary><div><p>Set <code>ZIPSTREAM_PREFETCH_MB</code>. The README suggests 64 MB for 4 GB RAM systems (about 30 to 60 seconds of forward buffer), 1024 MB for 8 to 16 GB systems, and 5120 MB for 32 GB and gigabit-fiber machines. The precedence is environment variables, then <code>config.json</code>, then defaults.</p></div></details>
+      <details class="rv"><summary>Is ZipStreamHub free, and which platforms does it run on?</summary><div><p>Yes. It is free and released under the MIT License. It is a Python 3.9+ package with urllib3 as its only dependency, and it runs on Windows, macOS and Linux, or as a Docker container. Use it only with archives you are entitled to access and respect the terms of the hosts and services involved.</p></div></details>
+    </div>
+    <p class="note"><b>Use responsibly.</b> ZipStreamHub is a neutral streaming tool. Only stream archives you have the right to access, and respect the terms of service and rate limits of the hosts and CDNs you connect to.</p>
+  </div>
+</section>
+
+<!-- MORE -->
+<section id="more">
+  <div class="wrap">
+    <div class="rv"><p class="kicker">More by MHJoy99</p>
+    <h2>Other open-source <span class="grad">tools</span></h2></div>
+    <div class="more">
+      <a class="rv" href="https://mhjoy99.github.io/CCUsageX/"><b>CCUsageX</b><span>Claude Code usage dashboard</span></a>
+      <a class="rv" href="https://mhjoy99.github.io/joyvoice/"><b>joyvoice</b><span>Windows voice typing with Gemini</span></a>
+      <a class="rv" href="https://mhjoy99.github.io/bdx-bench/"><b>bdx-bench</b><span>Local LLM benchmark + leaderboard</span></a>
+      <a class="rv" href="https://mhjoy99.github.io/mirror-leech-telegram-bot-fuse/"><b>mirror-leech-telegram-bot-fuse</b><span>Telegram mirror/leech bot</span></a>
+    </div>
+    <p class="more-links">Also: <a href="https://mhjoy99.github.io/camscanner-mcp-hd-scanner/">camscanner-mcp-hd-scanner</a> &middot; <a href="https://mhjoy99.github.io/speedy-bonding/">speedy-bonding</a> &middot; <a href="https://mhjoy99.github.io/jellyfin-torbox-potplayer-stack/">jellyfin-torbox-potplayer-stack</a> &middot; <a href="https://mhjoy99.github.io/codex-vscode-health/">codex-vscode-health</a> &middot; <a href="https://mhjoy99.github.io/Rainmeter-Todo-Skin/">Rainmeter-Todo-Skin</a> &middot; <a href="https://github.com/MHJoy99">GitHub profile</a></p>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="row">
+      <a href="https://github.com/MHJoy99/ZipStream-Hub">GitHub repository</a>
+      <a href="https://github.com/MHJoy99/ZipStream-Hub/issues">Issues</a>
+      <a href="https://github.com/MHJoy99/ZipStream-Hub/blob/main/LICENSE">MIT License</a>
+      <a href="https://github.com/MHJoy99/ZipStream-Hub/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="llms.txt">llms.txt</a>
+      <a href="llms-full.txt">llms-full.txt</a>
+    </div>
+    <p>Built by <a href="https://github.com/MHJoy99">MHJoy99</a>. ZipStreamHub is released under the MIT License.</p>
+    <p>Not affiliated with PotPlayer, MPV, VLC, IINA, Kodi, Infuse, Jellyfin, Emby or any other product named here; all names belong to their owners.</p>
+    <p>This website uses cookieless Cloudflare Web Analytics.</p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a2f7f3d589ae4c8688a646d54918b0e7"}'></script>
+</body>
+</html>
